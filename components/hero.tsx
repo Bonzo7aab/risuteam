@@ -1,44 +1,40 @@
-import NextLogo from "./next-logo";
-import SupabaseLogo from "./supabase-logo";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { ArrowUpRight, CirclePlay } from "lucide-react";
+import Image from "next/image";
+import React from "react";
+import { Card, CardContent, CardHeader } from "./ui/card";
 
-export default function Header() {
+const Hero = () => {
   return (
-    <div className="flex flex-col gap-16 items-center">
-      <div className="flex gap-8 justify-center items-center">
-        <a
-          href="https://supabase.com/?utm_source=create-next-app&utm_medium=template&utm_term=nextjs"
-          target="_blank"
-          rel="noreferrer"
-        >
-          <SupabaseLogo />
-        </a>
-        <span className="border-l rotate-45 h-6" />
-        <a href="https://nextjs.org/" target="_blank" rel="noreferrer">
-          <NextLogo />
-        </a>
+    <div className="flex flex-col items-center justify-center gap-4 overflow-hidden">
+      <div className="relative w-full">
+        <Image
+          alt="risu team hero"
+          src={"/risuhero.jpg"}
+          width={0}
+          height={0}
+          sizes="100vw"
+          style={{ width: "100%", height: "auto" }}
+        />
+        <Card className="w-full mt-4 border-none shadow-none lg:w-1/2 max-w w-full-sm lg:mt-0 lg:absolute top-4 left-4 bg-muted/70">
+          <CardHeader className="lg:py-5">
+            <h1 className="lg:mt-6 max-w-[17ch] text-xl lg:text-5xl md:text-5xl font-bold !leading-[1.2] tracking-tight">
+              Risu Team
+            </h1>
+          </CardHeader>
+          <CardContent>
+            <p className="lg:mt-6 max-w-[60ch] text-sm lg:text-lg">
+              Risu Team to klub sportowy oferujący zajęcia dla dzieci, młodzieży
+              oraz doroslych. Zajęcia prowadzone są przez doświadczonych
+              instruktorów, którzy dbają o bezpieczeństwo i indywidualne
+              podejście do każdego uczestnika.
+            </p>
+          </CardContent>
+        </Card>
       </div>
-      <h1 className="sr-only">Supabase and Next.js Starter Template</h1>
-      <p className="text-3xl lg:text-4xl !leading-tight mx-auto max-w-xl text-center">
-        The fastest way to build apps with{" "}
-        <a
-          href="https://supabase.com/?utm_source=create-next-app&utm_medium=template&utm_term=nextjs"
-          target="_blank"
-          className="font-bold hover:underline"
-          rel="noreferrer"
-        >
-          Supabase
-        </a>{" "}
-        and{" "}
-        <a
-          href="https://nextjs.org/"
-          target="_blank"
-          className="font-bold hover:underline"
-          rel="noreferrer"
-        >
-          Next.js
-        </a>
-      </p>
-      <div className="w-full p-[1px] bg-gradient-to-r from-transparent via-foreground/10 to-transparent my-8" />
     </div>
   );
-}
+};
+
+export default Hero;

@@ -2,6 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Fix to close button on InfoWindow in Google Maps https://github.com/visgl/react-google-maps/issues/378 */
+.gm-style-iw-chr {
+  position: absolute;
+  display: flex;
+  top: 0;
+  right: 0;
+}
+
+.gm-style-iw.gm-style-iw-c {
+  padding-top: 14px !important;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
