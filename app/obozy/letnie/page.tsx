@@ -17,7 +17,7 @@ const SummerCamp = () => {
             <div className="w-full aspect-[6/4] bg-muted rounded-xl border border-border/50 basis-1/2">
               <Image
                 alt="risu team hero"
-                src="/zakopane_lato_2025_1.jpeg"
+                src="/zakopane_2025_ver2_1.jpg"
                 width={0}
                 height={0}
                 sizes="100vw"
@@ -57,7 +57,7 @@ const SummerCamp = () => {
             <div className="w-full aspect-[6/4] bg-muted rounded-xl border border-border/50 basis-1/2">
               <Image
                 alt="risu team hero"
-                src="/zakopane_lato_2025_2.jpeg"
+                src="/zakopane_2025_ver2_2.jpg"
                 width={0}
                 height={0}
                 sizes="100vw"

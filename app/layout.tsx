@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils";
 import { headers } from "next/headers";
 import { Clapperboard, Mail, Phone } from "lucide-react";
 import Logo from "@/lib/logo";
+import Image from "next/image";
 
 // const defaultUrl = process.env.VERCEL_URL
 //   ? `https://${process.env.VERCEL_URL}`
@@ -119,11 +120,19 @@ const Navbar = async () => {
   } = await supabase.auth.getUser();
 
   return (
-    <nav className="z-20 flex justify-center w-full h-32 border-b bg-muted-foreground border-b-foreground/10 ">
+    <nav className="z-20 flex justify-center w-full h-32 border-b border-b-foreground/10 ">
       <div className="flex items-center justify-center w-full p-4 px-5 text-sm max-w-7xl">
         {process.env.NEXT_PUBLIC_PROD_TEMPLATE ? (
-          <Link href="/" className="h-32 p-4" passHref>
-            <Logo />
+          <Link href="/" className="h-32" passHref>
+            <Image
+              alt="risu team hero"
+              src="/logoWithBorder.png"
+              width={0}
+              height={0}
+              sizes="100vw"
+              style={{ width: "100%", height: "100%" }}
+            />
+            {/* <Logo /> */}
           </Link>
         ) : (
           <NavigationMenu>
@@ -232,10 +241,18 @@ const Navbar = async () => {
 
 const Footer = () => {
   return (
-    <footer className="flex justify-center w-full h-24 border-t border-foreground/10 bg-muted-foreground">
+    <footer className="flex justify-center w-full h-24 border-t border-foreground/10">
       <div className="flex items-center justify-between w-full p-4 px-5 text-sm max-w-7xl">
-        <div className="h-24 p-4">
-          <Logo />
+        <div className="h-24 ">
+          <Image
+            alt="risu team hero"
+            src="/logoWithBorder.png"
+            width={0}
+            height={0}
+            sizes="100vw"
+            style={{ width: "100%", height: "100%" }}
+          />
+          {/* <Logo /> */}
         </div>
         <div className="flex gap-4">
           <div className="flex items-center gap-2">
