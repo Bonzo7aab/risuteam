@@ -119,7 +119,7 @@ const Navbar = async () => {
   } = await supabase.auth.getUser();
 
   return (
-    <nav className="z-20 flex justify-center w-full h-32 border-b border-b-foreground/10">
+    <nav className="z-20 flex justify-center w-full h-32 border-b bg-muted-foreground border-b-foreground/10 ">
       <div className="flex items-center justify-center w-full p-4 px-5 text-sm max-w-7xl">
         {process.env.NEXT_PUBLIC_PROD_TEMPLATE ? (
           <Link href="/" className="h-32 p-4" passHref>
@@ -232,7 +232,7 @@ const Navbar = async () => {
 
 const Footer = () => {
   return (
-    <footer className="flex justify-center w-full h-24 border-t border-foreground/10">
+    <footer className="flex justify-center w-full h-24 border-t border-foreground/10 bg-muted-foreground">
       <div className="flex items-center justify-between w-full p-4 px-5 text-sm max-w-7xl">
         <div className="h-24 p-4">
           <Logo />
