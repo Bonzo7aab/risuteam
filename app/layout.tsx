@@ -247,10 +247,10 @@ const Footer = () => {
           <Image
             alt="risu team hero"
             src="/logoWithBorder.png"
-            width={0}
-            height={0}
-            sizes="100vw"
-            style={{ width: "100%", height: "100%" }}
+            width={142}
+            height={138}
+            // sizes="100vw"
+            // style={{ width: "100%", height: "100%" }}
           />
           {/* <Logo /> */}
         </div>
