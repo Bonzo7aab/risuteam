@@ -22,10 +22,13 @@ import { headers } from "next/headers";
 import { Clapperboard, Mail, Phone } from "lucide-react";
 import Logo from "@/lib/logo";
 import Image from "next/image";
-
-// const defaultUrl = process.env.VERCEL_URL
-//   ? `https://${process.env.VERCEL_URL}`
-//   : "http://localhost:3000";
+import { Toaster } from "@/components/ui/toaster";
+import {
+  Covered_By_Your_Grace,
+  Protest_Riot,
+  Rubik_Dirt,
+} from "next/font/google";
+import { GridPatternBackground } from "@/components/ui/grid-pattern-background";
 
 export const metadata = {
   icons: {
@@ -37,6 +40,21 @@ export const metadata = {
   description: "Klub sportwoy dla dzieci i młodzieży",
 };
 
+const coveredByYourGrace = Covered_By_Your_Grace({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-coveredByYourGrace",
+});
+const protestRiot = Protest_Riot({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-protestRiot",
+});
+const rubikDirt = Rubik_Dirt({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-rubikDirt",
+});
 const geistSans = Geist({
   display: "swap",
   subsets: ["latin"],
@@ -120,118 +138,112 @@ const Navbar = async () => {
   } = await supabase.auth.getUser();
 
   return (
-    <nav className="z-20 flex justify-center w-full h-32 border-b border-b-foreground/10 ">
-      <div className="flex items-center justify-center w-full p-4 px-5 text-sm max-w-7xl">
-        {process.env.NEXT_PUBLIC_PROD_TEMPLATE ? (
-          <Link href="/" className="h-32" passHref>
-            <Image
-              alt="risu team hero"
-              src="/logoWithBorder.png"
-              width={142}
-              height={138}
-              // sizes="100vw"
-              // style={{ width: "100%", height: "100%" }}
-            />
-            {/* <Logo /> */}
-          </Link>
-        ) : (
-          <NavigationMenu>
-            <NavigationMenuList>
-              <NavigationMenuItem>
-                <Link href="/aktualnosci" legacyBehavior passHref>
-                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                    Aktualności
-                  </NavigationMenuLink>
-                </Link>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <Link href="/docs" legacyBehavior passHref>
-                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                    Grafik
-                  </NavigationMenuLink>
-                </Link>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <Link href="/lokalizacja" legacyBehavior passHref>
-                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                    Gdzie trenujemy
-                  </NavigationMenuLink>
-                </Link>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <Link href="/docs" legacyBehavior passHref>
-                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                    Cennik
-                  </NavigationMenuLink>
-                </Link>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <Link href="/docs" legacyBehavior passHref>
-                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                    Zapisy
-                  </NavigationMenuLink>
-                </Link>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <NavigationMenuTrigger>Obozy</NavigationMenuTrigger>
-                <NavigationMenuContent>
-                  <ul className="grid gap-3 p-6 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
-                    <li className="row-span-3">
-                      <NavigationMenuLink asChild>
-                        <a
-                          className="flex flex-col justify-end w-full h-full p-6 no-underline rounded-md outline-none select-none bg-gradient-to-b from-muted/50 to-muted focus:shadow-md"
-                          href="/"
-                        >
-                          <div className="mt-4 mb-2 text-lg font-medium">
-                            Oferta
-                          </div>
-                          <p className="text-sm leading-tight text-muted-foreground">
-                            Beautifully designed components that you can copy
-                            and paste into your apps. Accessible. Customizable.
-                            Open Source.
-                          </p>
-                        </a>
-                      </NavigationMenuLink>
-                    </li>
-                    <ListItem href="/obozy/letnie" title="Obozy letnie">
-                      Re-usable components built using Radix UI and Tailwind
-                      CSS.
-                    </ListItem>
-                    <ListItem href="/obozy/zimowe" title="Obozy zimowe">
-                      How to install dependencies and structure your app.
-                    </ListItem>
-                    <ListItem href="/obozy/polkolonie" title="Półkolonie">
-                      Styles for headings, paragraphs, lists...etc
-                    </ListItem>
-                  </ul>
-                </NavigationMenuContent>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <NavigationMenuTrigger>O nas</NavigationMenuTrigger>
-                <NavigationMenuContent>
-                  <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] ">
-                    {components.map((component) => (
-                      <ListItem
-                        key={component.title}
-                        title={component.title}
-                        href={component.href}
+    <nav className="sticky top-0 z-50 flex justify-center w-full h-32 border-b border-b-foreground/10 backdrop-filter backdrop-blur-md">
+      <div className="flex items-center justify-between w-full p-4 px-5 max-w-7xl">
+        <Link href="/" className="h-32" passHref>
+          <Image
+            alt="risu team hero"
+            src="/logoWithBorder.png"
+            width={142}
+            height={138}
+          />
+          {/* <Logo fill="#FD9E04" /> */}
+        </Link>
+        <NavigationMenu>
+          <NavigationMenuList>
+            <NavigationMenuItem>
+              <Link href="/aktualnosci" legacyBehavior passHref>
+                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                  Aktualności
+                </NavigationMenuLink>
+              </Link>
+            </NavigationMenuItem>
+            <NavigationMenuItem>
+              <Link href="/docs" legacyBehavior passHref>
+                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                  Cennik
+                </NavigationMenuLink>
+              </Link>
+            </NavigationMenuItem>
+            <NavigationMenuItem>
+              <NavigationMenuTrigger>Obozy</NavigationMenuTrigger>
+              <NavigationMenuContent>
+                <ul className="grid gap-3 p-6 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
+                  <li className="row-span-3">
+                    <NavigationMenuLink asChild>
+                      <a
+                        className="flex flex-col justify-end w-full h-full p-6 no-underline rounded-md outline-none select-none bg-gradient-to-b from-muted/50 to-muted focus:shadow-md"
+                        href="/"
                       >
-                        {component.description}
-                      </ListItem>
-                    ))}
-                  </ul>
-                </NavigationMenuContent>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <Link href="/kontakt" legacyBehavior passHref>
-                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                    Kontakt
-                  </NavigationMenuLink>
-                </Link>
-              </NavigationMenuItem>
-            </NavigationMenuList>
-          </NavigationMenu>
-        )}
+                        <div className="mt-4 mb-2 text-lg font-medium">
+                          Oferta
+                        </div>
+                        <p className="text-sm leading-tight text-muted-foreground">
+                          Beautifully designed components that you can copy and
+                          paste into your apps. Accessible. Customizable. Open
+                          Source.
+                        </p>
+                      </a>
+                    </NavigationMenuLink>
+                  </li>
+                  <ListItem href="/obozy/letnie" title="Obozy letnie">
+                    Re-usable components built using Radix UI and Tailwind CSS.
+                  </ListItem>
+                  <ListItem href="/obozy/zimowe" title="Obozy zimowe">
+                    How to install dependencies and structure your app.
+                  </ListItem>
+                  <ListItem href="/obozy/polkolonie" title="Półkolonie">
+                    Styles for headings, paragraphs, lists...etc
+                  </ListItem>
+                </ul>
+              </NavigationMenuContent>
+            </NavigationMenuItem>
+            <NavigationMenuItem>
+              <NavigationMenuTrigger>O nas</NavigationMenuTrigger>
+              <NavigationMenuContent>
+                <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] ">
+                  {components.map((component) => (
+                    <ListItem
+                      key={component.title}
+                      title={component.title}
+                      href={component.href}
+                    >
+                      {component.description}
+                    </ListItem>
+                  ))}
+                </ul>
+              </NavigationMenuContent>
+            </NavigationMenuItem>
+            <NavigationMenuItem>
+              <Link href="/grafik" legacyBehavior passHref>
+                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                  Grafik
+                </NavigationMenuLink>
+              </Link>
+            </NavigationMenuItem>
+            <NavigationMenuItem>
+              <Link href="/lokalizacja" legacyBehavior passHref>
+                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                  Gdzie trenujemy
+                </NavigationMenuLink>
+              </Link>
+            </NavigationMenuItem>
+            <NavigationMenuItem>
+              <Link href="/kontakt" legacyBehavior passHref>
+                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                  Kontakt
+                </NavigationMenuLink>
+              </Link>
+            </NavigationMenuItem>
+            <NavigationMenuItem>
+              <Link href="/docs" legacyBehavior passHref>
+                <NavigationMenuLink className="p-2 px-4 bg-blue-500 rounded-sm">
+                  Zapisy
+                </NavigationMenuLink>
+              </Link>
+            </NavigationMenuItem>
+          </NavigationMenuList>
+        </NavigationMenu>
         {pathname === "/admin" &&
           (user && !hasEnvVars ? <EnvVarWarning /> : <HeaderAuth />)}
       </div>
@@ -281,7 +293,14 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={geistSans.className} suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`
+        ${coveredByYourGrace.variable}
+        ${protestRiot.variable}
+        ${rubikDirt.variable}`}
+      suppressHydrationWarning
+    >
       <body className="bg-background text-foreground">
         <ThemeProvider
           attribute="class"
@@ -289,15 +308,26 @@ export default async function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <main className="flex flex-col items-center min-h-screen">
-            <div className="flex flex-col items-center flex-1 w-full gap-20">
+          <main className="flex flex-col items-center min-h-screen bg-[url(/noise5.png)] font-protestRiot relative w-full">
+            <GridPatternBackground
+              gridType="lines"
+              gridSize={32}
+              opacity={0.5}
+              color="#F29602"
+              animate={false}
+              // className="dark:opacity-80"
+            />
+            <div className="flex flex-col items-center flex-1 w-full">
               <Navbar />
-              <div className="flex flex-col flex-1 w-full gap-20 p-5 max-w-7xl">
+              {/* <div className="relative h-[400px] rounded-lg w-full"> */}
+              {/* </div> */}
+              <div className="flex flex-col flex-1 w-full xl:max-w-7xl">
                 {children}
               </div>
               <Footer />
             </div>
           </main>
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>

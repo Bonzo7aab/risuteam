@@ -1,43 +1,45 @@
 "use client";
 
+import { useActionState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import React, { FormEvent, useRef, useState } from "react";
-import { z } from "zod";
+import { sendEmailAction } from "../api/actions";
+import { useToast } from "@/hooks/use-toast";
+
+const initialState = {
+  errors: {
+    firstname: undefined,
+    lastname: undefined,
+    email: undefined,
+    phone_number: undefined,
+    message: undefined,
+  },
+};
 
 const Contact = () => {
-  const ref = useRef<HTMLFormElement>(null);
-  const [buttonDisabled, setButtonDisabled] = useState(false);
+  const [state, formAction, isPending] = useActionState(
+    sendEmailAction,
+    initialState
+  );
+  const { toast } = useToast();
 
-  const sendEmail = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setButtonDisabled(true);
-    const formData = new FormData(e.currentTarget);
-    const form_values = Object.fromEntries(formData);
-
-    const response = await fetch("/api/send", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form_values),
-    });
-
-    // if(response.status === 200) {
-    //     toast.success('Wiadomość została wysłana!')
-    // } else {
-    //     toast.error('Błąd wysłania wiadomości. Skontaktuj się ze mną inaczej.')
-    // }
-    setButtonDisabled(false);
-  };
-
-  const User = z.object({
-    firstname: z.string(),
-    lastname: z.string(),
-    email: z.string(),
-    phone_numer: z.string(),
-    details: z.string(),
-  });
+  useEffect(() => {
+    if (state.success) {
+      toast({
+        variant: "success",
+        title: state.success,
+        description: "Odpowiadamy zazwyczaj w ciągu 1-2 dni.",
+      });
+    } else if (state.error) {
+      toast({
+        variant: "destructive",
+        title: state.error,
+        description: "Wyślij mail ręcznie ze swojej skrzynki.",
+      });
+    }
+  }, [state]);
 
   return (
     <div className="max-w-5xl mx-auto text-muted-foreground">
@@ -52,13 +54,7 @@ const Contact = () => {
             Wypełnij formularz poniżej
           </h2>
 
-          <form
-            ref={ref}
-            onSubmit={async (formData) => {
-              await sendEmail(formData);
-              ref.current?.reset();
-            }}
-          >
+          <form action={formAction}>
             <div className="grid gap-4">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
@@ -66,26 +62,38 @@ const Contact = () => {
                     Imię
                   </Label>
                   <Input
-                    required
                     type="text"
                     name="firstname"
                     id="firstname"
                     className="focus-visible:ring-transparent"
                     placeholder="Imię"
+                    required
+                    maxLength={32}
                   />
+                  {state?.errors?.firstname && (
+                    <p className="px-2 text-sm text-red-400">
+                      {state.errors.firstname}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <Label htmlFor="lastname" className="sr-only">
                     Nazwisko
                   </Label>
                   <Input
-                    required
                     type="text"
                     name="lastname"
                     id="lastname"
                     className="focus-visible:ring-transparent"
                     placeholder="Nazwisko"
+                    required
+                    maxLength={32}
                   />
+                  {state?.errors?.lastname && (
+                    <p className="px-2 text-sm text-red-400">
+                      {state.errors.lastname}
+                    </p>
+                  )}
                 </div>
               </div>
               <div>
@@ -93,14 +101,18 @@ const Contact = () => {
                   Email
                 </Label>
                 <Input
-                  required
                   type="email"
                   name="email"
                   id="email"
-                  autoComplete="email"
                   className="focus-visible:ring-transparent"
                   placeholder="Email"
+                  required
                 />
+                {state?.errors?.email && (
+                  <p className="px-2 text-sm text-red-400">
+                    {state.errors.email}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -114,6 +126,11 @@ const Contact = () => {
                   className="focus-visible:ring-transparent"
                   placeholder="Numer telefonu (opcjonalnie)"
                 />
+                {state?.errors?.phone_number && (
+                  <p className="px-2 text-sm text-red-400">
+                    {state.errors.phone_number}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -121,23 +138,30 @@ const Contact = () => {
                   Wiadomość
                 </Label>
                 <Textarea
-                  required
-                  id="about"
-                  name="about"
+                  id="message"
+                  name="message"
                   rows={4}
                   className="focus-visible:ring-transparent"
                   placeholder="Wiadomość"
+                  required
+                  minLength={10}
+                  maxLength={500}
                 ></Textarea>
+                {state?.errors?.message && (
+                  <p className="px-2 text-sm text-red-400">
+                    {state.errors.message}
+                  </p>
+                )}
               </div>
             </div>
 
             <div className="grid mt-4">
               <Button
                 type="submit"
-                disabled={buttonDisabled}
+                disabled={isPending}
                 className="bg-blue-400 hover:bg-blue-500"
               >
-                Wyślij
+                {isPending ? "Wysyłam..." : "Wyślij"}
               </Button>
             </div>
 
@@ -173,7 +197,7 @@ const Contact = () => {
               </p>
               <a
                 className="inline-flex items-center mt-2 text-sm font-medium text-gray-600 gap-x-2 focus:outline-hidden"
-                href="#"
+                href="/faq"
               >
                 Przejdź
                 <svg
@@ -186,7 +210,7 @@ const Contact = () => {
                 >
                   <path
                     fillRule="evenodd"
-                    clip-rule="evenodd"
+                    clipRule="evenodd"
                     d="M0.975821 6.92249C0.43689 6.92249 -3.50468e-07 7.34222 -3.27835e-07 7.85999C-3.05203e-07 8.37775 0.43689 8.79749 0.975821 8.79749L12.7694 8.79748L7.60447 13.7596C7.22339 14.1257 7.22339 14.7193 7.60447 15.0854C7.98555 15.4515 8.60341 15.4515 8.98449 15.0854L15.6427 8.68862C16.1191 8.23098 16.1191 7.48899 15.6427 7.03134L8.98449 0.634573C8.60341 0.268455 7.98555 0.268456 7.60447 0.634573C7.22339 1.00069 7.22339 1.59428 7.60447 1.9604L12.7694 6.92248L0.975821 6.92249Z"
                     fill="currentColor"
                   />
@@ -215,13 +239,13 @@ const Contact = () => {
             <div className="grow">
               <h3 className="font-semibold ">Telefon</h3>
               <p className="mt-1 text-sm text-gray-500">
-                W razie pilnych spraw zapraszamy do kontaktu telefonicznego.
+                W razie pytań zapraszam do kontaktu telefonicznego.
               </p>
               <a
                 className="inline-flex items-center mt-2 text-sm font-medium text-gray-600 gap-x-2 focus:outline-hidden"
                 href="#"
               >
-                777-888-999
+                533 020 048
               </a>
             </div>
           </div>
@@ -251,7 +275,7 @@ const Contact = () => {
                 className="inline-flex items-center mt-2 text-sm font-medium text-gray-600 gap-x-2 focus:outline-hidden"
                 href="#"
               >
-                example@site.com
+                risu.biuro@gmail.com
               </a>
             </div>
           </div>
