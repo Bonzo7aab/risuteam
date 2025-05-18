@@ -16,182 +16,7 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@radix-ui/react-dropdown-menu";
 import { Button } from "@/components/ui/button";
-
-interface Schedule {
-  [day: string]: {
-    id: number;
-    start: string;
-    end: string;
-    type: string;
-    instructor: string;
-    free_slots: number;
-    title: string;
-    place: string;
-  }[];
-}
-
-const mockSchedule: Schedule = {
-  Poniedziałek: [
-    {
-      id: 1,
-      start: "9:00 AM",
-      end: "10:00 AM",
-      type: "Judo",
-      instructor: "John Doe",
-      free_slots: 5,
-      title: "Team Meeting",
-      place: "Conference Room A",
-    },
-    {
-      id: 2,
-      start: "11:00 AM",
-      end: "12:00 PM",
-      type: "Judo",
-      instructor: "Jane Smith",
-      free_slots: 3,
-      title: "Code Review Session",
-      place: "Conference Room B",
-    },
-    {
-      id: 3,
-      start: "2:00 PM",
-      end: "4:00 PM",
-      type: "Karate",
-      instructor: "Alice Johnson",
-      free_slots: 2,
-      title: "Development Time",
-      place: "Office",
-    },
-  ],
-  Wtorek: [
-    {
-      id: 4,
-      start: "10:00 AM",
-      end: "11:00 AM",
-      type: "Karate",
-      instructor: "John Doe",
-      free_slots: 5,
-      title: "Daily Standup",
-      place: "Conference Room A",
-    },
-    {
-      id: 5,
-      start: "1:00 PM",
-      end: "2:00 PM",
-      type: "Judo",
-      instructor: "N/A",
-      free_slots: 0,
-      title: "Lunch Break",
-      place: "Cafeteria",
-    },
-    {
-      id: 6,
-      start: "3:00 PM",
-      end: "5:00 PM",
-      type: "Kickboxing",
-      instructor: "Alice Johnson",
-      free_slots: 2,
-      title: "Development Time",
-      place: "Office",
-    },
-  ],
-  Środa: [
-    {
-      id: 7,
-      start: "10:00 AM",
-      end: "11:00 AM",
-      type: "Kickboxing",
-      instructor: "John Doe",
-      free_slots: 5,
-      title: "Daily Standup",
-      place: "Conference Room A",
-    },
-    {
-      id: 8,
-      start: "1:00 PM",
-      end: "2:00 PM",
-      type: "Judo",
-      instructor: "N/A",
-      free_slots: 0,
-      title: "Lunch Break",
-      place: "Cafeteria",
-    },
-    {
-      id: 9,
-      start: "3:00 PM",
-      end: "5:00 PM",
-      type: "Gimnastyka",
-      instructor: "Alice Johnson",
-      free_slots: 2,
-      title: "Development Time",
-      place: "Office",
-    },
-  ],
-  Czwartek: [
-    {
-      id: 10,
-      start: "10:00 AM",
-      end: "11:00 AM",
-      type: "Team Standup",
-      instructor: "John Doe",
-      free_slots: 5,
-      title: "Daily Standup",
-      place: "Conference Room A",
-    },
-    {
-      id: 11,
-      start: "1:00 PM",
-      end: "2:00 PM",
-      type: "Gimnastyka",
-      instructor: "N/A",
-      free_slots: 0,
-      title: "Lunch Break",
-      place: "Cafeteria",
-    },
-    {
-      id: 12,
-      start: "3:00 PM",
-      end: "5:00 PM",
-      type: "Rozciąganie",
-      instructor: "Alice Johnson",
-      free_slots: 2,
-      title: "Development Time",
-      place: "Office",
-    },
-  ],
-  Piątek: [
-    {
-      id: 13,
-      start: "10:00 AM",
-      end: "11:00 AM",
-      type: "Rozciąganie",
-      instructor: "John Doe",
-      free_slots: 5,
-      title: "Daily Standup",
-      place: "Conference Room A",
-    },
-    {
-      id: 14,
-      start: "1:00 PM",
-      end: "2:00 PM",
-      type: "Judo",
-      instructor: "N/A",
-      free_slots: 0,
-      title: "Lunch Break",
-      place: "Cafeteria",
-    },
-    {
-      id: 15,
-      start: "3:00 PM",
-      end: "5:00 PM",
-      type: "Rozciąganie",
-      instructor: "Alice Johnson",
-      free_slots: 2,
-      title: "Development Time",
-      place: "Office",
-    },
-  ],
-};
+import { mockSchedule, ScheduleType } from "../types/schedule";
 
 const mockSchedule_flat = Object.values(mockSchedule).flat();
 
@@ -339,7 +164,7 @@ const Filters = ({
 
 const Schedule = ({ filters }: { filters: any }) => {
   const [filteredSchedule, setFilteredSchedule] =
-    useState<Schedule>(mockSchedule);
+    useState<ScheduleType>(mockSchedule);
 
   useEffect(() => {
     const filterSchedule = () => {
@@ -389,27 +214,33 @@ const Schedule = ({ filters }: { filters: any }) => {
 
   return (
     <div className="w-full p-4">
-      <h1 className="mb-4 text-2xl font-bold">Grafik zajęć</h1>
-      <div className="grid grid-cols-1 gap-4">
+      <div className="gap-4 flex flex-col">
         {Object.entries(filteredSchedule).map(([day, activities]) => (
           <Accordion type="single" collapsible className="w-full" key={day}>
             <AccordionItem value="item-1">
               <AccordionTrigger>{day}</AccordionTrigger>
               {activities.map((activity, index) => (
                 <AccordionContent key={index}>
-                  <div className="flex flex-col gap-2 p-4 border rounded-md border-muted hover:bg-muted">
-                    <div className="flex justify-between">
+                  <div
+                    className={`flex flex-col gap-2 py-4 pl-4 border-x-2 border-risu-400 hover:bg-muted ${index % 2 === 1 ? "bg-risu-300/10" : ""}`}
+                  >
+                    <div className="flex justify-between items-center">
                       <span className="text-base font-semibold">
                         {activity.start} - {activity.end}
                       </span>
-                      <h2 className="font-semibold">{activity.type}</h2>
+                      <h2 className="font-semibold bg-risu-400 px-4 py-2">
+                        {activity.type}
+                      </h2>
                     </div>
-                    <p className="text-gray-500 text-md">
-                      {activity.instructor}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      {activity.place} - Free Slots: {activity.free_slots}
-                    </p>
+                    <span className="text-gray-500 text-md">
+                      Trener: {activity.instructor}
+                    </span>
+                    <span className="text-sm flex justify-between items-center">
+                      <span>Lokalizacja: {activity.place}</span>
+                      <span className="border-risu-400 border-l-2 px-4 py-2">
+                        Free Slots: {activity.free_slots}
+                      </span>
+                    </span>
                   </div>
                 </AccordionContent>
               ))}
@@ -430,7 +261,8 @@ const Page = () => {
   });
 
   return (
-    <div className="flex flex-col justify-center w-full">
+    <div className="flex flex-col justify-center w-full my-16">
+      <h1 className="mb-4 text-2xl font-bold">Grafik zajęć</h1>
       <Filters onFilterChange={setFilters} filters={filters} />
       <Schedule filters={filters} />
     </div>

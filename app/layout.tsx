@@ -29,6 +29,7 @@ import {
   Rubik_Dirt,
 } from "next/font/google";
 import { GridPatternBackground } from "@/components/ui/grid-pattern-background";
+import { Navbar } from "../components/navbar";
 
 export const metadata = {
   icons: {
@@ -54,10 +55,6 @@ const rubikDirt = Rubik_Dirt({
   subsets: ["latin"],
   weight: "400",
   variable: "--font-rubikDirt",
-});
-const geistSans = Geist({
-  display: "swap",
-  subsets: ["latin"],
 });
 
 const components: { title: string; href: string; description: string }[] = [
@@ -128,129 +125,6 @@ const ListItem = forwardRef<HTMLAnchorElement, ListItemProps>(
 );
 ListItem.displayName = "ListItem";
 
-const Navbar = async () => {
-  const supabase = await createClient();
-  const headerList = await headers();
-  const pathname = headerList.get("x-current-path");
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  return (
-    <nav className="sticky top-0 z-50 flex justify-center w-full h-32 border-b border-b-foreground/10 backdrop-filter backdrop-blur-md">
-      <div className="flex items-center justify-between w-full p-4 px-5 max-w-7xl">
-        <Link href="/" className="h-32" passHref>
-          <Image
-            alt="risu team hero"
-            src="/logoWithBorder.png"
-            width={142}
-            height={138}
-          />
-          {/* <Logo fill="#FD9E04" /> */}
-        </Link>
-        <NavigationMenu>
-          <NavigationMenuList>
-            <NavigationMenuItem>
-              <Link href="/aktualnosci" legacyBehavior passHref>
-                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                  Aktualności
-                </NavigationMenuLink>
-              </Link>
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <Link href="/docs" legacyBehavior passHref>
-                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                  Cennik
-                </NavigationMenuLink>
-              </Link>
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <NavigationMenuTrigger>Obozy</NavigationMenuTrigger>
-              <NavigationMenuContent>
-                <ul className="grid gap-3 p-6 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
-                  <li className="row-span-3">
-                    <NavigationMenuLink asChild>
-                      <a
-                        className="flex flex-col justify-end w-full h-full p-6 no-underline rounded-md outline-none select-none bg-gradient-to-b from-muted/50 to-muted focus:shadow-md"
-                        href="/"
-                      >
-                        <div className="mt-4 mb-2 text-lg font-medium">
-                          Oferta
-                        </div>
-                        <p className="text-sm leading-tight text-muted-foreground">
-                          Beautifully designed components that you can copy and
-                          paste into your apps. Accessible. Customizable. Open
-                          Source.
-                        </p>
-                      </a>
-                    </NavigationMenuLink>
-                  </li>
-                  <ListItem href="/obozy/letnie" title="Obozy letnie">
-                    Re-usable components built using Radix UI and Tailwind CSS.
-                  </ListItem>
-                  <ListItem href="/obozy/zimowe" title="Obozy zimowe">
-                    How to install dependencies and structure your app.
-                  </ListItem>
-                  <ListItem href="/obozy/polkolonie" title="Półkolonie">
-                    Styles for headings, paragraphs, lists...etc
-                  </ListItem>
-                </ul>
-              </NavigationMenuContent>
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <NavigationMenuTrigger>O nas</NavigationMenuTrigger>
-              <NavigationMenuContent>
-                <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] ">
-                  {components.map((component) => (
-                    <ListItem
-                      key={component.title}
-                      title={component.title}
-                      href={component.href}
-                    >
-                      {component.description}
-                    </ListItem>
-                  ))}
-                </ul>
-              </NavigationMenuContent>
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <Link href="/grafik" legacyBehavior passHref>
-                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                  Grafik
-                </NavigationMenuLink>
-              </Link>
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <Link href="/lokalizacja" legacyBehavior passHref>
-                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                  Gdzie trenujemy
-                </NavigationMenuLink>
-              </Link>
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <Link href="/kontakt" legacyBehavior passHref>
-                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                  Kontakt
-                </NavigationMenuLink>
-              </Link>
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <Link href="/docs" legacyBehavior passHref>
-                <NavigationMenuLink className="p-2 px-4 bg-blue-500 rounded-sm">
-                  Zapisy
-                </NavigationMenuLink>
-              </Link>
-            </NavigationMenuItem>
-          </NavigationMenuList>
-        </NavigationMenu>
-        {pathname === "/admin" &&
-          (user && !hasEnvVars ? <EnvVarWarning /> : <HeaderAuth />)}
-      </div>
-    </nav>
-  );
-};
-
 const Footer = () => {
   return (
     <footer className="flex justify-center w-full h-24 border-t border-foreground/10">
@@ -308,20 +182,18 @@ export default async function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <main className="flex flex-col items-center min-h-screen bg-[url(/noise5.png)] font-protestRiot relative w-full">
+          <main className="flex flex-col items-center min-h-screen font-protestRiot relative w-full">
             <GridPatternBackground
               gridType="lines"
               gridSize={32}
-              opacity={0.5}
+              opacity={0.3}
               color="#F29602"
               animate={false}
-              // className="dark:opacity-80"
+              className="fixed inset-0 -z-10"
             />
-            <div className="flex flex-col items-center flex-1 w-full">
+            <div className="flex flex-col items-center flex-1 w-full relative">
               <Navbar />
-              {/* <div className="relative h-[400px] rounded-lg w-full"> */}
-              {/* </div> */}
-              <div className="flex flex-col flex-1 w-full xl:max-w-7xl">
+              <div className="flex flex-col flex-1 w-full xl:max-w-7xl tracking-wider">
                 {children}
               </div>
               <Footer />

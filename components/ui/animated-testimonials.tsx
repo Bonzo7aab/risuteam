@@ -1,16 +1,18 @@
 "use client";
 
-import { ArrowLeft, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-type Testimonial = {
-  quote: string;
+export type Testimonial = {
   name: string;
-  designation: string;
+  date: string;
+  location: string;
   src: string;
+  tab?: "polkolonie" | "letnie" | "zimowe" | "nocowanka";
 };
+
 export const AnimatedTestimonials = ({
   testimonials,
   autoplay = false,
@@ -19,13 +21,11 @@ export const AnimatedTestimonials = ({
   autoplay?: boolean;
 }) => {
   const [active, setActive] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
+  const router = useRouter();
 
   const handleNext = () => {
     setActive((prev) => (prev + 1) % testimonials.length);
-  };
-
-  const handlePrev = () => {
-    setActive((prev) => (prev - 1 + testimonials.length) % testimonials.length);
   };
 
   const isActive = (index: number) => {
@@ -33,20 +33,25 @@ export const AnimatedTestimonials = ({
   };
 
   useEffect(() => {
-    if (autoplay) {
+    if (autoplay && !isHovered) {
       const interval = setInterval(handleNext, 5000);
       return () => clearInterval(interval);
     }
-  }, [autoplay]);
+  }, [autoplay, isHovered]);
 
   const randomRotateY = () => {
     return Math.floor(Math.random() * 21) - 10;
   };
+
   return (
     <div className="max-w-sm px-4 py-20 mx-auto font-sans antialiased md:max-w-4xl md:px-8 lg:px-12">
       <div className="relative grid grid-cols-1 gap-20">
         <div>
-          <div className="relative w-full h-96">
+          <div
+            className="relative w-full h-96 cursor-pointer"
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+          >
             <AnimatePresence>
               {testimonials.map((testimonial, index) => (
                 <motion.div
@@ -87,78 +92,36 @@ export const AnimatedTestimonials = ({
                     draggable={false}
                     className="object-fill object-center w-full h-full rounded-3xl"
                   />
+                  {isActive(index) && isHovered && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      onClick={() =>
+                        router.push(`/obozy?tab=${testimonial.tab}`)
+                      }
+                      transition={{ duration: 0.2 }}
+                      className="absolute inset-0 bg-black/80 rounded-3xl flex flex-col justify-center gap-4 items-center p-6 text-white"
+                    >
+                      <h3 className="text-4xl font-bold mb-6 text-risu-400">
+                        {testimonial.name}
+                      </h3>
+                      <p className="text-xl font-semibold text-gray-300">
+                        {testimonial.date}
+                      </p>
+                      <p className="text-lg font-semibold">
+                        {testimonial.location}
+                      </p>
+                      <div className="text-3xl font-bold hover:text-risu-300 transition duration-300">
+                        Przejdź do szczegółów
+                      </div>
+                    </motion.div>
+                  )}
                 </motion.div>
               ))}
             </AnimatePresence>
           </div>
         </div>
-        {/* <div className="flex flex-col justify-between py-4">
-          <motion.div
-            key={active}
-            initial={{
-              y: 20,
-              opacity: 0,
-            }}
-            animate={{
-              y: 0,
-              opacity: 1,
-            }}
-            exit={{
-              y: -20,
-              opacity: 0,
-            }}
-            transition={{
-              duration: 0.2,
-              ease: "easeInOut",
-            }}
-          >
-            <h3 className="text-2xl font-bold text-black dark:text-white">
-              {testimonials[active].name}
-            </h3>
-            <p className="text-sm text-gray-500 dark:text-neutral-500">
-              {testimonials[active].designation}
-            </p>
-            <motion.p className="mt-8 text-lg text-gray-500 dark:text-neutral-300">
-              {testimonials[active].quote.split(" ").map((word, index) => (
-                <motion.span
-                  key={index}
-                  initial={{
-                    filter: "blur(10px)",
-                    opacity: 0,
-                    y: 5,
-                  }}
-                  animate={{
-                    filter: "blur(0px)",
-                    opacity: 1,
-                    y: 0,
-                  }}
-                  transition={{
-                    duration: 0.2,
-                    ease: "easeInOut",
-                    delay: 0.02 * index,
-                  }}
-                  className="inline-block"
-                >
-                  {word}&nbsp;
-                </motion.span>
-              ))}
-            </motion.p>
-          </motion.div>
-          <div className="flex gap-4 pt-12 md:pt-0">
-            <button
-              onClick={handlePrev}
-              className="flex items-center justify-center bg-gray-100 rounded-full group/button h-7 w-7 dark:bg-neutral-800"
-            >
-              <ArrowLeft className="w-5 h-5 text-black transition-transform duration-300 group-hover/button:rotate-12 dark:text-neutral-400" />
-            </button>
-            <button
-              onClick={handleNext}
-              className="flex items-center justify-center bg-gray-100 rounded-full group/button h-7 w-7 dark:bg-neutral-800"
-            >
-              <ArrowRight className="w-5 h-5 text-black transition-transform duration-300 group-hover/button:-rotate-12 dark:text-neutral-400" />
-            </button>
-          </div>
-        </div> */}
       </div>
     </div>
   );

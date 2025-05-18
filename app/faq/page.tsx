@@ -35,23 +35,25 @@ const faq = [
 
 const FAQ = () => {
   return (
-    <div className="flex justify-center min-h-screen px-6">
-      <div className="max-w-xl">
-        <h2 className="text-4xl md:text-5xl !leading-[1.15] font-bold tracking-tight">
+    <div className="flex flex-col mx-auto max-w-4xl w-full px-2 md:px-0 my-8">
+      <div className="text-center text-2xl mb-16 flex justify-center">
+        <h1 className="border-b-2 pb-2 border-risu-400 w-fit">
           Pytania i odpowiedzi
-        </h2>
-
-        <Accordion type="single" className="mt-6" defaultValue="question-0">
-          {faq.map(({ question, answer }, index) => (
-            <AccordionItem key={question} value={`question-${index}`}>
-              <AccordionTrigger className="text-lg text-left">
-                {question}
-              </AccordionTrigger>
-              <AccordionContent>{answer}</AccordionContent>
-            </AccordionItem>
-          ))}
-        </Accordion>
+        </h1>
       </div>
+
+      <Accordion type="multiple">
+        {faq.map(({ question, answer }, index) => (
+          <AccordionItem key={question} value={`question-${index}`}>
+            <AccordionTrigger className="text-lg text-left">
+              {question}
+            </AccordionTrigger>
+            <AccordionContent className="m-2 text-slate-400">
+              {answer}
+            </AccordionContent>
+          </AccordionItem>
+        ))}
+      </Accordion>
     </div>
   );
 };

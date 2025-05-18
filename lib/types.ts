@@ -19,18 +19,6 @@ interface TrainerType {
     join_date: string;
     activity: string;
 }[]
-
-interface ScheduleType {
-    id: number;
-    created_at: number;
-    day: string;
-    time_start: string;
-    time_end: string;
-    activity: string;
-    trainer: string;
-    place: string;
-}
-
 interface ContactFormType {
     firstname: string;
     lastname: string;
@@ -39,4 +27,4 @@ interface ContactFormType {
     message: string;
 }
 
-export type { PlaceType, TrainerType, ScheduleType, ContactFormType };
+export type { PlaceType, TrainerType, ContactFormType };
