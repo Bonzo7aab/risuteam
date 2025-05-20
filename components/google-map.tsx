@@ -6,7 +6,7 @@ import {
 } from "@react-google-maps/api";
 import React, { useState } from "react";
 import { Skeleton } from "./skeleton";
-import { PlaceType } from "@/lib/types";
+import { PlaceType } from "@/app/types/types";
 
 const containerStyle = {
   width: "100%",

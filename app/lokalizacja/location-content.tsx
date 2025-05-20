@@ -3,7 +3,7 @@
 import { Skeleton } from "@/components/skeleton";
 import { MapPinned } from "lucide-react";
 import Map from "@/components/google-map";
-import { PlaceType } from "@/lib/types";
+import { PlaceType } from "@/app/types/types";
 
 interface LocationContentProps {
   places: PlaceType[];

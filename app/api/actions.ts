@@ -2,7 +2,8 @@
 
 import { Resend } from "resend";
 import { z } from "zod";
-import ContactUserEmail from "../emails/page";
+import * as React from "react";
+import ContactUserEmail from "../emails/helloEmail";
 
 const contactSchema = z.object({
     firstname: z.string().min(1, "Imię wymagane").max(32),
@@ -36,7 +37,7 @@ export async function sendEmailAction(prevState: any, formData: FormData) {
     const firstname = formData.get('firstname') as string;
     const lastname = formData.get('lastname') as string;
     const email = formData.get('email') as string;
-    const phone_number = formData.get('phone_number') as string;
+    const phone_number = formData.get('phone_number') as string | null;
     const message = formData.get('message') as string;
 
     const emailPayload = {
@@ -48,9 +49,9 @@ export async function sendEmailAction(prevState: any, formData: FormData) {
         firstname,
         lastname,
         email,
-        phone_number,
+        phone_number: phone_number || undefined,
         message
-      })
+      }) as React.ReactElement
     };
 
     const { data: resendData, error} = await resend.emails.send(emailPayload);

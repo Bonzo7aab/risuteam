@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { Skeleton } from "@/components/skeleton";
 import { createClient } from "@/utils/supabase/server";
-import { TrainerType } from "@/lib/types";
+import { TrainerType } from "@/app/types/types";
 
 const Trainers = async () => {
   const supabase = await createClient();

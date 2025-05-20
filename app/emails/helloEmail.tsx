@@ -1,4 +1,5 @@
-import { ContactFormType } from "@/lib/types";
+import * as React from "react";
+import { ContactFormType } from "@/app/types/types";
 import {
   Body,
   Container,
@@ -7,19 +8,17 @@ import {
   Hr,
   Html,
   Img,
-  Link,
   Preview,
   Section,
   Text,
 } from "@react-email/components";
 import { Tailwind } from "@react-email/tailwind";
-import * as React from "react";
 
 const baseUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
   : "";
 
-export const ContactUserEmail = ({
+const ContactUserEmail = ({
   firstname,
   lastname,
   email,
@@ -67,6 +66,7 @@ export const ContactUserEmail = ({
   );
 };
 
+// Add PreviewProps as a static property
 ContactUserEmail.PreviewProps = {
   firstname: "alan",
   lastname: "turing",
