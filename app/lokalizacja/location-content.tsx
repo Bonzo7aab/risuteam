@@ -13,7 +13,6 @@ export default function LocationContent({ places }: LocationContentProps) {
   return (
     <div className="flex flex-col md:flex-row justify-center w-full min-h-screen gap-8 p-4 md:p-8">
       <div className="flex flex-col gap-8 p-8 md:p-12 border-y md:border border-risu-400 bg-risu-700/20 md:rounded-xl h-fit">
-        <h1 className="text-2xl">Gdzie jesteśmy</h1>
         {places ? (
           places.map((place) => (
             <div key={place.id} className="flex flex-col gap-2">

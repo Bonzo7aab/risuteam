@@ -1,9 +1,11 @@
+import { NumberTicker } from "@/components/ui/number-ticker";
+import { TextAnimate } from "@/components/ui/text-animate";
 import { Dumbbell, MapPinHouse, PersonStanding, TentTree } from "lucide-react";
 import React from "react";
 
 const Onas = () => {
   return (
-    <div className="my-16">
+    <div className="my-16 relative">
       <div className="w-full max-w-7xl px-4 md:px-0 lg:px-5 mx-auto">
         <div className="w-full justify-start items-center gap-12 grid lg:grid-cols-2 grid-cols-1">
           <div className="w-full justify-center items-start gap-6 grid sm:grid-cols-2 grid-cols-1 lg:order-first order-last">
@@ -28,12 +30,14 @@ const Onas = () => {
                     Historia klubu Risu Team
                   </h1>
                 </div>
-                <p className="text-base font-normal leading-relaxed lg:text-start text-center">
-                  Klub sportowy został założony przez Kacpa Lewandowskiego w
-                  2025 roku, bo podziale poprzedniego kluby założonego w 2014
-                  roku. zajmujemy siętaki sportami jak Karate, Judo, Gimnastyka,
-                  Samoobrona i inne. Działamy w wielu szkołąch na teranie
-                  Mysiadłą i Ursynowa.
+                <p className="text-lg font-normal leading-relaxed lg:text-start text-center">
+                  <TextAnimate animation="blurInUp" by="character" once>
+                    Klub sportowy został założony przez Kacpa Lewandowskiego w
+                    2025 roku, bo podziale poprzedniego kluby założonego w 2014
+                    roku. zajmujemy siętaki sportami jak Karate, Judo,
+                    Gimnastyka, Samoobrona i inne. Działamy w wielu szkołąch na
+                    teranie Mysiadłą i Ursynowa.
+                  </TextAnimate>
                 </p>
               </div>
             </div>
@@ -50,7 +54,7 @@ const Onas = () => {
                 <PersonStanding size={40} />
               </div>
               <h2 className="title-font font-medium text-3xl text-risu-400">
-                300+
+                <NumberTicker value={300} />+
               </h2>
               <p className="leading-relaxed">Dzieci</p>
             </div>
@@ -61,7 +65,7 @@ const Onas = () => {
                 <MapPinHouse size={40} />
               </div>
               <h2 className="title-font font-medium text-3xl text-risu-400">
-                8
+                <NumberTicker value={8} />
               </h2>
               <p className="leading-relaxed">Placówek</p>
             </div>
@@ -72,7 +76,7 @@ const Onas = () => {
                 <Dumbbell size={40} />
               </div>
               <h2 className="title-font font-medium text-3xl text-risu-400">
-                5
+                <NumberTicker value={5} />
               </h2>
               <p className="leading-relaxed">Trenerów</p>
             </div>
@@ -83,7 +87,7 @@ const Onas = () => {
                 <TentTree size={40} />
               </div>
               <h2 className="title-font font-medium text-3xl text-risu-400">
-                10+
+                <NumberTicker value={10} />+
               </h2>
               <p className="leading-relaxed">Odbyte obozy</p>
             </div>
@@ -91,15 +95,17 @@ const Onas = () => {
         </div>
       </div>
 
-      <div className="flex divide-x-2 divide-risu-400 my-16">
+      <div className="flex divide-x-2 divide-risu-400 my-16 text-lg">
         <div className="w-1/2 px-16 leading-relaxed">
-          Poza codziennymi zajęciami organizujemy również obozy sportowe dla
-          dziecie oraz rodziców dziećmi. Bezpieczeństwo, nauka oraz dobra zabaw
-          - to są głowne ich cechy. Staramy się pogłębiać zainteresowania
-          sportem, poprzez gry i zabawy w grupach.
+          <TextAnimate animation="blurInUp" by="character" once>
+            Poza codziennymi zajęciami organizujemy również obozy sportowe dla
+            dziecie oraz rodziców dziećmi. Bezpieczeństwo, nauka oraz dobra
+            zabaw - to są głowne ich cechy. Staramy się pogłębiać
+            zainteresowania sportem, poprzez gry i zabawy w grupach.
+          </TextAnimate>
         </div>
-        <div className="w-1/2 px-16">
-          <ul className="list-none flex-wrap flex leading-loose">
+        <div className="w-1/2 px-16 flex align-middle">
+          <ul className="list-none flex-wrap flex">
             <li className="w-1/3">sport</li>
             <li className="w-1/3">zabawa</li>
             <li className="w-1/3">dyscyplina</li>

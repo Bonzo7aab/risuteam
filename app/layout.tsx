@@ -1,4 +1,4 @@
-import { forwardRef, HTMLAttributes } from "react";
+import { forwardRef, HTMLAttributes, Suspense } from "react";
 import { EnvVarWarning } from "@/components/env-var-warning";
 import HeaderAuth from "@/components/header-auth";
 import {
@@ -30,6 +30,7 @@ import {
 } from "next/font/google";
 import { GridPatternBackground } from "@/components/ui/grid-pattern-background";
 import { Navbar } from "../components/navbar";
+import Loading from "./loading";
 
 export const metadata = {
   icons: {
@@ -129,16 +130,8 @@ const Footer = () => {
   return (
     <footer className="flex justify-center w-full h-24 border-t border-foreground/10">
       <div className="flex items-center justify-between w-full p-4 px-5 text-sm max-w-7xl">
-        <div className="h-24 ">
-          <Image
-            alt="risu team hero"
-            src="/logoWithBorder.png"
-            width={142}
-            height={138}
-            // sizes="100vw"
-            // style={{ width: "100%", height: "100%" }}
-          />
-          {/* <Logo /> */}
+        <div className="h-16">
+          <Logo fill="#FD9E04" className="h-full w-auto drop-shadow-md" />
         </div>
         <div className="flex gap-4">
           <div className="flex items-center gap-2">
@@ -193,8 +186,8 @@ export default async function RootLayout({
             />
             <div className="flex flex-col items-center flex-1 w-full relative">
               <Navbar />
-              <div className="flex flex-col flex-1 w-full xl:max-w-7xl tracking-wider">
-                {children}
+              <div className="flex flex-col flex-1 w-full xl:max-w-7xl tracking-wider relative">
+                <Suspense fallback={<Loading />}>{children}</Suspense>
               </div>
               <Footer />
             </div>

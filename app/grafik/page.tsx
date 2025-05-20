@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@radix-ui/react-dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { mockSchedule, ScheduleType } from "../types/schedule";
+import { mockSchedule, ScheduleType } from "../../lib/schedule";
 
 const mockSchedule_flat = Object.values(mockSchedule).flat();
 
@@ -238,7 +238,7 @@ const Schedule = ({ filters }: { filters: any }) => {
                     <span className="text-sm flex justify-between items-center">
                       <span>Lokalizacja: {activity.place}</span>
                       <span className="border-risu-400 border-l-2 px-4 py-2">
-                        Free Slots: {activity.free_slots}
+                        Wolne miejsca: {activity.free_slots}
                       </span>
                     </span>
                   </div>
@@ -262,7 +262,9 @@ const Page = () => {
 
   return (
     <div className="flex flex-col justify-center w-full my-16">
-      <h1 className="mb-4 text-2xl font-bold">Grafik zajęć</h1>
+      <div className="text-center text-4xl mb-16 flex justify-center">
+        <h1 className="border-b-2 pb-2 border-risu-400 w-fit">Grafik zajęć</h1>
+      </div>
       <Filters onFilterChange={setFilters} filters={filters} />
       <Schedule filters={filters} />
     </div>

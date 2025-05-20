@@ -24,8 +24,9 @@ import {
 import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import { CampType, CAMP_DATA, TabType } from "../types/camps";
+import { CampType, CAMP_DATA, TabType } from "../../lib/camps";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import Link from "next/link";
 
 const TABS: Record<TabType, { label: string; icon: React.ReactNode }> = {
   all: {
@@ -321,11 +322,11 @@ const CampContent = ({
                 <div className="mb-2 flex flex-col md:flex-row justify-center gap-2 md:gap-4">
                   <strong>Numer Konta:</strong>
                   <span className="text-slate-400">
-                    1111 2222 3333 4444 5555 6666
+                    28 1090 1694 0000 0001 3471 6556
                   </span>
                   <button
                     onClick={() =>
-                      copyToClipboard("1111 2222 3333 4444 5555 6666")
+                      copyToClipboard("28 1090 1694 0000 0001 3471 6556")
                     }
                     className="text-risu-400 hover:text-risu-700 flex gap-1 justify-center md:justify-start"
                   >
@@ -343,6 +344,14 @@ const CampContent = ({
                     uczestników, [nr wpłacanej raty]
                   </span>
                 </div>
+              </div>
+
+              <div className="my-4 flex flex-col">
+                <span>Zapisy i więcej informacji:</span>
+                <Link href="/kontakt" className="text-risu-400">
+                  Kontakt
+                </Link>
+                <span>Do zobaczenia!</span>
               </div>
             </div>
           </div>

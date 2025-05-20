@@ -44,10 +44,9 @@ const Contact = () => {
 
   return (
     <div className="my-16">
-      <div className="flex justify-center">
-        <h1 className="text-3xl font-bold sm:text-4xl relative w-fit">
+      <div className="text-center text-4xl flex justify-center">
+        <h1 className="border-b-2 pb-2 border-risu-400 w-fit">
           Skontaktuj się z nami!
-          <div className="absolute -bottom-4 -left-0 w-24 border-t-4 border-risu-500 opacity-70"></div>
         </h1>
       </div>
 

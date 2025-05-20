@@ -9,7 +9,7 @@ const Trainers = async () => {
 
   return (
     <div className="flex flex-col mx-auto max-w-4xl px-2 py-8 md:px-0">
-      <div className="text-center text-2xl mb-16 flex justify-center">
+      <div className="text-center text-4xl mb-16 flex justify-center">
         <h1 className="border-b-2 pb-2 border-risu-400 w-fit">Nasi trenerzy</h1>
       </div>
       <div className="flex w-full gap-8">

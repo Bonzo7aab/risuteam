@@ -1,8 +1,4 @@
-import { Skeleton } from "@/components/skeleton";
-import { MapPinned } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { createClient } from "@/utils/supabase/server";
-import Map from "@/components/google-map";
 import LocationContent from "./location-content";
 
 const Page = async () => {
@@ -12,7 +8,16 @@ const Page = async () => {
   if (error) console.error("error", error);
   if (!places) places = [];
 
-  return <LocationContent places={places} />;
+  return (
+    <>
+      <div className="text-center text-4xl mb-16 flex justify-center">
+        <h1 className="border-b-2 pb-2 border-risu-400 w-fit">
+          Gdzie jesteśmy
+        </h1>
+      </div>
+      <LocationContent places={places} />
+    </>
+  );
 };
 
 export default Page;

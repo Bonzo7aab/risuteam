@@ -180,7 +180,7 @@ const KARATE_RANKS: KarateRank[] = [
 const Exams = () => {
   return (
     <div className="max-w-4xl mx-auto my-8 px-2 md:px-0">
-      <div className="text-center text-2xl mb-16 flex justify-center">
+      <div className="text-center text-4xl mb-16 flex justify-center">
         <h1 className="border-b-2 pb-2 border-risu-400 w-fit">
           Egzaminy na pasy - zasady
         </h1>
@@ -195,7 +195,7 @@ const Exams = () => {
           <div className="relative last:after:hidden after:absolute after:top-10 after:bottom-0 after:start-5 after:w-0.5 after:-translate-x-[0.5px] after:transition-all after:duration-300 after:ease-in-out after:bg-risu-300 group-hover:after:bg-risu-700">
             <div className="relative z-10 size-10 flex justify-center items-center">
               <span
-                className={`flex size-10 border-2 transition-all duration-300 ease-in-out border-risu-300 group-hover:border-risu-700 rounded-full bg-${ranking.color}-400`}
+                className={`flex size-10 border-2 transition-all duration-300 ease-in-out border-risu-300 group-hover:bg-risu-700 group-hover:border-risu-700 rounded-full bg-${ranking.color}-400`}
               />
             </div>
           </div>

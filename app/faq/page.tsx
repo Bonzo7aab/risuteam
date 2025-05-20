@@ -36,7 +36,7 @@ const faq = [
 const FAQ = () => {
   return (
     <div className="flex flex-col mx-auto max-w-4xl w-full px-2 md:px-0 my-8">
-      <div className="text-center text-2xl mb-16 flex justify-center">
+      <div className="text-center text-4xl mb-16 flex justify-center">
         <h1 className="border-b-2 pb-2 border-risu-400 w-fit">
           Pytania i odpowiedzi
         </h1>
@@ -48,7 +48,7 @@ const FAQ = () => {
             <AccordionTrigger className="text-lg text-left">
               {question}
             </AccordionTrigger>
-            <AccordionContent className="m-2 text-slate-400">
+            <AccordionContent className="m-2 text-slate-400 border-x-2 px-4 border-risu-400/20">
               {answer}
             </AccordionContent>
           </AccordionItem>

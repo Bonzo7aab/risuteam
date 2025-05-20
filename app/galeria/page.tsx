@@ -3,63 +3,107 @@ import React from "react";
 
 const images = [
   {
-    src: "https://images.unsplash.com/photo-1682687220742-aba13b6e50ba?auto=compress&cs=tinysrgb&fit=crop&w=800&q=80",
-    alt: "Nebula in deep space",
+    src: "/gallery1.jpg",
+    alt: "zdjecie1",
   },
   {
-    src: "https://images.unsplash.com/photo-1462331940025-496dfbfc7564?auto=compress&cs=tinysrgb&fit=crop&w=800&q=80",
-    alt: "Galaxy formation",
+    src: "/gallery2.jpg",
+    alt: "zdjecie2",
   },
   {
-    src: "https://images.unsplash.com/photo-1444703686981-a3abbc4d4fe3?auto=compress&cs=tinysrgb&fit=crop&w=800&q=80",
-    alt: "Northern Lights",
+    src: "/gallery3.jpg",
+    alt: "zdjecie3",
   },
   {
-    src: "https://images.unsplash.com/photo-1543722530-d2c3201371e7?auto=compress&cs=tinysrgb&fit=crop&w=800&q=80",
-    alt: "Meteor shower",
+    src: "/gallery4.jpg",
+    alt: "zdjecie4",
   },
   {
-    src: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=compress&cs=tinysrgb&fit=crop&w=800&q=80",
-    alt: "Space Station",
+    src: "/gallery5.jpg",
+    alt: "zdjecie5",
   },
   {
-    src: "https://images.unsplash.com/photo-1614728263952-84ea256f9679?auto=compress&cs=tinysrgb&fit=crop&w=800&q=80",
-    alt: "Astronaut in space",
+    src: "/gallery6.jpg",
+    alt: "zdjecie6",
   },
   {
-    src: "https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=compress&cs=tinysrgb&fit=crop&w=800&q=80",
-    alt: "Milky Way galaxy",
+    src: "/gallery7.jpg",
+    alt: "zdjecie7",
   },
   {
-    src: "https://images.unsplash.com/photo-1502134249126-9f3755a50d78?auto=compress&cs=tinysrgb&fit=crop&w=800&q=80",
-    alt: "Solar eclipse",
+    src: "/gallery8.jpg",
+    alt: "zdjecie8",
   },
   {
-    src: "https://images.unsplash.com/photo-1454789548928-9efd52dc4031?auto=compress&cs=tinysrgb&fit=crop&w=800&q=80",
-    alt: "Rocket launch",
+    src: "/gallery9.jpg",
+    alt: "zdjecie9",
   },
   {
-    src: "https://images.unsplash.com/photo-1614728263952-84ea256f9679?auto=compress&cs=tinysrgb&fit=crop&w=800&q=80",
-    alt: "Astronaut in space",
+    src: "/gallery10.jpg",
+    alt: "zdjecie10",
   },
   {
-    src: "https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=compress&cs=tinysrgb&fit=crop&w=800&q=80",
-    alt: "Milky Way galaxy",
+    src: "/gallery11.jpg",
+    alt: "zdjecie11",
   },
   {
-    src: "https://images.unsplash.com/photo-1502134249126-9f3755a50d78?auto=compress&cs=tinysrgb&fit=crop&w=800&q=80",
-    alt: "Solar eclipse",
+    src: "/gallery12.jpg",
+    alt: "zdjecie12",
   },
   {
-    src: "https://images.unsplash.com/photo-1454789548928-9efd52dc4031?auto=compress&cs=tinysrgb&fit=crop&w=800&q=80",
-    alt: "Rocket launch",
+    src: "/gallery13.jpg",
+    alt: "zdjecie13",
+  },
+  {
+    src: "/gallery14.jpg",
+    alt: "zdjecie14",
+  },
+  {
+    src: "/gallery15.jpg",
+    alt: "zdjecie15",
+  },
+  {
+    src: "/gallery16.jpg",
+    alt: "zdjecie16",
+  },
+  {
+    src: "/gallery17.jpg",
+    alt: "zdjecie17",
+  },
+  {
+    src: "/gallery18.jpg",
+    alt: "zdjecie18",
+  },
+  {
+    src: "/gallery19.jpg",
+    alt: "zdjecie19",
+  },
+  {
+    src: "/gallery20.jpg",
+    alt: "zdjecie20",
+  },
+  {
+    src: "/gallery21.jpg",
+    alt: "zdjecie21",
+  },
+  {
+    src: "/gallery22.jpg",
+    alt: "zdjecie22",
+  },
+  {
+    src: "/gallery23.jpg",
+    alt: "zdjecie23",
+  },
+  {
+    src: "/gallery24.jpg",
+    alt: "zdjecie24",
   },
 ];
 
 const Gallery = () => {
   return (
     <div className="my-8">
-      <div className="text-center text-2xl mb-16 flex justify-center">
+      <div className="text-center text-4xl mb-16 flex justify-center">
         <h1 className="border-b-2 pb-2 border-risu-400 w-fit">Galeria</h1>
       </div>
       <BlurGallery images={images} />
