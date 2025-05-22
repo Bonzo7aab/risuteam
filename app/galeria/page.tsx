@@ -1,5 +1,10 @@
 import { BlurGallery } from "@/components/ui/blur-gallery";
 import React from "react";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Risu Team | Galeria",
+};
 
 const images = [
   {

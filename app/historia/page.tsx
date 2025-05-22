@@ -2,6 +2,11 @@ import { NumberTicker } from "@/components/ui/number-ticker";
 import { TextAnimate } from "@/components/ui/text-animate";
 import { Dumbbell, MapPinHouse, PersonStanding, TentTree } from "lucide-react";
 import React from "react";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Risu Team | Historia",
+};
 
 const Onas = () => {
   return (

@@ -1,4 +1,9 @@
 import React from "react";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Risu Team | Egzaminy",
+};
 
 interface KarateRank {
   rank: string; // e.g., "9 KYU", "1 DAN"

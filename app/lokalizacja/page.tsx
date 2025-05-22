@@ -1,5 +1,10 @@
 import { createClient } from "@/utils/supabase/server";
 import LocationContent from "./location-content";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Risu Team | Lokalizacje",
+};
 
 const Page = async () => {
   const supabase = await createClient();

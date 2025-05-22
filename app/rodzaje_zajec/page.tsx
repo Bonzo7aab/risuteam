@@ -1,6 +1,11 @@
 import { TextAnimate } from "@/components/ui/text-animate";
 import Image from "next/image";
 import React from "react";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Risu Team | Rodzaje zajęć",
+};
 
 const RodzajeZajec = () => {
   return (

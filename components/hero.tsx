@@ -158,7 +158,7 @@ export default function Hero() {
         </div>
       </div>
 
-      <div className="mt-16 mb-32 rounded-md flex flex-col antialiased  dark:bg-grid-white/[0.05] items-center justify-center relative overflow-hidden">
+      <div className="mt-16 mb-32 rounded-md flex flex-col antialiased items-center justify-center relative overflow-hidden">
         <InfiniteMovingCards items={rating} direction="right" speed="slow" />
       </div>
     </div>

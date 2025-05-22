@@ -2,6 +2,11 @@ import Image from "next/image";
 import { Skeleton } from "@/components/skeleton";
 import { createClient } from "@/utils/supabase/server";
 import { TrainerType } from "@/app/types/types";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Risu Team | Trenerzy",
+};
 
 const Trainers = async () => {
   const supabase = await createClient();
