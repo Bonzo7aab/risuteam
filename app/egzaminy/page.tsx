@@ -185,7 +185,7 @@ const Exams = () => {
           Egzaminy na pasy - zasady
         </h1>
       </div>
-      <div className="flex pl-16 pb-4">
+      <div className="pl-16 pb-4 hidden md:flex">
         <div className="basis-1/3 pl-1">Stopień oraz minimalny wiek</div>
         <div className="basis-1/3 pl-2">Zasadnicze kryteria</div>
         <div className="basis-1/3">Okres treningu między egzaminami</div>
@@ -200,7 +200,7 @@ const Exams = () => {
             </div>
           </div>
 
-          <div className="divide-x-2 group-hover:divide-black divide-risu-400/50 bg-risu-400/5 flex mb-8 rounded-md text-sm leading-6 border border-risu-600 group-hover:bg-risu-700 p-4 w-full transition-all duration-300 ease-in-out">
+          <div className="flex-col md:flex-row md:divide-x-2 group-hover:divide-black divide-risu-400/50 bg-risu-400/5 flex mb-8 rounded-md text-sm leading-6 border border-risu-600 group-hover:bg-risu-700 p-4 w-full transition-all duration-300 ease-in-out">
             <div className="basis-1/3">
               <h3 className="flex mb-2 font-semibold text-lg">
                 {ranking.rank} - {ranking.beltColor}
@@ -210,10 +210,20 @@ const Exams = () => {
                 {ranking.age}
               </div>
             </div>
-            <div className="basis-1/3 pl-4">
-              <span className="text-sm">{ranking.criteria}</span>
+            <div className="basis-1/3 md:pl-4">
+              <span className="text-sm">
+                <span className="inline-block md:hidden text-slate-400">
+                  Kryteria:&nbsp;
+                </span>
+                {ranking.criteria}
+              </span>
             </div>
-            <div className="basis-1/3 pl-4">{ranking.neededTraining}</div>
+            <div className="basis-1/3 md:pl-4">
+              <span className="inline-block md:hidden text-slate-400">
+                Trening między egzaminami:&nbsp;
+              </span>
+              {ranking.neededTraining}
+            </div>
           </div>
         </div>
       ))}

@@ -95,8 +95,8 @@ const Onas = () => {
         </div>
       </div>
 
-      <div className="flex divide-x-2 divide-risu-400 my-16 text-lg">
-        <div className="w-1/2 px-16 leading-relaxed">
+      <div className="flex divide-y md:divide-x-2 divide-risu-400 md:my-16 text-lg md:flex-row flex-col">
+        <div className="md:w-1/2 px-4 md:px-16 leading-relaxed pb-8">
           <TextAnimate animation="blurInUp" by="character" once>
             Poza codziennymi zajęciami organizujemy również obozy sportowe dla
             dziecie oraz rodziców dziećmi. Bezpieczeństwo, nauka oraz dobra
@@ -104,17 +104,17 @@ const Onas = () => {
             zainteresowania sportem, poprzez gry i zabawy w grupach.
           </TextAnimate>
         </div>
-        <div className="w-1/2 px-16 flex align-middle">
-          <ul className="list-none flex-wrap flex">
-            <li className="w-1/3">sport</li>
-            <li className="w-1/3">zabawa</li>
-            <li className="w-1/3">dyscyplina</li>
-            <li className="w-1/3">technika</li>
-            <li className="w-1/3">cierpliwość</li>
-            <li className="w-1/3">przygoda</li>
-            <li className="w-1/3">respekt</li>
-            <li className="w-1/3">przyjaźń</li>
-            <li className="w-1/3">pasja</li>
+        <div className="md:w-1/2 px-4 md:px-16 flex align-middle">
+          <ul className="list-none flex-wrap flex pt-8">
+            <li className="w-1/3 capitalize">sport</li>
+            <li className="w-1/3 capitalize">zabawa</li>
+            <li className="w-1/3 capitalize">dyscyplina</li>
+            <li className="w-1/3 capitalize">technika</li>
+            <li className="w-1/3 capitalize">cierpliwość</li>
+            <li className="w-1/3 capitalize">przygoda</li>
+            <li className="w-1/3 capitalize">respekt</li>
+            <li className="w-1/3 capitalize">przyjaźń</li>
+            <li className="w-1/3 capitalize">pasja</li>
           </ul>
         </div>
       </div>

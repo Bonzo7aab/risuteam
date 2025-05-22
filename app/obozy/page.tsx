@@ -9,12 +9,12 @@ import {
   CircleCheck,
   Copy,
   Eye,
-  Haze,
   List,
   MapPinned,
   Smile,
   Snowflake,
   Sun,
+  SunSnow,
   Tag,
   Tv,
   Users,
@@ -35,7 +35,7 @@ const TABS: Record<TabType, { label: string; icon: React.ReactNode }> = {
   },
   polkolonie: {
     label: "Półkolonie",
-    icon: <Haze />,
+    icon: <SunSnow />,
   },
   letnie: {
     label: "Obozy letnie",
@@ -81,9 +81,9 @@ const CampContent = ({
           </h1>
           <div className="text-base md:text-lg mb-6">{content.description}</div>
           {content.images && (
-            <div className="relative flex gap-4 mb-6 justify-center w-full md:w-80 mx-auto">
+            <div className="relative flex-col md:flex-row flex gap-4 mb-6 justify-center w-full md:w-80 mx-auto">
               {content.images.map((image, index) => (
-                <div key={index} className="relative">
+                <div key={index} className="relative mx-auto">
                   <Image
                     src={image.src}
                     alt={image.alt}

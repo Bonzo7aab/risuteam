@@ -162,7 +162,7 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      className={`
+      className={`dark 
         ${coveredByYourGrace.variable}
         ${protestRiot.variable}
         ${rubikDirt.variable}`}

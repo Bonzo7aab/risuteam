@@ -5,7 +5,12 @@ import { motion, MotionProps } from "framer-motion";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
 interface BlurGalleryProps extends MotionProps {
@@ -41,7 +46,10 @@ export function BlurGallery({ className, images, ...props }: BlurGalleryProps) {
       onOpenChange={(open) => !open && setSelectedIndex(null)}
     >
       <motion.ul
-        className={cn("mx-auto flex-wrap flex w-full gap-4 p-4", className)}
+        className={cn(
+          "mx-auto flex-wrap flex w-full gap-4 p-4 justify-center",
+          className
+        )}
         {...props}
       >
         {images.map((image, index) => (
@@ -87,45 +95,48 @@ export function BlurGallery({ className, images, ...props }: BlurGalleryProps) {
 
       <DialogContent className="max-w-[90vw] max-h-[90vh] p-0 bg-transparent border-none">
         {selectedIndex !== null && (
-          <div className="relative flex justify-center">
-            <div className="relative">
-              <Image
-                src={images[selectedIndex].src}
-                alt={
-                  images[selectedIndex].alt ||
-                  `Gallery image ${selectedIndex + 1}`
-                }
-                width={0}
-                height={0}
-                sizes="100vw"
-                className="w-auto h-auto"
-              />
+          <>
+            <DialogTitle>{images[selectedIndex].alt}</DialogTitle>
+            <div className="relative flex justify-center">
+              <div className="relative">
+                <Image
+                  src={images[selectedIndex].src}
+                  alt={
+                    images[selectedIndex].alt ||
+                    `Gallery image ${selectedIndex + 1}`
+                  }
+                  width={0}
+                  height={0}
+                  sizes="100vw"
+                  className="w-auto h-auto"
+                />
+                <Button
+                  variant="default"
+                  size="icon"
+                  className="absolute top-4 right-4 bg-black/50 hover:bg-gray-400 transition-colors duration-200 hover:text-black text-white rounded-full"
+                  onClick={() => setSelectedIndex(null)}
+                >
+                  <X className="h-6 w-6" />
+                </Button>
+              </div>
               <Button
-                variant="default"
+                variant="ghost"
                 size="icon"
-                className="absolute top-4 right-4 bg-black/50 hover:bg-gray-400 transition-colors duration-200 hover:text-black text-white rounded-full"
-                onClick={() => setSelectedIndex(null)}
+                className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full"
+                onClick={handlePrevious}
               >
-                <X className="h-6 w-6" />
+                <ChevronLeft className="h-8 w-8" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full"
+                onClick={handleNext}
+              >
+                <ChevronRight className="h-8 w-8" />
               </Button>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full"
-              onClick={handlePrevious}
-            >
-              <ChevronLeft className="h-8 w-8" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full"
-              onClick={handleNext}
-            >
-              <ChevronRight className="h-8 w-8" />
-            </Button>
-          </div>
+          </>
         )}
       </DialogContent>
     </Dialog>

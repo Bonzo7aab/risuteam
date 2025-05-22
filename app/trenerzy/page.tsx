@@ -8,11 +8,11 @@ const Trainers = async () => {
   const { data: trainers, error } = await supabase.from("trainers").select("*");
 
   return (
-    <div className="flex flex-col mx-auto max-w-4xl px-2 py-8 md:px-0">
+    <div className="flex flex-col mx-auto max-w-4xl px-2 py-8 md:px-0 mb-16">
       <div className="text-center text-4xl mb-16 flex justify-center">
         <h1 className="border-b-2 pb-2 border-risu-400 w-fit">Nasi trenerzy</h1>
       </div>
-      <div className="flex w-full gap-8">
+      <div className="flex w-full flex-col md:flex-row gap-8">
         {trainers ? (
           trainers.map((trainer: TrainerType) => (
             <div key={trainer.id}>
@@ -20,9 +20,9 @@ const Trainers = async () => {
                 <Image
                   src={trainer.image_url}
                   alt={trainer.name}
-                  className="object-cover w-full rounded-lg aspect-square"
-                  width={300}
-                  height={300}
+                  className="object-cover rounded-lg aspect-square"
+                  width={500}
+                  height={500}
                 />
                 <div className="absolute right-0 p-4 mt-4 text-2xl font-semibold text-white bg-black bottom-4 border-y-2 border-l-2 border-risu-400">
                   {trainer.name}

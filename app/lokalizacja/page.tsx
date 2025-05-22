@@ -10,7 +10,7 @@ const Page = async () => {
 
   return (
     <>
-      <div className="text-center text-4xl mb-16 flex justify-center">
+      <div className="text-center text-4xl my-16 flex justify-center">
         <h1 className="border-b-2 pb-2 border-risu-400 w-fit">
           Gdzie jesteśmy
         </h1>
