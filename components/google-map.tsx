@@ -7,6 +7,7 @@ import {
 import React, { useState } from "react";
 import { Skeleton } from "./skeleton";
 import { PlaceType } from "@/app/types/types";
+import { MapPinned } from "lucide-react";
 
 const containerStyle = {
   width: "100%",
@@ -47,13 +48,37 @@ const Map = ({ places }: { places: PlaceType[] }) => {
           <InfoWindow
             position={selectedPlace.position}
             onCloseClick={() => setSelectedPlace(undefined)}
-            options={{ pixelOffset: new google.maps.Size(0, -50) }}
+            options={{
+              pixelOffset: new google.maps.Size(0, -50),
+              maxWidth: 300,
+              minWidth: 200,
+              disableAutoPan: false,
+              ariaLabel: "Close",
+            }}
             zIndex={1}
           >
-            <div className="text-black">
-              <h1 className="font-bold">{selectedPlace.name}</h1>
-              <div className="inline-block"></div>
-              <div className="mr-4">{selectedPlace.address}</div>
+            <div className="text-black p-1">
+              <div className="flex justify-between items-start gap-4">
+                <div>
+                  <h1 className="font-bold text-lg mb-1">
+                    {selectedPlace.name}
+                  </h1>
+                  <div className="text-sm text-gray-600">
+                    {selectedPlace.address}
+                  </div>
+                  {selectedPlace.map_link && (
+                    <a
+                      href={selectedPlace.map_link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex gap-2 hover:text-gray-300 mt-2"
+                    >
+                      <MapPinned size={20} />
+                      <span className="text-sm">Otwórz w Google Maps</span>
+                    </a>
+                  )}
+                </div>
+              </div>
             </div>
           </InfoWindow>
         )}

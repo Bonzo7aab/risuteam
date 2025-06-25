@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils";
 import { AnimatePresence, motion, MotionProps, Variants } from "motion/react";
 import { ElementType, memo } from "react";
 
@@ -316,7 +316,7 @@ const TextAnimateBase = ({
   let segments: string[] = [];
   switch (by) {
     case "word":
-      segments = children.split(/(\s+)/);
+      segments = children.split(/\s+/);
       break;
     case "character":
       segments = children.split("");
@@ -387,20 +387,32 @@ const TextAnimateBase = ({
         viewport={{ once }}
         {...props}
       >
-        {segments.map((segment, i) => (
-          <motion.span
-            key={`${by}-${segment}-${i}`}
-            variants={finalVariants.item}
-            custom={i * staggerTimings[by]}
-            className={cn(
-              by === "line" ? "block" : "inline-block whitespace-pre",
-              by === "character" && "",
-              segmentClassName
-            )}
-          >
-            {segment}
-          </motion.span>
-        ))}
+        {by === "word"
+          ? segments.map((segment, i) => (
+              <motion.span
+                key={`word-${segment}-${i}`}
+                variants={finalVariants.item}
+                custom={i * staggerTimings[by]}
+                className={cn("inline-block", segmentClassName)}
+              >
+                {segment}
+                {i < segments.length - 1 ? " " : null}
+              </motion.span>
+            ))
+          : segments.map((segment, i) => (
+              <motion.span
+                key={`${by}-${segment}-${i}`}
+                variants={finalVariants.item}
+                custom={i * staggerTimings[by]}
+                className={cn(
+                  by === "line" ? "block" : "inline-block whitespace-pre",
+                  by === "character" && "",
+                  segmentClassName
+                )}
+              >
+                {segment}
+              </motion.span>
+            ))}
       </MotionComponent>
     </AnimatePresence>
   );

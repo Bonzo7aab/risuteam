@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { motion, MotionProps } from "framer-motion";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import {
@@ -93,12 +93,15 @@ export function BlurGallery({ className, images, ...props }: BlurGalleryProps) {
         ))}
       </motion.ul>
 
-      <DialogContent className="max-w-[90vw] max-h-[90vh] p-0 bg-transparent border-none">
+      <DialogContent className="max-w-[90vw] max-h-[90vh] p-0 bg-transparent border-none [&>button]:hidden">
         {selectedIndex !== null && (
           <>
-            <DialogTitle>{images[selectedIndex].alt}</DialogTitle>
             <div className="relative flex justify-center">
               <div className="relative">
+                <div className="absolute top-4 left-4 z-10 text-white bg-black/50 px-3 py-1 rounded-md">
+                  {images[selectedIndex].alt ||
+                    `Gallery image ${selectedIndex + 1}`}
+                </div>
                 <Image
                   src={images[selectedIndex].src}
                   alt={
@@ -108,7 +111,7 @@ export function BlurGallery({ className, images, ...props }: BlurGalleryProps) {
                   width={0}
                   height={0}
                   sizes="100vw"
-                  className="w-auto h-auto"
+                  className="w-auto max-h-[85vh] object-contain"
                 />
                 <Button
                   variant="default"

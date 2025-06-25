@@ -5,40 +5,15 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Metadata } from "next";
+import { fetchFaq } from "@/app/actions";
 
 export const metadata: Metadata = {
   title: "Risu Team | FAQ",
 };
 
-const faq = [
-  {
-    question: "What is your return policy?",
-    answer:
-      "You can return unused items in their original packaging within 30 days for a refund or exchange. Contact support for assistance.",
-  },
-  {
-    question: "How do I track my order?",
-    answer:
-      "Track your order using the link provided in your confirmation email, or log into your account to view tracking details.",
-  },
-  {
-    question: "Do you ship internationally?",
-    answer:
-      "Yes, we ship worldwide. Shipping fees and delivery times vary by location, and customs duties may apply for some countries.",
-  },
-  {
-    question: "What payment methods do you accept?",
-    answer:
-      "We accept Visa, MasterCard, American Express, PayPal, Apple Pay, and Google Pay, ensuring secure payment options for all customers.",
-  },
-  {
-    question: "What if I receive a damaged item?",
-    answer:
-      "Please contact our support team within 48 hours of delivery with photos of the damaged item. We’ll arrange a replacement or refund.",
-  },
-];
+export default async function FAQ() {
+  const { data: faq, error } = await fetchFaq();
 
-const FAQ = () => {
   return (
     <div className="flex flex-col mx-auto max-w-4xl w-full px-2 md:px-0 my-8">
       <div className="text-center text-4xl mb-16 flex justify-center">
@@ -47,20 +22,28 @@ const FAQ = () => {
         </h1>
       </div>
 
-      <Accordion type="multiple">
-        {faq.map(({ question, answer }, index) => (
-          <AccordionItem key={question} value={`question-${index}`}>
-            <AccordionTrigger className="text-lg text-left">
-              {question}
-            </AccordionTrigger>
-            <AccordionContent className="m-2 text-slate-400 border-x-2 px-4 border-risu-400/20">
-              {answer}
-            </AccordionContent>
-          </AccordionItem>
-        ))}
-      </Accordion>
+      {error && (
+        <div className="text-red-500 text-center py-8">
+          Błąd ładowania FAQ: {error}
+        </div>
+      )}
+      {(!faq || faq.length === 0) && !error && (
+        <div className="text-center py-8">Brak pytań do wyświetlenia.</div>
+      )}
+      {faq && faq.length > 0 && (
+        <Accordion type="multiple">
+          {faq.map(({ question, answer, id }, index) => (
+            <AccordionItem key={id} value={`question-${id}`}>
+              <AccordionTrigger className="text-lg text-left">
+                {question}
+              </AccordionTrigger>
+              <AccordionContent className="m-2 text-slate-400 border-x-2 px-4 border-risu-400/20">
+                {answer}
+              </AccordionContent>
+            </AccordionItem>
+          ))}
+        </Accordion>
+      )}
     </div>
   );
-};
-
-export default FAQ;
+}

@@ -22,7 +22,6 @@ const config = {
   			risuhero: 'url("/risuhero.jpg")'
   		},
 		fontFamily: {
-			coveredByYourGrace: ['var(--font-coveredByYourGrace)'],
 			protestRiot: ['var(--font-protestRiot)'],
 			rubikDirt: ['var(--font-rubikDirt)']
 		},

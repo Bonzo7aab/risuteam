@@ -1,9 +1,13 @@
 "use server";
 
-import { encodedRedirect } from "@/utils/utils";
-import { createClient } from "@/utils/supabase/server";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
+import { headers } from 'next/headers';
+import { redirect } from 'next/navigation';
+
+import { createClient } from '@/utils/supabase/server';
+import { encodedRedirect } from '@/utils';
+
+import { AmenityType, Hotel } from "@/app/types/types";
+import { ActivityType, Camp, FaqType, GalleryImageType, PlaceType, TrainerType } from './types/types';
 
 export const signUpAction = async (formData: FormData) => {
   const email = formData.get("email")?.toString();
@@ -44,7 +48,7 @@ export const signInAction = async (formData: FormData) => {
   const password = formData.get("password") as string;
   const supabase = await createClient();
 
-  const { error } = await supabase.auth.signInWithPassword({
+  const { error, data } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
@@ -53,7 +57,19 @@ export const signInAction = async (formData: FormData) => {
     return encodedRedirect("error", "/sign-in", error.message);
   }
 
-  return redirect("/admin");
+  // Fetch the user to check the role
+  const { data: { user } } = await supabase.auth.getUser();
+  if (user && user.app_metadata?.role === "admin") {
+    return redirect("/admin");
+  }
+
+  return encodedRedirect("error", "/sign-in", "You are not an admin user.");
+};
+
+export const signOutAction = async () => {
+  const supabase = await createClient();
+  await supabase.auth.signOut();
+  return redirect("/sign-in");
 };
 
 export const forgotPasswordAction = async (formData: FormData) => {
@@ -127,8 +143,505 @@ export const resetPasswordAction = async (formData: FormData) => {
   encodedRedirect("success", "/admin/reset-password", "Password updated");
 };
 
-export const signOutAction = async () => {
+// Places
+export async function fetchPlaces(): Promise<{
+  data: PlaceType[] | null;
+  error: string | null;
+}> {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("places")
+      .select("*")
+      .order("id");
+    if (error) {
+      return { data: null, error: error.message };
+    }
+    return { data: data as PlaceType[], error: null };
+  } catch (err) {
+    return { data: null, error: (err as Error).message };
+  }
+}
+
+// TRAINERS CRUD
+export async function fetchTrainers(): Promise<{
+  data: TrainerType[] | null;
+  error: string | null;
+}> {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("trainers")
+      .select("*")
+      .order("id");
+    if (error) {
+      return { data: null, error: error.message };
+    }
+    return { data: data as TrainerType[], error: null };
+  } catch (err) {
+    return { data: null, error: (err as Error).message };
+  }
+}
+
+export async function updateTrainer(id: number, data: Partial<TrainerType>): Promise<{ error: string | null }> {
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase
+      .from("trainers")
+      .update(data)
+      .eq("id", id);
+    if (error) {
+      return { error: error.message };
+    }
+    return { error: null };
+  } catch (err) {
+    return { error: (err as Error).message };
+  }
+}
+
+export async function createTrainer(data: Partial<TrainerType>): Promise<{ error: string | null }> {
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase.from("trainers").insert([{ ...data }]);
+    if (error) {
+      return { error: error.message };
+    }
+    return { error: null };
+  } catch (err) {
+    return { error: (err as Error).message };
+  }
+}
+
+export async function deleteTrainer(id: number): Promise<{ error: string | null }> {
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase.from("trainers").delete().eq("id", id);
+    if (error) {
+      return { error: error.message };
+    }
+    return { error: null };
+  } catch (err) {
+    return { error: (err as Error).message };
+  }
+}
+
+// SCHEDULE CRUD
+export async function fetchSchedule() {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("schedule")
+      .select("*")
+      .order("day")
+      .order("start");
+    if (error) return { data: null, error: error.message };
+    return { data, error: null };
+  } catch (err) {
+    return { data: null, error: (err as Error).message };
+  }
+}
+
+export async function insertSchedule(row: any) {
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase.from("schedule").insert([{ ...row }]);
+    if (error) return { error: error.message };
+    return { error: null };
+  } catch (err) {
+    return { error: (err as Error).message };
+  }
+}
+
+export async function updateSchedule(id: number, row: any) {
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase.from("schedule").update(row).eq("id", id);
+    if (error) return { error: error.message };
+    return { error: null };
+  } catch (err) {
+    return { error: (err as Error).message };
+  }
+}
+
+export async function deleteSchedule(id: number) {
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase.from("schedule").delete().eq("id", id);
+    if (error) return { error: error.message };
+    return { error: null };
+  } catch (err) {
+    return { error: (err as Error).message };
+  }
+}
+
+// CAMPS CRUD
+export async function fetchCamps(): Promise<Camp[]> {
   const supabase = await createClient();
-  await supabase.auth.signOut();
-  return redirect("/sign-in");
-};
+  const { data, error } = await supabase
+    .from("camps")
+    .select(
+      `
+          *,
+    camp_trainers (
+      trainer:trainers ( id, name )
+    )`
+    )
+    .order("date_from");
+
+  if (error) {
+    console.error("Error fetching camps:", error.message);
+    return []; // Return empty array on error
+  } else {
+    // The fetched data structure includes the embedded trainer
+    const transformedData: Camp[] = data.map((camp: any) => ({
+      ...camp,
+      // Flatten the nested trainer structure from camp_trainers for the CampRow trainers property
+      trainers: camp.camp_trainers?.map((ct: any) => ct.trainer).filter(Boolean) || [],
+      // Keep the original embedded structure for internal use if needed, or adjust CampRow type
+      camp_trainers: camp.camp_trainers // Keep the embedded structure as fetched
+    }));
+    return transformedData || [];
+  }
+}
+
+export async function insertCamp(row: any) {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase.from("camps").insert([{ ...row }]).select("id").single();
+    if (error) return { error: error.message, data: null };
+    return { error: null, data };
+  } catch (err) {
+    return { error: (err as Error).message, data: null };
+  }
+}
+
+export async function updateCamp(id: number, row: any) {
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase.from("camps").update(row).eq("id", id);
+    if (error) return { error: error.message };
+    return { error: null };
+  } catch (err) {
+    return { error: (err as Error).message };
+  }
+}
+
+export async function deleteCamp(id: number) {
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase.from("camps").delete().eq("id", id);
+    if (error) return { error: error.message };
+    return { error: null };
+  } catch (err) {
+    return { error: (err as Error).message };
+  }
+}
+
+// CAMP_TRAINERS CRUD
+export async function deleteCampTrainers(campId: number) {
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase.from("camp_trainers").delete().eq("camp_id", campId);
+    if (error) return { error: error.message };
+    return { error: null };
+  } catch (err) {
+    return { error: (err as Error).message };
+  }
+}
+
+export async function insertCampTrainers(trainers: { camp_id: number; trainer_id: number }[]) {
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase.from("camp_trainers").insert(trainers);
+    if (error) return { error: error.message };
+    return { error: null };
+  } catch (err) {
+    return { error: (err as Error).message };
+  }
+}
+
+// ACTIVITIES CRUD
+export async function fetchActivities(): Promise<{
+  data: ActivityType[] | null;
+  error: string | null;
+}> {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("activities")
+      .select("*")
+      .order("id");
+    if (error) {
+      return { data: null, error: error.message };
+    }
+    return { data: data as ActivityType[], error: null };
+  } catch (err) {
+    return { data: null, error: (err as Error).message };
+  }
+}
+
+export async function createActivity(data: Partial<ActivityType>): Promise<{ error: string | null }> {
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase.from("activities").insert([{ ...data }]);
+    if (error) {
+      return { error: error.message };
+    }
+    return { error: null };
+  } catch (err) {
+    return { error: (err as Error).message };
+  }
+}
+
+export async function updateActivity(id: number, data: Partial<ActivityType>): Promise<{ error: string | null }> {
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase
+      .from("activities")
+      .update(data)
+      .eq("id", id);
+    if (error) {
+      return { error: error.message };
+    }
+    return { error: null };
+  } catch (err) {
+    return { error: (err as Error).message };
+  }
+}
+
+export async function deleteActivity(id: number): Promise<{ error: string | null }> {
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase.from("activities").delete().eq("id", id);
+    if (error) {
+      return { error: error.message };
+    }
+    return { error: null };
+  } catch (err) {
+    return { error: (err as Error).message };
+  }
+}
+
+// FAQ CRUD
+export async function fetchFaq(): Promise<{
+  data: FaqType[] | null;
+  error: string | null;
+}> {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("faq")
+      .select("*")
+      .order("id");
+    if (error) {
+      return { data: null, error: error.message };
+    }
+    return { data: data as FaqType[], error: null };
+  } catch (err) {
+    return { data: null, error: (err as Error).message };
+  }
+}
+
+export async function createFaq(data: Partial<FaqType>): Promise<{ error: string | null }> {
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase.from("faq").insert([{ ...data }]);
+    if (error) {
+      return { error: error.message };
+    }
+    return { error: null };
+  } catch (err) {
+    return { error: (err as Error).message };
+  }
+}
+
+export async function updateFaq(id: number, data: Partial<FaqType>): Promise<{ error: string | null }> {
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase
+      .from("faq")
+      .update(data)
+      .eq("id", id);
+    if (error) {
+      return { error: error.message };
+    }
+    return { error: null };
+  } catch (err) {
+    return { error: (err as Error).message };
+  }
+}
+
+export async function deleteFaq(id: number): Promise<{ error: string | null }> {
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase.from("faq").delete().eq("id", id);
+    if (error) {
+      return { error: error.message };
+    }
+    return { error: null };
+  } catch (err) {
+    return { error: (err as Error).message };
+  }
+}
+
+// GALLERY CRUD
+export async function fetchGalleryImages(): Promise<{
+  data: GalleryImageType[] | null;
+  error: string | null;
+}> {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("gallery")
+      .select("*")
+      .order("order_number");
+    if (error) {
+      return { data: null, error: error.message };
+    }
+    return { data: data as GalleryImageType[], error: null };
+  } catch (err) {
+    return { data: null, error: (err as Error).message };
+  }
+}
+
+export async function createGalleryImage(data: Partial<GalleryImageType>): Promise<{ error: string | null }> {
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase.from("gallery").insert([{ ...data }]);
+    if (error) {
+      return { error: error.message };
+    }
+    return { error: null };
+  } catch (err) {
+    return { error: (err as Error).message };
+  }
+}
+
+export async function updateGalleryImage(id: number, data: Partial<GalleryImageType>): Promise<{ error: string | null }> {
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase
+      .from("gallery")
+      .update(data)
+      .eq("id", id);
+    if (error) {
+      return { error: error.message };
+    }
+    return { error: null };
+  } catch (err) {
+    return { error: (err as Error).message };
+  }
+}
+
+export async function deleteGalleryImage(id: number): Promise<{ error: string | null }> {
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase.from("gallery").delete().eq("id", id);
+    if (error) {
+      return { error: error.message };
+    }
+    return { error: null };
+  } catch (err) {
+    return { error: (err as Error).message };
+  }
+}
+
+//HOTELS CRUD
+
+export async function fetchHotelsWithAmenities(): Promise<{ data: Hotel[]; error: string | null }> {
+  try {
+    const supabase = await createClient();
+    const { data: hotelsData, error: hotelsError } = await supabase
+      .from('hotels')
+      .select('*')
+      .order('created_at', { ascending: true });
+    if (hotelsError) return { data: [], error: hotelsError.message };
+    const { data: amenitiesData, error: amenitiesError } = await supabase
+      .from('hotel_amenities')
+      .select('*');
+    if (amenitiesError) return { data: [], error: amenitiesError.message };
+    const hotelsWithAmenities = (hotelsData || []).map((hotel) => ({
+      ...hotel,
+      amenities: (amenitiesData || [])
+        .filter((a) => a.hotel_id === hotel.id)
+        .map((a) => ({ type: a.type as AmenityType, text: a.text })),
+    }));
+    return { data: hotelsWithAmenities, error: null };
+  } catch (err: any) {
+    return { data: [], error: err.message };
+  }
+}
+
+export async function createHotelWithAmenities(form: Partial<Hotel>): Promise<{ error: string | null }> {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from('hotels')
+      .insert({
+        title: form.title,
+        subtitle: form.subtitle,
+        description: form.description,
+        image_src: form.image_src,
+        image_alt: form.image_alt,
+      })
+      .select('id');
+    if (error) return { error: error.message };
+    const hotelId = data?.[0]?.id;
+    if (hotelId && form.amenities && form.amenities.length > 0) {
+      const toInsert = form.amenities.map((a) => ({
+        hotel_id: hotelId,
+        type: a.type,
+        text: a.text,
+      }));
+      const { error: amenityError } = await supabase.from('hotel_amenities').insert(toInsert);
+      if (amenityError) return { error: amenityError.message };
+    }
+    return { error: null };
+  } catch (err: any) {
+    return { error: err.message };
+  }
+}
+
+export async function updateHotelWithAmenities(id: number, form: Partial<Hotel>): Promise<{ error: string | null }> {
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase
+      .from('hotels')
+      .update({
+        title: form.title,
+        subtitle: form.subtitle,
+        description: form.description,
+        image_src: form.image_src,
+        image_alt: form.image_alt,
+      })
+      .eq('id', id);
+    if (error) return { error: error.message };
+    // Remove old amenities
+    await supabase.from('hotel_amenities').delete().eq('hotel_id', id);
+    // Insert new amenities
+    if (form.amenities && form.amenities.length > 0) {
+      const toInsert = form.amenities.map((a) => ({
+        hotel_id: id,
+        type: a.type,
+        text: a.text,
+      }));
+      const { error: amenityError } = await supabase.from('hotel_amenities').insert(toInsert);
+      if (amenityError) return { error: amenityError.message };
+    }
+    return { error: null };
+  } catch (err: any) {
+    return { error: err.message };
+  }
+}
+
+export async function deleteHotelWithAmenities(id: number): Promise<{ error: string | null }> {
+  try {
+    const supabase = await createClient();
+    await supabase.from('hotel_amenities').delete().eq('hotel_id', id);
+    const { error } = await supabase.from('hotels').delete().eq('id', id);
+    if (error) return { error: error.message };
+    return { error: null };
+  } catch (err: any) {
+    return { error: err.message };
+  }
+}

@@ -1,8 +1,9 @@
+import { Metadata } from "next";
 import Image from "next/image";
+
+import { TrainerType } from "@/app/types/types";
 import { Skeleton } from "@/components/skeleton";
 import { createClient } from "@/utils/supabase/server";
-import { TrainerType } from "@/app/types/types";
-import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Risu Team | Trenerzy",
@@ -13,21 +14,21 @@ const Trainers = async () => {
   const { data: trainers, error } = await supabase.from("trainers").select("*");
 
   return (
-    <div className="flex flex-col mx-auto max-w-4xl px-2 py-8 md:px-0 mb-16">
+    <div className="flex flex-col mx-auto container px-2 py-8 md:px-0 mb-16">
       <div className="text-center text-4xl mb-16 flex justify-center">
         <h1 className="border-b-2 pb-2 border-risu-400 w-fit">Nasi trenerzy</h1>
       </div>
-      <div className="flex w-full flex-col md:flex-row gap-8">
+      <div className="flex w-full flex-col md:flex-row flex-wrap gap-8 justify-center">
         {trainers ? (
           trainers.map((trainer: TrainerType) => (
-            <div key={trainer.id}>
+            <div key={trainer.id} className="max-w-[400px] ">
               <div className="relative">
                 <Image
                   src={trainer.image_url}
                   alt={trainer.name}
                   className="object-cover rounded-lg aspect-square"
-                  width={500}
-                  height={500}
+                  width={400}
+                  height={400}
                 />
                 <div className="absolute right-0 p-4 mt-4 text-2xl font-semibold text-white bg-black bottom-4 border-y-2 border-l-2 border-risu-400">
                   {trainer.name}

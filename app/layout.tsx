@@ -1,52 +1,24 @@
-import { forwardRef, HTMLAttributes, Suspense } from "react";
-import { EnvVarWarning } from "@/components/env-var-warning";
-import HeaderAuth from "@/components/header-auth";
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-  navigationMenuTriggerStyle,
-} from "@/components/ui/navigation-menu";
-import { ThemeSwitcher } from "@/components/theme-switcher";
-import { hasEnvVars } from "@/utils/supabase/check-env-vars";
-import { Geist } from "next/font/google";
-import { ThemeProvider } from "next-themes";
-import Link from "next/link";
-import "./globals.css";
-import { createClient } from "@/utils/supabase/server";
-import { cn } from "@/lib/utils";
-import { headers } from "next/headers";
-import { Clapperboard, Mail, Phone } from "lucide-react";
-import Logo from "@/lib/logo";
-import Image from "next/image";
-import { Toaster } from "@/components/ui/toaster";
-import {
-  Covered_By_Your_Grace,
-  Protest_Riot,
-  Rubik_Dirt,
-} from "next/font/google";
 import { GridPatternBackground } from "@/components/ui/grid-pattern-background";
+import Logo from "@/components/ui/logo";
+import { NavigationMenuLink } from "@/components/ui/navigation-menu";
+import { Toaster } from "@/components/ui/toaster";
+import { cn } from "@/utils";
+import { Clapperboard, Mail, Phone } from "lucide-react";
+import { Protest_Riot, Rubik_Dirt } from "next/font/google";
+import { forwardRef, HTMLAttributes } from "react";
 import { Navbar } from "../components/navbar";
-import Loading from "./loading";
+import { Providers } from "./providers";
+import "./globals.css";
 
 export const metadata = {
   icons: {
     icon: "./favicon.ico",
     href: "./favicon.ico",
   },
-  // metadataBase: new URL(defaultUrl),
   title: "Risu Team",
   description: "Klub sportwoy dla dzieci i młodzieży",
 };
 
-const coveredByYourGrace = Covered_By_Your_Grace({
-  subsets: ["latin"],
-  weight: "400",
-  variable: "--font-coveredByYourGrace",
-});
 const protestRiot = Protest_Riot({
   subsets: ["latin"],
   weight: "400",
@@ -131,7 +103,7 @@ const Footer = () => {
     <footer className="flex justify-center w-full h-24 border-t border-foreground/10">
       <div className="flex items-center justify-between w-full p-4 px-5 text-sm max-w-7xl">
         <div className="h-16">
-          <Logo fill="#FD9E04" className="h-full w-auto drop-shadow-md" />
+          <Logo fill="#fff" className="h-full w-auto drop-shadow-md" />
         </div>
         <div className="flex gap-4">
           <div className="flex items-center gap-2">
@@ -162,19 +134,11 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      className={`dark 
-        ${coveredByYourGrace.variable}
-        ${protestRiot.variable}
-        ${rubikDirt.variable}`}
+      className={`${protestRiot.variable} ${rubikDirt.variable}`}
       suppressHydrationWarning
     >
       <body className="bg-background text-foreground">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
+        <Providers>
           <main className="flex flex-col items-center min-h-screen font-protestRiot relative w-full">
             <GridPatternBackground
               gridType="lines"
@@ -187,13 +151,13 @@ export default async function RootLayout({
             <div className="flex flex-col items-center flex-1 w-full relative">
               <Navbar />
               <div className="flex flex-col flex-1 w-full xl:max-w-7xl tracking-wider relative">
-                <Suspense fallback={<Loading />}>{children}</Suspense>
+                {children}
               </div>
               <Footer />
             </div>
           </main>
           <Toaster />
-        </ThemeProvider>
+        </Providers>
       </body>
     </html>
   );

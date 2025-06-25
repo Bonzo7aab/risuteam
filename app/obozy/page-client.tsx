@@ -1,8 +1,6 @@
 "use client";
 
 import {
-  Bath,
-  BedDouble,
   BedSingle,
   Bike,
   CalendarDays,
@@ -16,18 +14,20 @@ import {
   Sun,
   SunSnow,
   Tag,
-  Tv,
   Users,
-  Wifi,
   X,
 } from "lucide-react";
-import Image from "next/image";
+import { Metadata } from "next";
+import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import { CampType, CAMP_DATA, TabType } from "../../lib/camps";
+
+import { fetchPlaces } from "@/app/actions";
+import Hotels from "@/app/hotele/page";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import Link from "next/link";
-import { Metadata } from "next";
+import { fetchCamps } from "@/lib/data";
+
+import { Camp, PlaceType, TabType } from "../types/types";
 
 export const metadata: Metadata = {
   title: "Risu Team | Lokalizacje",
@@ -58,12 +58,17 @@ const TABS: Record<TabType, { label: string; icon: React.ReactNode }> = {
 
 const DEFAULT_TAB: TabType = "all";
 
-const CampContent = ({
-  content,
-}: {
-  content: (typeof CAMP_DATA)[CampType];
-}) => {
+function formatDateRange(date_from: string, date_to: string) {
+  const from = new Date(date_from);
+  const to = new Date(date_to);
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  return `${pad(from.getDate())}.${pad(from.getMonth() + 1)}.${from.getFullYear()} - ${pad(to.getDate())}.${pad(to.getMonth() + 1)}.${to.getFullYear()}`;
+}
+
+const CampContent = ({ camp, places }: { camp: Camp; places: PlaceType[] }) => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const placeName =
+    places.find((p) => p.id === camp.place_id)?.name || camp.place_id;
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text).then(
@@ -82,20 +87,20 @@ const CampContent = ({
       <section className="py-8 px-4 md:pl-8 flex flex-col md:flex-row gap-8 md:gap-16">
         <div className="basis-full md:basis-2/3">
           <h1 className="text-3xl md:text-4xl text-risu-300 font-bold capitalize mb-6 md:mb-8">
-            {content.title}
+            {camp.title}
           </h1>
-          <div className="text-base md:text-lg mb-6">{content.description}</div>
-          {content.images && (
+          <div className="text-base md:text-lg mb-6">{camp.description}</div>
+          {camp.images && camp.images.length > 0 && (
             <div className="relative flex-col md:flex-row flex gap-4 mb-6 justify-center w-full md:w-80 mx-auto">
-              {content.images.map((image, index) => (
+              {camp.images.map((img, index) => (
                 <div key={index} className="relative mx-auto">
-                  <Image
-                    src={image.src}
-                    alt={image.alt}
-                    width={image.width}
-                    height={image.height}
-                    className="rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
-                    onClick={() => setSelectedImage(image.src)}
+                  <img
+                    src={typeof img === "string" ? img : img.url}
+                    alt={camp.title}
+                    className="rounded-lg cursor-pointer hover:opacity-90 transition-opacity w-48 h-32 object-cover"
+                    onClick={() =>
+                      setSelectedImage(typeof img === "string" ? img : img.url)
+                    }
                   />
                 </div>
               ))}
@@ -109,12 +114,9 @@ const CampContent = ({
               {selectedImage && (
                 <div className="relative flex justify-center">
                   <div className="relative">
-                    <Image
+                    <img
                       src={selectedImage}
                       alt="Expanded view"
-                      width={0}
-                      height={0}
-                      sizes="100vw"
                       className="w-auto h-auto max-h-[90vh]"
                     />
                     <button
@@ -135,25 +137,23 @@ const CampContent = ({
               <CalendarDays />
               <span className="text-base md:text-lg">Termin</span>
             </span>
-            <span className="text-slate-600 text-right">{content.date}</span>
+            <span className="text-slate-600 text-right">
+              {formatDateRange(camp.date_from, camp.date_to)}
+            </span>
           </div>
           <div className="bg-risu-400 text-black p-4 flex flex-col gap-2">
             <span className="flex gap-2">
               <Tag />
               <span className="text-base md:text-lg">Cena</span>
             </span>
-            <span className="text-slate-600 text-right">
-              {content.price} zł
-            </span>
+            <span className="text-slate-600 text-right">{camp.price} zł</span>
           </div>
           <div className="bg-risu-400 text-black p-4 flex flex-col gap-2">
             <span className="flex gap-2">
               <MapPinned />
               <span className="text-base md:text-lg">Lokalizacja</span>
             </span>
-            <span className="text-slate-600 text-right">
-              {content.location.name}
-            </span>
+            <span className="text-slate-600 text-right">{placeName}</span>
           </div>
         </div>
       </section>
@@ -209,60 +209,19 @@ const CampContent = ({
           <div className="hidden xl:block absolute -top-4 -left-4 w-32 h-32 border-l-2 border-t-2 border-risu-500 opacity-70"></div>
           <div className="hidden xl:block absolute -bottom-4 -right-4 w-32 h-32 border-r-2 border-b-2 border-risu-500 opacity-70"></div>
 
-          {content.program.map((item, index) => (
-            <li key={index} className="flex mb-2 gap-2">
-              <span className="text-risu-400">
-                <CircleCheck />
-              </span>
-              <span>{item}</span>
-            </li>
-          ))}
+          {camp.program &&
+            camp.program.map((item, index) => (
+              <li key={index} className="flex mb-2 gap-2">
+                <span className="text-risu-400">
+                  <CircleCheck />
+                </span>
+                <span>{item}</span>
+              </li>
+            ))}
         </ul>
       </section>
 
-      <section className="my-16 md:my-32 md:px-4">
-        <div className="container mx-auto max-w-6xl">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
-            <div>
-              <img
-                src="/willabasienka.jpg"
-                alt="Willa Basieńka - zdjęcie poglądowe"
-                className="rounded-xl w-full h-auto object-cover"
-              />
-            </div>
-            <div className="bg-risu-400 p-4 md:p-8 rounded-xl shadow-md shadow-risu-400/50">
-              <h3>Komfort i Wygoda w Sercu Gór</h3>
-              <h2 className="text-xl md:text-2xl font-semibold mb-4 text-slate-800">
-                Willa Basieńka
-              </h2>
-              <p className="mb-6 leading-relaxed">
-                Willa Basieńka zlokalizowana jest w pięknej, zalesionej okolicy
-                w pobliżu kompleksu Nosal oraz kolejki na Kasprowy Wierch. To
-                idealne miejsce na odpoczynek i bazę wypadową do górskich
-                wędrówek.
-              </p>
-              <ul className="space-y-3 text-slate-700">
-                <li className="flex items-center gap-2">
-                  <BedDouble />
-                  Pokoje 2, 3, 4, 5 osobowe
-                </li>
-                <li className="flex items-center gap-2">
-                  <Bath />
-                  Pełny węzeł sanitarny w każdym pokoju
-                </li>
-                <li className="flex items-center gap-2">
-                  <Tv />
-                  Telewizor w każdym pokoju
-                </li>
-                <li className="flex items-center gap-2">
-                  <Wifi />
-                  Dostęp do bezpłatnego WiFi
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
+      <Hotels />
 
       <section className="mt-16 md:mt-32 mb-8 md:mb-16 md:px-4">
         <div className="container mx-auto max-w-4xl">
@@ -276,47 +235,26 @@ const CampContent = ({
             </p>
           </div>
 
-          <div className="p-4 md:p-10 gap-y-8 flex flex-col">
-            <div className="payment-step">
-              <h3 className="text-lg md:text-xl font-semibold mb-1">
-                I Rata (Zaliczka)
-              </h3>
-              <p className="text-xl md:text-2xl font-bold text-risu-600 mb-1">
-                200 zł
-              </p>
-              <p className="text-sm text-slate-500 mb-2">
-                Przy zapisie – gwarantuje miejsce na obozie.
-              </p>
-            </div>
-            <div className="payment-step">
-              <h3 className="text-lg md:text-xl font-semibold mb-1">II Rata</h3>
-              <p className="text-xl md:text-2xl font-bold text-risu-600 mb-1">
-                600 zł
-              </p>
-              <p className="text-sm text-slate-500 mb-2">
-                Termin płatności: do 15.05.2025
-              </p>
-            </div>
-            <div className="payment-step">
-              <h3 className="text-lg md:text-xl font-semibold mb-1">
-                III Rata
-              </h3>
-              <p className="text-xl md:text-2xl font-bold text-risu-600 mb-1">
-                600 zł
-              </p>
-              <p className="text-sm text-slate-500 mb-2">
-                Termin płatności: do 15.06.2025
-              </p>
-            </div>
-            <div className="payment-step">
-              <h3 className="text-lg md:text-xl font-semibold mb-1">IV Rata</h3>
-              <p className="text-xl md:text-2xl font-bold text-risu-600 mb-1">
-                790 zł
-              </p>
-              <p className="text-sm text-slate-500 mb-2">
-                Termin płatności: do 01.07.2025
-              </p>
-            </div>
+          <div className="p-4 md:p-10 flex flex-col gap-8 py-6">
+            {camp.payments &&
+              camp.payments.length > 0 &&
+              camp.payments.map((payment, idx) => {
+                return (
+                  <div key={idx} className="text-center">
+                    <div className="text-lg md:text-xl font-semibold mb-1">
+                      {payment.installment} rata
+                    </div>
+                    <div className="text-xl md:text-2xl font-bold text-risu-500 mb-1">
+                      {payment.amount} zł
+                    </div>
+                    {payment.due && (
+                      <div className="text-sm text-slate-500 mb-2">
+                        Termin płatności: {payment.due}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
 
             <div>
               <div className="py-3 flex items-center text-risu-400 before:flex-1 before:border-t before:border-risu-700 before:me-6 after:flex-1 after:border-t after:border-risu-700 after:ms-6">
@@ -353,7 +291,7 @@ const CampContent = ({
 
               <div className="my-4 flex flex-col">
                 <span>Zapisy i więcej informacji:</span>
-                <Link href="/kontakt" className="text-risu-400">
+                <Link href="/kontakt" className="text-risu-400 my-2">
                   Kontakt
                 </Link>
                 <span>Do zobaczenia!</span>
@@ -375,6 +313,10 @@ const CampsClient = () => {
   const [activeTab, setActiveTab] = useState<TabType>(
     initialTab || DEFAULT_TAB
   );
+  const [camps, setCamps] = useState<Camp[]>([]);
+  const [places, setPlaces] = useState<PlaceType[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const selectedTab = searchParams.get("tab") as TabType;
@@ -385,14 +327,42 @@ const CampsClient = () => {
     }
   }, [searchParams]);
 
+  useEffect(() => {
+    async function loadData() {
+      setLoading(true);
+      setError(null);
+      try {
+        const [campsData, placesResult] = await Promise.all([
+          fetchCamps(),
+          fetchPlaces(),
+        ]);
+        setCamps(campsData);
+        setPlaces(placesResult.data || []);
+      } catch (err: any) {
+        setError(err.message || "Błąd ładowania obozów");
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
+  }, []);
+
   const handleTabClick = (tab: TabType) => {
     setActiveTab(tab);
-
     const current = new URLSearchParams(Array.from(searchParams.entries()));
     current.set("tab", tab);
     const search = current.toString();
     const query = search ? `?${search}` : "";
     router.push(`${pathname}${query}`);
+  };
+
+  // Group camps by type
+  const campsByType: Record<TabType, Camp[]> = {
+    all: camps,
+    polkolonie: camps.filter((c) => c.type === "polkolonie"),
+    letnie: camps.filter((c) => c.type === "letnie"),
+    zimowe: camps.filter((c) => c.type === "zimowe"),
+    nocowanka: camps.filter((c) => c.type === "nocowanka"),
   };
 
   return (
@@ -431,22 +401,42 @@ const CampsClient = () => {
           aria-labelledby={`tabs-with-icons-item-${activeTab}`}
           className="w-full"
         >
-          {activeTab === "all" ? (
+          {loading ? (
+            <div className="text-center py-12">Ładowanie obozów...</div>
+          ) : error ? (
+            <div className="text-center text-red-500 py-12">{error}</div>
+          ) : campsByType[activeTab].length === 0 ? (
+            <div className="text-center py-12">
+              Brak obozów w tej kategorii.
+            </div>
+          ) : activeTab === "all" ? (
             <div className="space-y-12">
-              {Object.entries(CAMP_DATA).map(([tab, content]) => (
-                <div key={tab}>
-                  <div className="flex items-center gap-2 mb-16 justify-center">
-                    {TABS[tab as TabType].icon}
-                    <h2 className="text-xl font-bold">
-                      {TABS[tab as TabType].label}
-                    </h2>
+              {Object.entries(TABS)
+                .filter(([tab]) => tab !== "all")
+                .map(([tab, { icon, label }]) => (
+                  <div key={tab}>
+                    <div className="flex items-center gap-2 mb-16 justify-center">
+                      {icon}
+                      <h2 className="text-xl font-bold">{label}</h2>
+                    </div>
+                    {campsByType[tab as TabType].length === 0 ? (
+                      <div className="text-center py-8">Brak obozów.</div>
+                    ) : (
+                      campsByType[tab as TabType].map((camp) => (
+                        <CampContent
+                          key={camp.id}
+                          camp={camp}
+                          places={places}
+                        />
+                      ))
+                    )}
                   </div>
-                  <CampContent content={content} />
-                </div>
-              ))}
+                ))}
             </div>
           ) : (
-            <CampContent content={CAMP_DATA[activeTab]} />
+            campsByType[activeTab].map((camp) => (
+              <CampContent key={camp.id} camp={camp} places={places} />
+            ))
           )}
         </div>
       </div>

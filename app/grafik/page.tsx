@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   title: "Risu Team | Grafik",
 };
 
-const Page = () => {
+const Schedule = () => {
   return (
     <div className="flex flex-col justify-center w-full my-16">
       <div className="text-center text-4xl mb-16 flex justify-center">
@@ -16,4 +16,4 @@ const Page = () => {
   );
 };
 
-export default Page;
+export default Schedule;

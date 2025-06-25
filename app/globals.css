@@ -14,9 +14,52 @@
   padding-top: 14px !important;
 }
 
-@layer base {
-  :root {
 
+
+
+@layer base {
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type="date"].date-icon-visible::-webkit-calendar-picker-indicator {
+    filter: invert(1) brightness(2);
+    opacity: 1;
+  }
+  input[type="date"].date-icon-visible::-webkit-input-placeholder {
+    color: #fff;
+  }
+  input[type="date"].date-icon-visible::-moz-placeholder {
+    color: #fff;
+  }
+  input[type="date"].date-icon-visible:-ms-input-placeholder {
+    color: #fff;
+  }
+  input[type="date"].date-icon-visible::placeholder {
+    color: #fff;
+  }
+  input[type="time"]::-webkit-calendar-picker-indicator {
+    filter: invert(1) brightness(2);
+    opacity: 1;
+  }
+  input[type="time"]::-webkit-input-placeholder {
+    color: #fff;
+  }
+  input[type="time"]::-moz-placeholder {
+    color: #fff;
+  }
+  input[type="time"]:-ms-input-placeholder {
+    color: #fff;
+  }
+  input[type="time"]::placeholder {
+    color: #fff;
+  }
+  input[type=file]::file-selector-button {
+    color: #000;
+  }
+
+  :root {
     --background: 0 0% 3.9%;
     --foreground: 0 0% 98%;
     --card: 0 0% 3.9%;

@@ -1,8 +1,5 @@
 "use client";
 
-import { useState } from "react";
-import { EnvVarWarning } from "@/components/env-var-warning";
-import HeaderAuth from "@/components/header-auth";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -12,41 +9,38 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
-import { hasEnvVars } from "@/utils/supabase/check-env-vars";
 import Link from "next/link";
-// import { createClient } from "@/utils/supabase/server";
-// import { headers } from "next/headers";
+import { useState } from "react";
+import Logo from "@/components/ui/logo";
+import { TextAnimate } from "@/components/ui/text-animate";
+import { cn } from "@/utils";
 import {
-  Menu,
-  SunMoon,
-  X,
-  Sun,
-  Snowflake,
-  Bed,
-  BookOpen,
   Award,
-  Calendar,
-  MapPin,
-  Mail,
-  Pencil,
+  Bed,
   Book,
-  Users,
+  BookOpen,
+  Calendar,
   HelpCircle,
+  HotelIcon,
   Image as LucideImage,
+  Mail,
+  MapPin,
+  Menu,
+  Pencil,
+  Snowflake,
+  Sun,
+  SunMoon,
   SunSnow,
+  Users,
+  X,
 } from "lucide-react";
-import Image from "next/image";
-import { cn } from "@/lib/utils";
-import { User } from "@supabase/supabase-js";
-import Logo from "@/lib/logo";
+import React from "react";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "./ui/accordion";
-import React from "react";
-import { TextAnimate } from "@/components/ui/text-animate";
 
 const mobileCamps: { title: string; href: string }[] = [
   {
@@ -79,6 +73,10 @@ const mobileNavigation: { title: string; href: string }[] = [
   {
     title: "Gdzie trenujemy",
     href: "/lokalizacja",
+  },
+  {
+    title: "Galeria",
+    href: "/galeria",
   },
   {
     title: "Kontakt",
@@ -117,9 +115,9 @@ const aboutNavigation: { title: string; href: string; description: string }[] =
       description: "Najczęsciej zadawane pytanie.",
     },
     {
-      title: "Galeria",
-      href: "/galeria",
-      description: "Galeria zdjęć oraz filmów z naszych zajęć i obozów.",
+      title: "Hotele",
+      href: "/hotele",
+      description: "Hotele w okolicy kompleksu Nosal.",
     },
   ];
 
@@ -135,6 +133,7 @@ const mobileNavigationIcons: Record<string, React.ReactNode> = {
   "Egzaminy na pasy": <Award className="w-5 h-5 text-risu-400" />,
   Grafik: <Calendar className="w-5 h-5 text-risu-400" />,
   "Gdzie trenujemy": <MapPin className="w-5 h-5 text-risu-400" />,
+  Hotele: <HotelIcon className="w-5 h-5 text-risu-400" />,
   Kontakt: <Mail className="w-5 h-5 text-risu-400" />,
 };
 
@@ -145,22 +144,15 @@ const aboutNavigationIcons: Record<string, React.ReactNode> = {
   "Egzaminy na pasy": <Award className="w-5 h-5 text-risu-400" />,
   FAQ: <HelpCircle className="w-5 h-5 text-risu-400" />,
   Galeria: <LucideImage className="w-5 h-5 text-risu-400" />,
+  Hotele: <HotelIcon className="w-5 h-5 text-risu-400" />,
 };
 
 export const Navbar = () => {
-  // const supabase = await createClient();
-  // const headerList = await headers();
-  // const pathname = headerList.get("x-current-path");
-
-  // const {
-  //   data: { user },
-  // } = await supabase.auth.getUser();
-
   return (
     <nav className="sticky top-0 z-50 flex justify-center w-full h-32 shadow-md bg-black md:bg-transparent md:backdrop-filter md:backdrop-blur-md">
       <div className="flex items-center justify-between w-full p-4 px-5 max-w-7xl">
         <Link href="/" className="h-24 w-auto flex items-center" passHref>
-          <Logo fill="#FD9E04" className="h-full w-auto drop-shadow-md" />
+          <Logo fill="#fff" className="h-full w-auto drop-shadow-md" />
         </Link>
 
         {/* Desktop Navigation */}
@@ -260,6 +252,18 @@ export const Navbar = () => {
                 </Link>
               </NavigationMenuItem>
               <NavigationMenuItem>
+                <Link href="/galeria" legacyBehavior passHref>
+                  <NavigationMenuLink
+                    className={cn(
+                      navigationMenuTriggerStyle(),
+                      "text-white font-medium hover:bg-risu-400 hover:text-black"
+                    )}
+                  >
+                    Galeria
+                  </NavigationMenuLink>
+                </Link>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
                 <Link href="/kontakt" legacyBehavior passHref>
                   <NavigationMenuLink
                     className={cn(
@@ -286,9 +290,6 @@ export const Navbar = () => {
         <div className="md:hidden">
           <MobileMenu />
         </div>
-        {/* 
-        {pathname === "/admin" &&
-          (user && !hasEnvVars ? <EnvVarWarning /> : <HeaderAuth />)} */}
       </div>
     </nav>
   );
@@ -296,7 +297,6 @@ export const Navbar = () => {
 
 const MobileMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [aboutOpen, setAboutOpen] = useState(false);
 
   return (
     <div className="relative">
@@ -332,9 +332,9 @@ const MobileMenu = () => {
         </button>
         <div className="w-full max-w-xs mx-auto flex flex-col items-center pt-8 pb-4">
           {/* Avatar */}
-          <div className="w-36 h-36 rounded-full overflow-hidden shadow-md shadow-risu-400 mb-4 flex justify-center items-center">
+          <div className="w-36 h-36 rounded-full overflow-hidden shadow-md bg-risu-400 shadow-gray-400 mb-4 flex justify-center items-center">
             <Link href="/" className="h-24 w-24" passHref>
-              <Logo fill="#FD9E04" className="h-full w-auto drop-shadow-md" />
+              <Logo fill="#fff" className="h-full w-auto drop-shadow-md" />
             </Link>
           </div>
           {/* Club Info */}
