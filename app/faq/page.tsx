@@ -1,3 +1,4 @@
+import { fetchFaq } from "@/app/actions";
 import {
   Accordion,
   AccordionContent,
@@ -5,7 +6,6 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Metadata } from "next";
-import { fetchFaq } from "@/app/actions";
 
 export const metadata: Metadata = {
   title: "Risu Team | FAQ",

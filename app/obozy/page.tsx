@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { Suspense } from "react";
 import CampsClient from "./page-client";
 
 export const metadata: Metadata = {
@@ -6,7 +7,11 @@ export const metadata: Metadata = {
 };
 
 const Camp = () => {
-  return <CampsClient />;
+  return (
+    <Suspense fallback={null}>
+      <CampsClient />
+    </Suspense>
+  );
 };
 
 export default Camp;

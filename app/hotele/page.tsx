@@ -1,13 +1,7 @@
-import { AMENITY_ICONS } from "@/utils/constants";
-import { Metadata } from "next";
-
 import { fetchHotelsWithAmenities } from "@/app/actions";
+import { AMENITY_ICONS } from "@/utils/constants";
 
 import { Hotel } from "../types/types";
-
-export const metadata: Metadata = {
-  title: "Risu Team | Hotele",
-};
 
 function HotelCard({ hotel }: { hotel: Hotel }) {
   return (

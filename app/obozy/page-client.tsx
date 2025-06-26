@@ -17,21 +17,15 @@ import {
   Users,
   X,
 } from "lucide-react";
-import { Metadata } from "next";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
-import { fetchPlaces } from "@/app/actions";
+import { fetchCamps, fetchPlaces } from "@/app/actions";
 import Hotels from "@/app/hotele/page";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { fetchCamps } from "@/lib/data";
 
 import { Camp, PlaceType, TabType } from "../types/types";
-
-export const metadata: Metadata = {
-  title: "Risu Team | Lokalizacje",
-};
 
 const TABS: Record<TabType, { label: string; icon: React.ReactNode }> = {
   all: {
