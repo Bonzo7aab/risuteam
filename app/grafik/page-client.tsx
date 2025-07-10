@@ -19,7 +19,7 @@ import {
 import { POLISH_DAY_ORDER } from "@/utils/constants";
 import { createClient } from "@/utils/supabase/client";
 
-import { PlaceOption, ScheduleType, TrainerOption } from "../types/types";
+import { PlaceType, ScheduleType, TrainerType } from "../types/types";
 
 const Filters = ({
   filters,
@@ -175,8 +175,8 @@ const Schedule = ({
   }) => void;
 }) => {
   const [schedule, setSchedule] = useState<ScheduleType[]>([]);
-  const [trainers, setTrainers] = useState<TrainerOption[]>([]);
-  const [places, setPlaces] = useState<PlaceOption[]>([]);
+  const [trainers, setTrainers] = useState<TrainerType[]>([]);
+  const [places, setPlaces] = useState<PlaceType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -197,12 +197,12 @@ const Schedule = ({
         setSchedule(data || []);
         const { data: trainersData, error: trainersError } = await supabase
           .from("trainers")
-          .select("id, name");
+          .select("*");
         if (trainersError) {
           console.error("Trainers fetch error:", trainersError);
           throw trainersError;
         }
-        setTrainers((trainersData || []) as TrainerOption[]);
+        setTrainers(trainersData || []);
         const { data: placesData, error: placesError } = await fetchPlaces();
         if (placesError) {
           console.error("Places fetch error:", placesError);
@@ -224,11 +224,11 @@ const Schedule = ({
   const scheduleWithNames = schedule.map((row) => ({
     ...row,
     trainer:
-      trainers.find((t) => t.id === row.trainer_id)?.name ||
+      trainers.find((t) => t.id === Number(row.trainer_id))?.name ||
       String(row.trainer_id) ||
       "",
     place:
-      places.find((p) => p.id === row.place_id)?.name ||
+      places.find((p) => p.id === Number(row.place_id))?.name ||
       String(row.place_id) ||
       "",
     start: row.start,

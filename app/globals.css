@@ -23,22 +23,6 @@
     -webkit-appearance: none;
     margin: 0;
   }
-  input[type="date"].date-icon-visible::-webkit-calendar-picker-indicator {
-    filter: invert(1) brightness(2);
-    opacity: 1;
-  }
-  input[type="date"].date-icon-visible::-webkit-input-placeholder {
-    color: #fff;
-  }
-  input[type="date"].date-icon-visible::-moz-placeholder {
-    color: #fff;
-  }
-  input[type="date"].date-icon-visible:-ms-input-placeholder {
-    color: #fff;
-  }
-  input[type="date"].date-icon-visible::placeholder {
-    color: #fff;
-  }
   input[type="time"]::-webkit-calendar-picker-indicator {
     filter: invert(1) brightness(2);
     opacity: 1;

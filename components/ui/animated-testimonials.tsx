@@ -1,23 +1,16 @@
 "use client";
 
-import { motion, AnimatePresence } from "motion/react";
+import { TestimonialType } from "@/app/types/types";
+import { AnimatePresence, motion } from "motion/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-
-export type Testimonial = {
-  name: string;
-  date: string;
-  location: string;
-  src: string;
-  tab?: "polkolonie" | "letnie" | "zimowe" | "nocowanka";
-};
 
 export const AnimatedTestimonials = ({
   testimonials,
   autoplay = false,
 }: {
-  testimonials: Testimonial[];
+  testimonials: TestimonialType[];
   autoplay?: boolean;
 }) => {
   const [active, setActive] = useState(0);
@@ -99,7 +92,7 @@ export const AnimatedTestimonials = ({
             <AnimatePresence>
               {testimonials.map((testimonial, index) => (
                 <motion.div
-                  key={testimonial.src}
+                  key={testimonial.id}
                   initial={{
                     opacity: 0,
                     scale: 0.9,
@@ -147,14 +140,14 @@ export const AnimatedTestimonials = ({
                       transition={{ duration: 0.2 }}
                       className="absolute inset-0 bg-black/80 rounded-3xl flex flex-col justify-center gap-4 items-center p-6 text-white"
                     >
-                      <h3 className="text-4xl font-bold mb-6 text-risu-400">
+                      <h3 className="text-4xl text-center font-bold mb-6 text-risu-400">
                         {testimonial.name}
                       </h3>
                       <p className="text-xl font-semibold text-gray-300">
                         {testimonial.date}
                       </p>
                       <p className="text-lg font-semibold">
-                        {testimonial.location}
+                        {testimonial.location_name}
                       </p>
                       <div className="text-3xl font-bold hover:text-risu-300 transition duration-300">
                         Przejdź do szczegółów

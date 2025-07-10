@@ -1,15 +1,6 @@
 import { ImageFile } from "@/components/ui/image-upload";
 import { ReactNode } from "react";
 
-interface TrainerOption {
-    id: number;
-    name: string;
-}
-  
-interface PlaceOption {
-    id: number;
-    name: string;
-}
 interface PlaceType {
     id: number
     created_at: number;
@@ -60,24 +51,30 @@ interface CampPayment {
   due: string;
 }
 
-interface Camp {
-  date_from: string;
-  date_to: string;
-  description: string;
-  id: number;
-  images: ImageFile[] | string[];
-  included: string[];
-  not_included: string[];
-  payments?: any[];
-  place_id: number | null;
-  price: number;
-  program: string[];
-  title: string;
-  type: string;
-  // trainers is now an array of linked trainer objects
-  trainers: TrainerOption[];
-  // Add the embedded camp_trainers structure as fetched
-  camp_trainers: { trainer: TrainerOption }[] | null; // Adjust type based on actual fetch result
+// Unified TrainerOption for both backend and form
+export interface TrainerOption {
+  id: string; // always string for consistency in form and backend
+  name?: string; // for backend
+  label?: string; // for form
+}
+
+// Unified Camp interface for both backend and form
+export interface Camp {
+  id?: number;
+  date_from?: string;
+  date_to?: string;
+  description?: string;
+  images?: ImageFile[] | string[];
+  included?: string[];
+  not_included?: string[];
+  payments?: CampPayment[];
+  place_id?: number | null;
+  price?: number;
+  program?: string[];
+  title?: string;
+  type?: CampType;
+  camp_trainers?: TrainerOption[]; // always array of TrainerOption for form and backend
+  hotel_id?: number | null;
 }
 
 interface ActivityType {
@@ -170,4 +167,15 @@ interface CampTab {
   content: CampContent;
 }
 
-export type { PlaceType, TrainerType, ContactFormType, ScheduleType, Camp, TrainerOption, PlaceOption, ActivityType, FaqType, GalleryImageType, CampTab, CampPayment, CampLocation, CampIncluded, CampContent, HotelAmenity, AmenityType, CampImage, Hotel };
+interface TestimonialType {
+  id: number;
+  name: string;
+  date: string;
+  location_id: number | null;
+  location_name: string;
+  src: string;
+  tab?: "polkolonie" | "letnie" | "zimowe" | "nocowanka";
+  created_at: string;
+}
+
+export type { ActivityType, AmenityType, CampContent, CampImage, CampIncluded, CampLocation, CampPayment, CampTab, ContactFormType, FaqType, GalleryImageType, Hotel, HotelAmenity, PlaceType, ScheduleType, TrainerType, TestimonialType };

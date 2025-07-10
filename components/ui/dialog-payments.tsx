@@ -1,7 +1,6 @@
-import { useState, useEffect } from "react";
-import { Button, Input, Label } from "./index";
+import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogTitle } from "./dialog";
-import { Separator } from "./separator";
+import { Button, Input, Label } from "./index";
 
 interface PaymentDraft {
   id: string;
@@ -73,6 +72,7 @@ export function DialogPayments({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="pt-12">
+        <DialogTitle className="text-white">Płatności</DialogTitle>
         <div className="mb-2 flex gap-2 items-center">
           <div className="flex flex-col gap-2">
             <Label htmlFor="installment" className="text-sm text-gray-500">
@@ -132,7 +132,6 @@ export function DialogPayments({
             Dodaj
           </Button>
         </div>
-        <Label className="text-gray-500">Płatności</Label>
         <div className="flex flex-col gap-2">
           {localItems.length > 0 ? (
             localItems.map((item, idx) => (

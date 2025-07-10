@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
-import { Button, Input, Label } from "./index";
+import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogTitle } from "./dialog";
+import { Button, Input } from "./index";
 import {
+  Item as SortableItem,
   SortableList,
   SortableListItem,
-  Item as SortableItem,
 } from "./sortable-list";
 
 interface DialogNotIncludedProps {
@@ -51,6 +51,7 @@ export function DialogNotIncluded({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="pt-12">
+        <DialogTitle className="text-white">Oferta nie zawiera</DialogTitle>
         <div className="mb-2 flex gap-2">
           <Input
             value={newNotIncludedText}
@@ -68,7 +69,6 @@ export function DialogNotIncluded({
             Dodaj
           </Button>
         </div>
-        <Label className="text-gray-500">Oferta nie zawiera</Label>
         <SortableList
           items={localItems}
           setItems={(newItems) => {

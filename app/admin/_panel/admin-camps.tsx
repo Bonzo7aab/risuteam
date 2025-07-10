@@ -5,22 +5,30 @@ import { useCallback, useEffect, useState } from "react";
 // Import types and functions from the new data file
 import {
   deleteCamp,
+  deleteCampTrainers,
+  fetchCampImages,
+  fetchCamps,
+  fetchHotelsWithAmenities,
   fetchPlaces,
   fetchTrainers,
   insertCamp,
-  updateCamp,
-  deleteCampTrainers,
   insertCampTrainers,
-  fetchCamps,
+  updateCamp,
+  uploadCampImage,
 } from "@/app/actions";
-import { Camp, PlaceType, CampPayment } from "@/app/types/types";
+import {
+  Camp,
+  CampPayment,
+  Hotel,
+  PlaceType,
+  TrainerOption,
+} from "@/app/types/types";
 import { Button, Input, Label, Table, Textarea } from "@/components/ui";
 import { DialogImages } from "@/components/ui/dialog-images";
 import { DialogIncluded } from "@/components/ui/dialog-included";
 import { DialogNotIncluded } from "@/components/ui/dialog-not-included";
 import { DialogPayments } from "@/components/ui/dialog-payments";
 import { DialogProgram } from "@/components/ui/dialog-program";
-import { ImageFile } from "@/components/ui/image-upload";
 import { MultiSelect } from "@/components/ui/multi-select";
 import {
   Select,
@@ -30,67 +38,27 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Item as SortableItem } from "@/components/ui/sortable-list";
-import { createClient } from "@/utils/supabase/client";
-
-function parseMaybeArray(val: any): string[] {
-  if (Array.isArray(val)) return val;
-  if (typeof val === "string" && val.startsWith("[")) {
-    try {
-      return JSON.parse(val);
-    } catch {
-      return [];
-    }
-  }
-  return val ? [val] : [];
-}
-
-// Add helper to map between string[] and SortableItem[]
-function programToSortableItems(program: string[]): SortableItem[] {
-  return program.map((text, idx) => ({
-    id: String(idx + 1),
-    text,
-    checked: false,
-    description: "",
-  }));
-}
-function sortableItemsToProgram(items: SortableItem[]): string[] {
-  return items.map((item) => item.text);
-}
-
-// Interface for the form state, specifically for the trainers field
-interface CampFormState {
-  date_from?: string;
-  date_to?: string;
-  description?: string;
-  id?: number;
-  images?: (ImageFile | string)[];
-  included?: string[];
-  not_included?: string[];
-  payments?: CampPayment[];
-  place_id?: number | null;
-  price?: number;
-  program?: string[];
-  title?: string;
-  type?: string;
-  camp_trainers?: any[];
-}
-
-// For new MultiSelect: id and label
-type TrainerOption = { id: string; label: string };
+import {
+  isCampPaymentArray,
+  isImageFileArray,
+  isStringArray,
+  parseMaybeArray,
+  programToSortableItems,
+  sortableItemsToProgram,
+  trainersChanged,
+} from "@/utils";
 
 export default function AdminCampsPanel() {
   const [camps, setCamps] = useState<Camp[]>([]);
   const [loading, setLoading] = useState(true);
-  const [form, setForm] = useState<CampFormState>({});
+  const [form, setForm] = useState<Camp>({});
   const [editingId, setEditingId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [places, setPlaces] = useState<PlaceType[]>([]);
   const [programItems, setProgramItems] = useState<SortableItem[]>([]);
   const [programDialogOpen, setProgramDialogOpen] = useState(false);
   const [selectedImageFiles, setSelectedImageFiles] = useState<File[]>([]);
   const [uploadingImages, setUploadingImages] = useState(false);
   const [allTrainers, setAllTrainers] = useState<TrainerOption[]>([]);
-  const supabase = createClient();
   const [imageDialogOpen, setImageDialogOpen] = useState(false);
   const [bucketImages, setBucketImages] = useState<string[]>([]);
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
@@ -101,13 +69,21 @@ export default function AdminCampsPanel() {
   const [paymentsDialogOpen, setPaymentsDialogOpen] = useState(false);
   const [notIncludedItems, setNotIncludedItems] = useState<SortableItem[]>([]);
   const [notIncludedDialogOpen, setNotIncludedDialogOpen] = useState(false);
+  const [originalTrainerIds, setOriginalTrainerIds] = useState<string[]>([]);
+  const [locationType, setLocationType] = useState<"hotel" | "localization">(
+    "hotel"
+  );
+  const [hotels, setHotels] = useState<Hotel[]>([]);
+  const [places, setPlaces] = useState<PlaceType[]>([]);
+  const [hotelsLoading, setHotelsLoading] = useState(false);
+  const [placesLoading, setPlacesLoading] = useState(false);
+  const [selectedHotelId, setSelectedHotelId] = useState<number | null>(null);
+  const [selectedPlaceId, setSelectedPlaceId] = useState<number | null>(null);
 
   useEffect(() => {
     async function loadData() {
       const campsData = await fetchCamps();
       setCamps(campsData);
-      const { data: placesData } = await fetchPlaces();
-      setPlaces(placesData || []);
       const { data: trainersData } = await fetchTrainers();
       setAllTrainers(
         trainersData?.map((trainer) => ({
@@ -120,41 +96,22 @@ export default function AdminCampsPanel() {
     loadData();
   }, []);
 
-  // When editing, populate programItems from form.program
   useEffect(() => {
-    if (form.program && Array.isArray(form.program)) {
-      setProgramItems(programToSortableItems(form.program));
-    } else {
-      setProgramItems([]);
+    if (locationType === "hotel" && hotels.length === 0) {
+      setHotelsLoading(true);
+      fetchHotelsWithAmenities().then(({ data }) => {
+        setHotels(data || []);
+        setHotelsLoading(false);
+      });
     }
-  }, [form.program]);
-
-  // When editing, populate includedItems from form.included
-  useEffect(() => {
-    if (form.included && Array.isArray(form.included)) {
-      setIncludedItems(programToSortableItems(form.included));
-    } else {
-      setIncludedItems([]);
+    if (locationType === "localization" && places.length === 0) {
+      setPlacesLoading(true);
+      fetchPlaces().then(({ data }) => {
+        setPlaces(data || []);
+        setPlacesLoading(false);
+      });
     }
-  }, [form.included]);
-
-  // When editing, populate payments from form.payments
-  useEffect(() => {
-    if (form.payments && Array.isArray(form.payments)) {
-      setPayments(form.payments);
-    } else {
-      setPayments([]);
-    }
-  }, [form.payments]);
-
-  // When editing, populate notIncludedItems from form.not_included
-  useEffect(() => {
-    if (form.not_included && Array.isArray(form.not_included)) {
-      setNotIncludedItems(programToSortableItems(form.not_included));
-    } else {
-      setNotIncludedItems([]);
-    }
-  }, [form.not_included]);
+  }, [locationType]);
 
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -187,6 +144,24 @@ export default function AdminCampsPanel() {
       payments: parseMaybeArray(row.payments),
       camp_trainers: initialTrainers,
     });
+    setOriginalTrainerIds(initialTrainers.map((t) => String(t.id)));
+    setProgramItems(programToSortableItems(parseMaybeArray(row.program)));
+    setIncludedItems(programToSortableItems(parseMaybeArray(row.included)));
+    const parsedPayments = parseMaybeArray(row.payments);
+    setPayments(isCampPaymentArray(parsedPayments) ? parsedPayments : []);
+    setNotIncludedItems(
+      programToSortableItems(parseMaybeArray(row.not_included))
+    );
+    // Set locationType and selected hotel/place for editing
+    if (row.hotel_id) {
+      setLocationType("hotel");
+      setSelectedHotelId(row.hotel_id);
+      setSelectedPlaceId(null);
+    } else if (row.place_id) {
+      setLocationType("localization");
+      setSelectedPlaceId(row.place_id);
+      setSelectedHotelId(null);
+    }
   }
 
   function cancelEdit() {
@@ -217,19 +192,13 @@ export default function AdminCampsPanel() {
     if (selectedImageFiles.length > 0) {
       try {
         for (const file of selectedImageFiles) {
-          const filePath = `${Date.now()}-${Math.random().toString(36).slice(2)}-${file.name}`;
-          const { error: uploadError } = await supabase.storage
-            .from("camps")
-            .upload(filePath, file, { upsert: false });
-          if (uploadError) {
-            setError("Image upload failed: " + uploadError.message);
+          const { error, url } = await uploadCampImage(file);
+          if (error) {
+            setError("Image upload failed: " + error);
             setUploadingImages(false);
             return;
           }
-          const { data } = supabase.storage
-            .from("camps")
-            .getPublicUrl(filePath);
-          imageUrls.push(data.publicUrl);
+          if (url) imageUrls.push(url);
         }
       } catch (err: any) {
         setError("Image upload failed: " + (err?.message || err));
@@ -240,7 +209,7 @@ export default function AdminCampsPanel() {
     setUploadingImages(false);
     const program = sortableItemsToProgram(programItems);
     const included = sortableItemsToProgram(includedItems);
-    // Remove id and camp_trainers from the object before insert
+    // Remove id and camp_trainers via destructuring, then remove trainers if present at runtime
     const { id, camp_trainers, ...rest } = {
       ...form,
       program,
@@ -248,7 +217,18 @@ export default function AdminCampsPanel() {
       payments,
       images: imageUrls,
     };
+    // Remove 'trainers' property if it exists
+    if ("trainers" in rest) {
+      delete (rest as any).trainers;
+    }
     const submitForm = rest;
+
+    // Ensure only one of place_id or hotel_id is set
+    if (locationType === "hotel") {
+      submitForm.place_id = null;
+    } else if (locationType === "localization") {
+      submitForm.hotel_id = null;
+    }
 
     let campId = editingId;
     let isNew = false;
@@ -261,9 +241,25 @@ export default function AdminCampsPanel() {
         setUploadingImages(false);
         return;
       }
+      // Only update camp_trainers if changed
+      const currentIds = (form.camp_trainers ?? []).map((t: any) =>
+        String(t.id)
+      );
+      if (trainersChanged(currentIds, originalTrainerIds)) {
+        await deleteCampTrainers(editingId);
+        if ((form.camp_trainers ?? []).length > 0) {
+          const trainersToInsertPayments = (form.camp_trainers ?? []).map(
+            (trainer: any) => ({
+              camp_id: editingId,
+              trainer_id: parseInt(trainer.id, 10),
+            })
+          );
+          await insertCampTrainers(trainersToInsertPayments);
+        }
+      }
+      setOriginalTrainerIds(currentIds);
     } else {
       // Insert new camp
-      // Debug: log the payload before insert
       if (!editingId) {
         console.log("submitForm payload:", JSON.stringify(submitForm));
       }
@@ -275,16 +271,27 @@ export default function AdminCampsPanel() {
       }
       campId = data.id;
       isNew = true;
-    }
-    // Update camp_trainers join table
-    if (campId && Array.isArray(form.camp_trainers)) {
-      await deleteCampTrainers(campId);
-      if (form.camp_trainers.length > 0) {
-        const trainersToInsert = form.camp_trainers.map((trainer: any) => ({
-          camp_id: campId,
-          trainer_id: parseInt(trainer.id, 10),
-        }));
-        await insertCampTrainers(trainersToInsert);
+      // Insert camp_trainers for new camp
+      if (
+        campId &&
+        Array.isArray(form.camp_trainers) &&
+        form.camp_trainers.length > 0 &&
+        typeof campId === "number"
+      ) {
+        const trainersToInsertNew = form.camp_trainers
+          .map((trainer: any) => {
+            if (typeof campId === "number") {
+              return {
+                camp_id: campId,
+                trainer_id: parseInt(trainer.id, 10),
+              };
+            }
+            return null;
+          })
+          .filter(
+            (t): t is { camp_id: number; trainer_id: number } => t !== null
+          );
+        await insertCampTrainers(trainersToInsertNew);
       }
     }
     setUploadingImages(false);
@@ -297,23 +304,14 @@ export default function AdminCampsPanel() {
   }
 
   // Fetch images from Supabase storage 'camps' bucket
-  const fetchCampImages = useCallback(async () => {
-    const { data, error } = await supabase.storage.from("camps").list();
-    if (!error && data) {
-      const urls = data
-        .filter((file) => file.name.match(/\.(jpg|jpeg|png|webp)$/i))
-        .map(
-          (file) =>
-            supabase.storage.from("camps").getPublicUrl(file.name).data
-              .publicUrl
-        );
-      setBucketImages(urls);
-    }
-  }, [supabase]);
+  const fetchCampImagesHandler = useCallback(async () => {
+    const { error, urls } = await fetchCampImages();
+    if (!error) setBucketImages(urls);
+  }, []);
 
   useEffect(() => {
-    if (imageDialogOpen) fetchCampImages();
-  }, [imageDialogOpen, fetchCampImages]);
+    if (imageDialogOpen) fetchCampImagesHandler();
+  }, [imageDialogOpen, fetchCampImagesHandler]);
 
   // Sync selectedImages with form.images
   useEffect(() => {
@@ -328,7 +326,25 @@ export default function AdminCampsPanel() {
     setPayments(items);
     setForm((f) => ({ ...f, payments: items }));
     if (editingId) {
-      await updateCamp(editingId, { payments: items });
+      const { camp_trainers, ...rest } = form;
+      await updateCamp(editingId, { ...rest, payments: items });
+      // Only update camp_trainers if changed
+      const currentIds = (form.camp_trainers ?? []).map((t: any) =>
+        String(t.id)
+      );
+      if (trainersChanged(currentIds, originalTrainerIds)) {
+        await deleteCampTrainers(editingId);
+        if ((form.camp_trainers ?? []).length > 0) {
+          const trainersToInsertPayments = (form.camp_trainers ?? []).map(
+            (trainer: any) => ({
+              camp_id: editingId,
+              trainer_id: parseInt(trainer.id, 10),
+            })
+          );
+          await insertCampTrainers(trainersToInsertPayments);
+        }
+      }
+      setOriginalTrainerIds(currentIds);
     }
   };
 
@@ -337,7 +353,37 @@ export default function AdminCampsPanel() {
     const program = sortableItemsToProgram(items);
     setForm((f) => ({ ...f, program }));
     if (editingId) {
-      await updateCamp(editingId, { program });
+      const { camp_trainers, ...rest } = form;
+      await updateCamp(editingId, { ...rest, program });
+      if (
+        Array.isArray(form.camp_trainers) &&
+        typeof editingId === "number" &&
+        trainersChanged(
+          (form.camp_trainers ?? []).map((t: any) => String(t.id)),
+          originalTrainerIds
+        )
+      ) {
+        await deleteCampTrainers(editingId);
+        if ((form.camp_trainers ?? []).length > 0) {
+          const trainersToInsertProgram = (form.camp_trainers ?? [])
+            .map((trainer: any) => {
+              if (typeof editingId === "number") {
+                return {
+                  camp_id: editingId,
+                  trainer_id: parseInt(trainer.id, 10),
+                };
+              }
+              return null;
+            })
+            .filter(
+              (t): t is { camp_id: number; trainer_id: number } => t !== null
+            );
+          await insertCampTrainers(trainersToInsertProgram);
+        }
+      }
+      setOriginalTrainerIds(
+        (form.camp_trainers ?? []).map((t: any) => String(t.id))
+      );
     }
   };
 
@@ -346,7 +392,37 @@ export default function AdminCampsPanel() {
     const included = sortableItemsToProgram(items);
     setForm((f) => ({ ...f, included }));
     if (editingId) {
-      await updateCamp(editingId, { included });
+      const { camp_trainers, ...rest } = form;
+      await updateCamp(editingId, { ...rest, included });
+      if (
+        Array.isArray(form.camp_trainers) &&
+        typeof editingId === "number" &&
+        trainersChanged(
+          (form.camp_trainers ?? []).map((t: any) => String(t.id)),
+          originalTrainerIds
+        )
+      ) {
+        await deleteCampTrainers(editingId);
+        if ((form.camp_trainers ?? []).length > 0) {
+          const trainersToInsertIncluded = (form.camp_trainers ?? [])
+            .map((trainer: any) => {
+              if (typeof editingId === "number") {
+                return {
+                  camp_id: editingId,
+                  trainer_id: parseInt(trainer.id, 10),
+                };
+              }
+              return null;
+            })
+            .filter(
+              (t): t is { camp_id: number; trainer_id: number } => t !== null
+            );
+          await insertCampTrainers(trainersToInsertIncluded);
+        }
+      }
+      setOriginalTrainerIds(
+        (form.camp_trainers ?? []).map((t: any) => String(t.id))
+      );
     }
   };
 
@@ -355,7 +431,37 @@ export default function AdminCampsPanel() {
     const not_included = sortableItemsToProgram(items);
     setForm((f) => ({ ...f, not_included }));
     if (editingId) {
-      await updateCamp(editingId, { not_included });
+      const { camp_trainers, ...rest } = form;
+      await updateCamp(editingId, { ...rest, not_included });
+      if (
+        Array.isArray(form.camp_trainers) &&
+        typeof editingId === "number" &&
+        trainersChanged(
+          (form.camp_trainers ?? []).map((t: any) => String(t.id)),
+          originalTrainerIds
+        )
+      ) {
+        await deleteCampTrainers(editingId);
+        if ((form.camp_trainers ?? []).length > 0) {
+          const trainersToInsertNotIncluded = (form.camp_trainers ?? [])
+            .map((trainer: any) => {
+              if (typeof editingId === "number") {
+                return {
+                  camp_id: editingId,
+                  trainer_id: parseInt(trainer.id, 10),
+                };
+              }
+              return null;
+            })
+            .filter(
+              (t): t is { camp_id: number; trainer_id: number } => t !== null
+            );
+          await insertCampTrainers(trainersToInsertNotIncluded);
+        }
+      }
+      setOriginalTrainerIds(
+        (form.camp_trainers ?? []).map((t: any) => String(t.id))
+      );
     }
   };
 
@@ -373,11 +479,18 @@ export default function AdminCampsPanel() {
       ),
     },
     {
-      key: "place_id",
+      key: "location",
       header: "Lokalizacja",
       render: (row: Camp) => {
-        const place = places.find((p) => p.id === row.place_id);
-        return place ? place.name : "";
+        if (row.hotel_id) {
+          const hotel = hotels.find((h) => h.id === row.hotel_id);
+          return hotel ? hotel.title : "";
+        }
+        if (row.place_id) {
+          const place = places.find((p) => p.id === row.place_id);
+          return place ? place.name : "";
+        }
+        return "";
       },
     },
     { key: "price", header: "Cena" },
@@ -460,7 +573,6 @@ export default function AdminCampsPanel() {
                 value={form.date_from || ""}
                 onChange={handleChange}
                 required
-                className="date-icon-visible"
               />
             </div>
             <div className="flex-1">
@@ -473,7 +585,6 @@ export default function AdminCampsPanel() {
                 value={form.date_to || ""}
                 onChange={handleChange}
                 required
-                className="date-icon-visible"
               />
             </div>
           </div>
@@ -488,24 +599,115 @@ export default function AdminCampsPanel() {
             />
           </div>
           <div>
-            <Label htmlFor="place_id" className="text-gray-500">
-              Lokalizacja
+            <Label htmlFor="locationType" className="text-gray-500 mb-1 block">
+              Wybierz typ lokalizacji
             </Label>
-            <Select
-              value={form.place_id ? String(form.place_id) : ""}
-              onValueChange={(v) => handleSelectChange("place_id", Number(v))}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Wybierz lokalizację" />
-              </SelectTrigger>
-              <SelectContent>
-                {places.map((p) => (
-                  <SelectItem key={p.id} value={String(p.id)}>
-                    {p.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="flex gap-2 mb-2">
+              <Button
+                type="button"
+                variant={locationType === "hotel" ? "default" : "outline"}
+                onClick={() => {
+                  setLocationType("hotel");
+                  setSelectedPlaceId(null);
+                  setForm((f) => ({
+                    ...f,
+                    place_id: undefined,
+                    hotel_id: f.hotel_id,
+                  }));
+                }}
+              >
+                Hotel
+              </Button>
+              <Button
+                type="button"
+                variant={
+                  locationType === "localization" ? "default" : "outline"
+                }
+                onClick={() => {
+                  setLocationType("localization");
+                  setSelectedHotelId(null);
+                  setForm((f) => ({
+                    ...f,
+                    hotel_id: undefined,
+                    place_id: f.place_id,
+                  }));
+                }}
+              >
+                Lokalizacja
+              </Button>
+            </div>
+            {locationType === "hotel" && (
+              <div>
+                <Label htmlFor="hotel_id" className="text-gray-500">
+                  Hotel
+                </Label>
+                <Select
+                  value={selectedHotelId ? String(selectedHotelId) : ""}
+                  onValueChange={(v) => {
+                    setSelectedHotelId(Number(v));
+                    setSelectedPlaceId(null);
+                    setForm((f) => ({
+                      ...f,
+                      hotel_id: Number(v),
+                      place_id: undefined,
+                    }));
+                  }}
+                  disabled={hotelsLoading}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue
+                      placeholder={
+                        hotelsLoading ? "Ładowanie hoteli..." : "Wybierz hotel"
+                      }
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {hotels.map((h) => (
+                      <SelectItem key={h.id} value={String(h.id)}>
+                        {h.title}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            {locationType === "localization" && (
+              <div>
+                <Label htmlFor="place_id" className="text-gray-500">
+                  Lokalizacja
+                </Label>
+                <Select
+                  value={selectedPlaceId ? String(selectedPlaceId) : ""}
+                  onValueChange={(v) => {
+                    setSelectedPlaceId(Number(v));
+                    setSelectedHotelId(null);
+                    setForm((f) => ({
+                      ...f,
+                      place_id: Number(v),
+                      hotel_id: undefined,
+                    }));
+                  }}
+                  disabled={placesLoading}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue
+                      placeholder={
+                        placesLoading
+                          ? "Ładowanie lokalizacji..."
+                          : "Wybierz lokalizację"
+                      }
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {places.map((p) => (
+                      <SelectItem key={p.id} value={String(p.id)}>
+                        {p.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
           <div>
             <Label htmlFor="description" className="text-gray-500">
@@ -546,19 +748,6 @@ export default function AdminCampsPanel() {
                   Dodaj zawartość oferty
                 </Button>
               )}
-              <Button
-                type="button"
-                size="sm"
-                variant="ghost"
-                className="text-xs text-gray-400 border border-gray-300 px-2 py-1"
-                onClick={() =>
-                  handleIncludedChange([
-                    { id: "1", text: "Brak", checked: false, description: "" },
-                  ])
-                }
-              >
-                Brak
-              </Button>
             </div>
             <DialogIncluded
               open={includedDialogOpen}
@@ -593,7 +782,10 @@ export default function AdminCampsPanel() {
               selectedImages={selectedImages}
               onChange={(imgs) => {
                 setSelectedImages(imgs);
-                setForm((f) => ({ ...f, images: imgs }));
+                setForm((f) => ({
+                  ...f,
+                  images: imgs,
+                }));
               }}
               disabled={uploadingImages}
             />
@@ -617,12 +809,36 @@ export default function AdminCampsPanel() {
                           setSelectedImages((imgs) =>
                             imgs.filter((img) => img !== url)
                           );
-                          setForm((f) => ({
-                            ...f,
-                            images: (f.images || []).filter(
-                              (img) => img !== url
-                            ),
-                          }));
+                          setForm((f) => {
+                            const valueToRemove = url;
+                            if (
+                              Array.isArray(f.images) &&
+                              f.images.length > 0
+                            ) {
+                              if (
+                                isStringArray(f.images) &&
+                                typeof valueToRemove === "string"
+                              ) {
+                                return {
+                                  ...f,
+                                  images: f.images.filter(
+                                    (img) => img !== valueToRemove
+                                  ),
+                                };
+                              } else if (
+                                isImageFileArray(f.images) &&
+                                typeof valueToRemove !== "string"
+                              ) {
+                                return {
+                                  ...f,
+                                  images: f.images.filter(
+                                    (img) => img !== valueToRemove
+                                  ),
+                                };
+                              }
+                            }
+                            return { ...f, images: [] };
+                          });
                         }}
                         className="absolute top-1 right-1 bg-white/80 rounded-full p-1 text-red-600 opacity-0 group-hover:opacity-100 transition-opacity border border-red-200 hover:bg-red-100"
                       >
@@ -692,19 +908,6 @@ export default function AdminCampsPanel() {
                   Dodaj pozycje nie zawiera
                 </Button>
               )}
-              <Button
-                type="button"
-                size="sm"
-                variant="ghost"
-                className="text-xs text-gray-400 border border-gray-300 px-2 py-1"
-                onClick={() =>
-                  handleNotIncludedChange([
-                    { id: "1", text: "Brak", checked: false, description: "" },
-                  ])
-                }
-              >
-                Brak
-              </Button>
             </div>
             <DialogNotIncluded
               open={notIncludedDialogOpen}
@@ -726,7 +929,7 @@ export default function AdminCampsPanel() {
             </Label>
             <MultiSelect
               options={allTrainers.map((t) => ({
-                label: t.label,
+                label: t.label ?? t.name ?? "",
                 value: t.id,
               }))}
               defaultValue={
@@ -762,17 +965,6 @@ export default function AdminCampsPanel() {
                 disabled={uploadingImages}
               >
                 {editingId ? "Edytuj płatności" : "Dodaj płatności"}
-              </Button>
-              <Button
-                type="button"
-                size="sm"
-                variant="ghost"
-                className="text-xs text-gray-400 border border-gray-300 px-2 py-1"
-                onClick={() =>
-                  handlePaymentsChange([{ installment: 1, amount: 0, due: "" }])
-                }
-              >
-                Brak
               </Button>
             </div>
             <DialogPayments
@@ -826,19 +1018,6 @@ export default function AdminCampsPanel() {
                   Dodaj program
                 </Button>
               )}
-              <Button
-                type="button"
-                size="sm"
-                variant="ghost"
-                className="text-xs text-gray-400 border border-gray-300 px-2 py-1"
-                onClick={() =>
-                  handleProgramChange([
-                    { id: "1", text: "Brak", checked: false, description: "" },
-                  ])
-                }
-              >
-                Brak
-              </Button>
             </div>
             <DialogProgram
               open={programDialogOpen}

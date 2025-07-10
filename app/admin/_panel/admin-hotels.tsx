@@ -130,7 +130,12 @@ export default function AdminHotelsPanel() {
   }
 
   async function handleDelete(id: number) {
-    if (!confirm("Are you sure you want to delete this hotel?")) return;
+    if (
+      !confirm(
+        "Usunięcie hotelu spowoduje również usunięcie wszystkich powiązanych udogodnień oraz innych powiązanych danych (np. obozów, jeśli są powiązane). Czy na pewno chcesz kontynuować?"
+      )
+    )
+      return;
     const { error } = await deleteHotelWithAmenities(id);
     if (error) setError(error);
     await loadHotels();

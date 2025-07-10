@@ -1,39 +1,13 @@
 "use client";
 
-import {
-  AnimatedTestimonials,
-  Testimonial,
-} from "@/components/ui/animated-testimonials";
+import { AnimatedTestimonials } from "@/components/ui/animated-testimonials";
 import { ContainerTextFlip } from "./ui/container-text-flip";
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { InfiniteMovingCards } from "./ui/infinite-moving-cards";
 import { TextAnimate } from "./ui/text-animate";
-
-const testimonials: Testimonial[] = [
-  {
-    name: "Nocowanka",
-    date: "21.06.2025 - 28.06.2025",
-    location: "SP 141 Zamienie",
-    src: "/carousel1.jpg",
-    tab: "letnie",
-  },
-  {
-    name: "Darmowy trening Funny Judo!",
-    date: "10.11.2025 - 17.11.2025",
-    location: "SP 141 Zamienie",
-    src: "/carousel2.jpg",
-    tab: "zimowe",
-  },
-  {
-    name: "Funny Judo",
-    date: "10.07.2025 - 11.07.2025",
-    location: "SP 141 Zamienie",
-    src: "/carousel3.jpg",
-    tab: "nocowanka",
-  },
-];
+import { TestimonialType } from "@/app/types/types";
 
 const rating = [
   {
@@ -68,7 +42,11 @@ const rating = [
   },
 ];
 
-export default function Hero() {
+interface HeroProps {
+  testimonials: TestimonialType[];
+}
+
+const Hero: React.FC<HeroProps> = ({ testimonials }) => {
   const router = useRouter();
 
   return (
@@ -163,4 +141,6 @@ export default function Hero() {
       </div>
     </div>
   );
-}
+};
+
+export default Hero;

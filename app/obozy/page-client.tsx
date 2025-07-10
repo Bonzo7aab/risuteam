@@ -22,7 +22,6 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
 import { fetchCamps, fetchPlaces } from "@/app/actions";
-import Hotels from "@/app/hotele/page";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 import { Camp, PlaceType, TabType } from "../types/types";
@@ -62,7 +61,7 @@ function formatDateRange(date_from: string, date_to: string) {
 const CampContent = ({ camp, places }: { camp: Camp; places: PlaceType[] }) => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const placeName =
-    places.find((p) => p.id === camp.place_id)?.name || camp.place_id;
+    places.find((p) => p.id === camp.hotel_id)?.name || camp.hotel_id;
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text).then(
@@ -81,16 +80,18 @@ const CampContent = ({ camp, places }: { camp: Camp; places: PlaceType[] }) => {
       <section className="py-8 px-4 md:pl-8 flex flex-col md:flex-row gap-8 md:gap-16">
         <div className="basis-full md:basis-2/3">
           <h1 className="text-3xl md:text-4xl text-risu-300 font-bold capitalize mb-6 md:mb-8">
-            {camp.title}
+            {camp.title || "Brak tytułu"}
           </h1>
-          <div className="text-base md:text-lg mb-6">{camp.description}</div>
-          {camp.images && camp.images.length > 0 && (
+          <div className="text-base md:text-lg mb-6">
+            {camp.description || "Brak opisu"}
+          </div>
+          {camp.images && camp.images.length > 0 ? (
             <div className="relative flex-col md:flex-row flex gap-4 mb-6 justify-center w-full md:w-80 mx-auto">
               {camp.images.map((img, index) => (
                 <div key={index} className="relative mx-auto">
                   <img
                     src={typeof img === "string" ? img : img.url}
-                    alt={camp.title}
+                    alt={camp.title || "Obóz"}
                     className="rounded-lg cursor-pointer hover:opacity-90 transition-opacity w-48 h-32 object-cover"
                     onClick={() =>
                       setSelectedImage(typeof img === "string" ? img : img.url)
@@ -99,6 +100,8 @@ const CampContent = ({ camp, places }: { camp: Camp; places: PlaceType[] }) => {
                 </div>
               ))}
             </div>
+          ) : (
+            <div className="text-slate-400 mb-6">Brak zdjęć</div>
           )}
           <Dialog
             open={!!selectedImage}
@@ -132,7 +135,9 @@ const CampContent = ({ camp, places }: { camp: Camp; places: PlaceType[] }) => {
               <span className="text-base md:text-lg">Termin</span>
             </span>
             <span className="text-slate-600 text-right">
-              {formatDateRange(camp.date_from, camp.date_to)}
+              {camp.date_from && camp.date_to
+                ? formatDateRange(camp.date_from, camp.date_to)
+                : "Brak daty"}
             </span>
           </div>
           <div className="bg-risu-400 text-black p-4 flex flex-col gap-2">
@@ -140,30 +145,36 @@ const CampContent = ({ camp, places }: { camp: Camp; places: PlaceType[] }) => {
               <Tag />
               <span className="text-base md:text-lg">Cena</span>
             </span>
-            <span className="text-slate-600 text-right">{camp.price} zł</span>
+            <span className="text-slate-600 text-right">
+              {camp.price !== undefined && camp.price !== null
+                ? `${camp.price} zł`
+                : "Brak ceny"}
+            </span>
           </div>
           <div className="bg-risu-400 text-black p-4 flex flex-col gap-2">
             <span className="flex gap-2">
               <MapPinned />
               <span className="text-base md:text-lg">Lokalizacja</span>
             </span>
-            <span className="text-slate-600 text-right">{placeName}</span>
+            <span className="text-slate-600 text-right">
+              {placeName || "Brak lokalizacji"}
+            </span>
           </div>
         </div>
       </section>
 
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8 text-center my-16 md:my-32 px-4">
         <div className="border-2 border-risu-300 p-4 rounded-lg">
-          <div className="w-full flex justify-center">
+          <div className="w-full flex justify-center mb-2">
             <Eye />
           </div>
           <h3 className="text-lg md:text-xl font-semibold mb-2 text-risu-400">
-            Malownicze Tatry
+            Malownicze widoki
           </h3>
-          <p className="text-sm text-slate-100">Odkryjcie piękno polski.</p>
+          <p className="text-sm text-slate-100">Odkryjcie piękno Polski.</p>
         </div>
         <div className="border-2 border-risu-300 p-4 rounded-lg">
-          <div className="w-full flex justify-center">
+          <div className="w-full flex justify-center mb-2">
             <Users />
           </div>
           <h3 className="text-lg md:text-xl font-semibold mb-2 text-risu-400">
@@ -174,7 +185,7 @@ const CampContent = ({ camp, places }: { camp: Camp; places: PlaceType[] }) => {
           </p>
         </div>
         <div className="border-2 border-risu-300 p-4 rounded-lg">
-          <div className="w-full flex justify-center">
+          <div className="w-full flex justify-center mb-2">
             <Bike />
           </div>
           <h3 className="text-lg md:text-xl font-semibold mb-2 text-risu-400">
@@ -185,7 +196,7 @@ const CampContent = ({ camp, places }: { camp: Camp; places: PlaceType[] }) => {
           </p>
         </div>
         <div className="border-2 border-risu-300 p-4 rounded-lg">
-          <div className="w-full flex justify-center">
+          <div className="w-full flex justify-center mb-2">
             <Smile />
           </div>
           <h3 className="text-lg md:text-xl font-semibold mb-2 text-risu-400">
@@ -203,7 +214,7 @@ const CampContent = ({ camp, places }: { camp: Camp; places: PlaceType[] }) => {
           <div className="hidden xl:block absolute -top-4 -left-4 w-32 h-32 border-l-2 border-t-2 border-risu-500 opacity-70"></div>
           <div className="hidden xl:block absolute -bottom-4 -right-4 w-32 h-32 border-r-2 border-b-2 border-risu-500 opacity-70"></div>
 
-          {camp.program &&
+          {camp.program && camp.program.length > 0 ? (
             camp.program.map((item, index) => (
               <li key={index} className="flex mb-2 gap-2">
                 <span className="text-risu-400">
@@ -211,17 +222,18 @@ const CampContent = ({ camp, places }: { camp: Camp; places: PlaceType[] }) => {
                 </span>
                 <span>{item}</span>
               </li>
-            ))}
+            ))
+          ) : (
+            <li className="text-slate-400">Brak programu</li>
+          )}
         </ul>
       </section>
-
-      <Hotels />
 
       <section className="mt-16 md:mt-32 mb-8 md:mb-16 md:px-4">
         <div className="container mx-auto max-w-4xl">
           <div className="bg-risu-400 text-black rounded-t-lg p-2">
             <h2 className="text-lg md:text-xl">
-              Plan Płatności – Zarezerwuj Swoje Miejsce!
+              Plan Płatności – Zarezerwuj swoje miejsce!
             </h2>
             <p className="text-center text-base md:text-lg">
               Aby zagwarantować sobie udział w obozie, prosimy o dokonywanie
@@ -230,8 +242,7 @@ const CampContent = ({ camp, places }: { camp: Camp; places: PlaceType[] }) => {
           </div>
 
           <div className="p-4 md:p-10 flex flex-col gap-8 py-6">
-            {camp.payments &&
-              camp.payments.length > 0 &&
+            {camp.payments && camp.payments.length > 0 ? (
               camp.payments.map((payment, idx) => {
                 return (
                   <div key={idx} className="text-center">
@@ -248,7 +259,12 @@ const CampContent = ({ camp, places }: { camp: Camp; places: PlaceType[] }) => {
                     )}
                   </div>
                 );
-              })}
+              })
+            ) : (
+              <div className="text-slate-400 text-center">
+                Brak informacji o płatnościach
+              </div>
+            )}
 
             <div>
               <div className="py-3 flex items-center text-risu-400 before:flex-1 before:border-t before:border-risu-700 before:me-6 after:flex-1 after:border-t after:border-risu-700 after:ms-6">

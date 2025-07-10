@@ -23,7 +23,7 @@ import {
 } from "@/components/ui";
 import { POLISH_DAY_ORDER } from "@/utils/constants";
 
-import { PlaceOption, ScheduleType, TrainerOption } from "../../types/types";
+import { PlaceType, ScheduleType, TrainerType } from "../../types/types";
 
 export default function AdminSchedulePanel() {
   const [schedule, setSchedule] = useState<ScheduleType[]>([]);
@@ -31,8 +31,8 @@ export default function AdminSchedulePanel() {
   const [form, setForm] = useState<Partial<ScheduleType>>({});
   const [editingId, setEditingId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [trainers, setTrainers] = useState<TrainerOption[]>([]);
-  const [places, setPlaces] = useState<PlaceOption[]>([]);
+  const [trainers, setTrainers] = useState<TrainerType[]>([]);
+  const [places, setPlaces] = useState<PlaceType[]>([]);
 
   useEffect(() => {
     loadSchedule();
@@ -51,13 +51,13 @@ export default function AdminSchedulePanel() {
   async function loadTrainers() {
     const { data, error } = await fetchTrainers();
     if (error) setError(error);
-    setTrainers((data || []).map((t) => ({ id: Number(t.id), name: t.name })));
+    setTrainers(data || []);
   }
 
   async function loadPlaces() {
     const { data, error } = await fetchPlaces();
     if (error) setError(error);
-    setPlaces((data || []).map((p) => ({ id: Number(p.id), name: p.name })));
+    setPlaces(data || []);
   }
 
   function handleChange(

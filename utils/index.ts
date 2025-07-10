@@ -1,6 +1,9 @@
 import { redirect } from "next/navigation";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { CampPayment } from "@/app/types/types";
+import { Item as SortableItem } from "@/components/ui/sortable-list";
+import { ImageFile } from "@/components/ui/image-upload";
 
 /**
  * Redirects to a specified path with an encoded message as a query parameter.
@@ -87,4 +90,66 @@ export async function shrinkImageToMaxSize(
     };
     img.src = url;
   });
+}
+
+// Helper: parseMaybeArray
+export function parseMaybeArray(val: any): string[] {
+  if (Array.isArray(val)) return val;
+  if (typeof val === "string" && val.startsWith("[")) {
+    try {
+      return JSON.parse(val);
+    } catch {
+      return [];
+    }
+  }
+  return val ? [val] : [];
+}
+
+// Helper: programToSortableItems
+export function programToSortableItems(program: string[]): SortableItem[] {
+  return program.map((text, idx) => ({
+    id: String(idx + 1),
+    text,
+    checked: false,
+    description: "",
+  }));
+}
+
+// Helper: sortableItemsToProgram
+export function sortableItemsToProgram(items: SortableItem[]): string[] {
+  return items.map((item) => item.text);
+}
+
+// Helper: isStringArray
+export function isStringArray(arr: unknown[]): arr is string[] {
+  return arr.length === 0 || typeof arr[0] === "string";
+}
+
+// Helper: isImageFileArray
+export function isImageFileArray(arr: unknown[]): arr is ImageFile[] {
+  return arr.length > 0 && typeof arr[0] !== "string";
+}
+
+// Helper: isCampPaymentArray
+export function isCampPaymentArray(arr: any): arr is CampPayment[] {
+  return (
+    Array.isArray(arr) &&
+    (arr.length === 0 ||
+      (typeof arr[0] === "object" &&
+        arr[0] !== null &&
+        "installment" in arr[0] &&
+        "amount" in arr[0] &&
+        "due" in arr[0]))
+  );
+}
+
+// Helper: trainersChanged
+export function trainersChanged(a: string[], b: string[]): boolean {
+  const aSorted = [...a].sort();
+  const bSorted = [...b].sort();
+  if (aSorted.length !== bSorted.length) return true;
+  for (let i = 0; i < aSorted.length; i++) {
+    if (aSorted[i] !== bSorted[i]) return true;
+  }
+  return false;
 }

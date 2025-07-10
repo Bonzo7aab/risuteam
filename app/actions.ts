@@ -7,7 +7,7 @@ import { createClient } from '@/utils/supabase/server';
 import { encodedRedirect } from '@/utils';
 
 import { AmenityType, Hotel } from "@/app/types/types";
-import { ActivityType, Camp, FaqType, GalleryImageType, PlaceType, TrainerType } from './types/types';
+import { ActivityType, Camp, FaqType, GalleryImageType, PlaceType, TrainerType, TestimonialType } from './types/types';
 
 export const signUpAction = async (formData: FormData) => {
   const email = formData.get("email")?.toString();
@@ -316,6 +316,8 @@ export async function insertCamp(row: any) {
 }
 
 export async function updateCamp(id: number, row: any) {
+  console.log("updateCamp", id, row);
+
   try {
     const supabase = await createClient();
     const { error } = await supabase.from("camps").update(row).eq("id", id);
@@ -643,5 +645,108 @@ export async function deleteHotelWithAmenities(id: number): Promise<{ error: str
     return { error: null };
   } catch (err: any) {
     return { error: err.message };
+  }
+}
+
+// Fetch all images from Supabase storage 'camps' bucket
+export async function fetchCampImages() {
+  const supabase = await createClient();
+  const { data, error } = await supabase.storage.from("camps").list();
+  if (error) return { error: error.message, urls: [] };
+  const urls = data
+    .filter((file) => file.name.match(/\.(jpg|jpeg|png|webp)$/i))
+    .map(
+      (file) =>
+        supabase.storage.from("camps").getPublicUrl(file.name).data.publicUrl
+    );
+  return { error: null, urls };
+}
+
+// Upload a file to Supabase storage 'camps' bucket and return its public URL
+export async function uploadCampImage(file: File) {
+  const supabase = await createClient();
+  const filePath = `${Date.now()}-${Math.random().toString(36).slice(2)}-${file.name}`;
+  const { error: uploadError } = await supabase.storage
+    .from("camps")
+    .upload(filePath, file, { upsert: false });
+  if (uploadError) {
+    return { error: uploadError.message, url: null };
+  }
+  const { data } = supabase.storage.from("camps").getPublicUrl(filePath);
+  return { error: null, url: data.publicUrl };
+}
+
+// TESTIMONIALS CRUD
+export async function fetchTestimonials(): Promise<{
+  data: TestimonialType[] | null;
+  error: string | null;
+}> {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("testimonials")
+      .select("*")
+      .order("id");
+    if (error) {
+      return { data: null, error: error.message };
+    }
+    // Backward compatibility: if location_id is null, try to match location_name to places
+    return { data: data as TestimonialType[], error: null };
+  } catch (err) {
+    return { data: null, error: (err as Error).message };
+  }
+}
+
+export async function createTestimonial(data: Partial<TestimonialType>): Promise<{ error: string | null }> {
+  try {
+    const supabase = await createClient();
+    // If location_id is set, fetch place name for location_name
+    let location_name = data.location_name;
+    if (data.location_id) {
+      const { data: places } = await supabase.from("places").select("name, address").eq("id", data.location_id).single();
+      location_name = places?.address || places?.name || "";
+    }
+    const { error } = await supabase.from("testimonials").insert([{ ...data, location_name }]);
+    if (error) {
+      return { error: error.message };
+    }
+    return { error: null };
+  } catch (err) {
+    return { error: (err as Error).message };
+  }
+}
+
+export async function updateTestimonial(id: number, data: Partial<TestimonialType>): Promise<{ error: string | null }> {
+  try {
+    const supabase = await createClient();
+    // If location_id is set, fetch place name for location_name
+    let location_name = data.location_name;
+    if (data.location_id) {
+      const { data: places } = await supabase.from("places").select("name, address").eq("id", data.location_id).single();
+      location_name = places?.address || places?.name || "";
+    }
+    const { error } = await supabase
+      .from("testimonials")
+      .update({ ...data, location_name })
+      .eq("id", id);
+    if (error) {
+      return { error: error.message };
+    }
+    return { error: null };
+  } catch (err) {
+    return { error: (err as Error).message };
+  }
+}
+
+export async function deleteTestimonial(id: number): Promise<{ error: string | null }> {
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase.from("testimonials").delete().eq("id", id);
+    if (error) {
+      return { error: error.message };
+    }
+    return { error: null };
+  } catch (err) {
+    return { error: (err as Error).message };
   }
 }

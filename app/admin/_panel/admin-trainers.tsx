@@ -88,7 +88,12 @@ export default function AdminTrainersPanel() {
   }
 
   async function handleDelete(id: number) {
-    if (!confirm("Are you sure you want to delete this trainer?")) return;
+    if (
+      !confirm(
+        "Usunięcie trenera spowoduje również usunięcie wszystkich powiązanych zajęć w grafiku (schedule). Czy na pewno chcesz kontynuować?"
+      )
+    )
+      return;
     const { error } = await deleteTrainer(id);
     if (error) setError(error);
     else {

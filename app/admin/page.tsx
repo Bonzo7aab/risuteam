@@ -20,6 +20,7 @@ import { createClient } from "@/utils/supabase/server";
 import AdminActivitiesPanel from "./_panel/admin-activities";
 import AdminCampsPanel from "./_panel/admin-camps";
 import AdminFaqPanel from "./_panel/admin-faq";
+import AdminTestimonialsPanel from "./_panel/admin-testimonials";
 import AdminGalleryPanel from "./_panel/admin-gallery";
 import AdminLocalizationsPanel from "./_panel/admin-localizations";
 import AdminSchedulePanel from "./_panel/admin-schedule";
@@ -52,6 +53,7 @@ export default async function ProtectedPage({
     { label: "Grafik", href: "grafik", icon: <Calendar /> },
     { label: "Zajęcia", href: "rodzaje_zajec", icon: <BookOpen /> },
     { label: "FAQ", href: "faq", icon: <HelpCircle /> },
+    { label: "Karuzela", href: "testimonials", icon: <Book /> },
     { label: "Galeria", href: "galeria", icon: <LucideImage /> },
     { label: "Obozy", href: "obozy", icon: <Tent /> },
     { label: "Hotele", href: "hotele", icon: <Hotel /> },
@@ -67,6 +69,7 @@ export default async function ProtectedPage({
   else if (section === "obozy") panel = <AdminCampsPanel />;
   else if (section === "rodzaje_zajec") panel = <AdminActivitiesPanel />;
   else if (section === "faq") panel = <AdminFaqPanel />;
+  else if (section === "testimonials") panel = <AdminTestimonialsPanel />;
   else if (section === "hotele") panel = <AdminHotelsPanel />;
   else if (section === "galeria") panel = <AdminGalleryPanel />;
 

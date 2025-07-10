@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Button, Input, Label } from "./index";
+import { Button, Input } from "./index";
 import { Dialog, DialogContent, DialogTitle } from "./dialog";
 import {
   SortableList,
@@ -51,6 +51,7 @@ export function DialogProgram({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="pt-12">
+        <DialogTitle className="text-white">Program</DialogTitle>
         <div className="mb-2 flex gap-2">
           <Input
             value={newProgramText}
@@ -68,7 +69,6 @@ export function DialogProgram({
             Dodaj
           </Button>
         </div>
-        <Label className="text-gray-500">Program</Label>
         <SortableList
           items={localItems}
           setItems={(newItems) => {
