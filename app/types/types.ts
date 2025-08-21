@@ -36,11 +36,14 @@ interface ScheduleType {
     trainer_id: number | null;
     day: string;
     place_id: number | null;
-    free_slots?: boolean;
     title?: string;
     start?: string;
     end?: string;
-  }
+    max_capacity?: number;
+    current_registrations?: number;
+    is_active?: boolean;
+    registration_deadline?: string;
+}
 
 export type CampType = "polkolonie" | "letnie" | "zimowe" | "nocowanka";
 export type TabType = CampType | "all";
@@ -178,4 +181,45 @@ interface TestimonialType {
   created_at: string;
 }
 
-export type { ActivityType, AmenityType, CampContent, CampImage, CampIncluded, CampLocation, CampPayment, CampTab, ContactFormType, FaqType, GalleryImageType, Hotel, HotelAmenity, PlaceType, ScheduleType, TrainerType, TestimonialType };
+interface ClassRegistrationType {
+  id: number;
+  user_id: string;
+  schedule_id: number;
+  registration_date: string;
+  status: "confirmed" | "cancelled" | "waitlist";
+  subscription_type: "single" | "monthly" | "quarterly" | "yearly";
+  subscription_start_date?: string;
+  subscription_end_date?: string;
+  auto_renew?: boolean;
+  is_active?: boolean;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+interface ClassSubscriptionType {
+  id: number;
+  user_id: string;
+  schedule_id: number;
+  subscription_type: "monthly" | "quarterly" | "yearly";
+  start_date: string;
+  end_date: string;
+  auto_renew: boolean;
+  status: "active" | "paused" | "cancelled" | "expired";
+  price?: number;
+  currency: string;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+interface SubscriptionSessionType {
+  id: number;
+  subscription_id: number;
+  class_registration_id?: number;
+  session_date: string;
+  attendance_status: "scheduled" | "attended" | "missed" | "cancelled";
+  created_at: string;
+}
+
+export type { ActivityType, AmenityType, CampContent, CampImage, CampIncluded, CampLocation, CampPayment, CampTab, ClassRegistrationType, ClassSubscriptionType, ContactFormType, FaqType, GalleryImageType, Hotel, HotelAmenity, PlaceType, ScheduleType, SubscriptionSessionType, TrainerType, TestimonialType };

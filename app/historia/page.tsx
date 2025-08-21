@@ -35,7 +35,7 @@ const Onas = () => {
                     Historia klubu Risu Team
                   </h1>
                 </div>
-                <p className="text-lg font-normal leading-relaxed lg:text-start text-center">
+                <div className="text-lg font-normal leading-relaxed lg:text-start text-center">
                   <TextAnimate animation="blurInUp" by="character" once>
                     Klub sportowy został założony przez Kacpa Lewandowskiego w
                     2025 roku, bo podziale poprzedniego kluby założonego w 2014
@@ -43,7 +43,7 @@ const Onas = () => {
                     Gimnastyka, Samoobrona i inne. Działamy w wielu szkołąch na
                     teranie Mysiadłą i Ursynowa.
                   </TextAnimate>
-                </p>
+                </div>
               </div>
             </div>
           </div>

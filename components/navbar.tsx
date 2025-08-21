@@ -10,7 +10,6 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import Link from "next/link";
-import { useState } from "react";
 import Logo from "@/components/ui/logo";
 import { TextAnimate } from "@/components/ui/text-animate";
 import { cn } from "@/utils";
@@ -25,22 +24,37 @@ import {
   Image as LucideImage,
   Mail,
   MapPin,
-  Menu,
-  Pencil,
+
   Snowflake,
   Sun,
   SunMoon,
   SunSnow,
   Users,
+  LogIn,
   X,
+  Menu,
+  User,
+  ChevronDown,
+  CreditCard,
+  Settings,
 } from "lucide-react";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "./ui/accordion";
+import { createClient } from "@/utils/supabase/client";
+import { Button } from "./ui/button";
+import { signOutAction } from "@/app/actions";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
 
 const mobileCamps: { title: string; href: string }[] = [
   {
@@ -275,12 +289,9 @@ export const Navbar = () => {
                   </NavigationMenuLink>
                 </Link>
               </NavigationMenuItem>
+
               <NavigationMenuItem>
-                <Link href="/zapisy" legacyBehavior passHref>
-                  <NavigationMenuLink className="px-6 py-3 font-medium text-black transition-colors bg-risu-400 rounded-md hover:bg-risu-600">
-                    Zapisy
-                  </NavigationMenuLink>
-                </Link>
+                <AuthButton />
               </NavigationMenuItem>
             </NavigationMenuList>
           </NavigationMenu>
@@ -414,16 +425,11 @@ const MobileMenu = () => {
                 {item.title}
               </Link>
             ))}
-            <Link
-              href="/zapisy"
-              onClick={() => setIsOpen(false)}
-              className="py-3 text-center text-base bg-risu-300 w-fit px-8 hover:bg-risu-400 rounded-sm font-medium tracking-widest text-gray-700 transition-colors flex items-center justify-center gap-2 uppercase"
-              style={{ letterSpacing: "0.1em" }}
-            >
-              <span className="flex items-center justify-center mr-2">
-                <Pencil className="w-5 h-5 mr-2" /> Zapisy
-              </span>
-            </Link>
+
+            {/* Mobile Auth Buttons */}
+            <div className="flex flex-col items-center w-full gap-2 mt-4">
+              <MobileAuthButtons />
+            </div>
           </div>
         </div>
       </div>
@@ -460,3 +466,252 @@ const ListItem = ({ className, title, children, ...props }: ListItemProps) => {
     </li>
   );
 };
+
+// Authentication Button Component
+function AuthButton() {
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const supabase = createClient();
+    
+    const getUser = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        setUser(user);
+      } catch (error) {
+        console.error('Error fetching user:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getUser();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  if (loading) {
+    return <div className="text-white text-sm">Ładowanie...</div>;
+  }
+
+  if (user) {
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 hover:text-white p-2">
+            <User className="w-5 h-5" />
+            <ChevronDown className="w-4 h-4 ml-1" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-56">
+          <div className="px-2 py-1.5 text-sm text-slate-600 border-b border-slate-200">
+            Witaj, {user.email}
+          </div>
+          <DropdownMenuSeparator />
+          {user.app_metadata?.role === "admin" ? (
+            <DropdownMenuItem asChild>
+              <Link href="/admin" className="flex items-center gap-2 cursor-pointer">
+                <User className="w-4 h-4" />
+                Panel Admina
+              </Link>
+            </DropdownMenuItem>
+          ) : (
+            <>
+              <DropdownMenuItem asChild>
+                <Link href="/dashboard" className="flex items-center gap-2 cursor-pointer">
+                  <User className="w-4 h-4" />
+                  Panel
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/dashboard/subscriptions" className="flex items-center gap-2 cursor-pointer">
+                  <CreditCard className="w-4 h-4" />
+                  Subskrypcje
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/dashboard/settings" className="flex items-center gap-2 cursor-pointer">
+                  <Settings className="w-4 h-4" />
+                  Ustawienia
+                </Link>
+              </DropdownMenuItem>
+            </>
+          )}
+          <DropdownMenuSeparator />
+          <DropdownMenuItem asChild>
+            <form action={signOutAction} className="w-full">
+              <Button 
+                type="submit" 
+                variant="ghost" 
+                size="sm" 
+                className="w-full justify-start h-auto p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+              >
+                <LogIn className="w-4 h-4 mr-2" />
+                Wyloguj
+              </Button>
+            </form>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  }
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 hover:text-white p-2">
+          <User className="w-5 h-5" />
+          <ChevronDown className="w-4 h-4 ml-1" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-48">
+        <DropdownMenuItem asChild>
+          <Link href="/sign-in" className="flex items-center gap-2 cursor-pointer">
+            <LogIn className="w-4 h-4" />
+            Zaloguj
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link href="/sign-up" className="flex items-center gap-2 cursor-pointer">
+            <User className="w-4 h-4" />
+            Rejestracja
+          </Link>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+// Mobile Authentication Buttons Component
+function MobileAuthButtons() {
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const supabase = createClient();
+    
+    const getUser = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        setUser(user);
+      } catch (error) {
+        console.error('Error fetching user:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getUser();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  if (loading) {
+    return <div className="text-gray-700 text-sm">Ładowanie...</div>;
+  }
+
+  if (user) {
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline" size="sm" className="w-full py-3 text-base border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors font-medium tracking-widest uppercase flex items-center justify-center gap-2">
+            <User className="w-5 h-5" />
+            <span>Konto</span>
+            <ChevronDown className="w-4 h-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="center" className="w-56">
+          <div className="px-2 py-1.5 text-sm text-slate-600 border-b border-slate-200">
+            <p className="font-medium">{user.email}</p>
+            <p className="text-xs text-slate-500">
+              {user.app_metadata?.role === "admin" ? "Administrator" : "Użytkownik"}
+            </p>
+          </div>
+          <DropdownMenuSeparator />
+          {user.app_metadata?.role === "admin" ? (
+            <DropdownMenuItem asChild>
+              <Link href="/admin" className="flex items-center gap-2 cursor-pointer py-3">
+                <User className="w-4 h-4" />
+                Panel Admina
+              </Link>
+            </DropdownMenuItem>
+          ) : (
+            <>
+              <DropdownMenuItem asChild>
+                <Link href="/dashboard" className="flex items-center gap-2 cursor-pointer py-3">
+                  <User className="w-4 h-4" />
+                  Panel
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/dashboard/subscriptions" className="flex items-center gap-2 cursor-pointer py-3">
+                  <CreditCard className="w-4 h-4" />
+                  Subskrypcje
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/dashboard/settings" className="flex items-center gap-2 cursor-pointer py-3">
+                  <Settings className="w-4 h-4" />
+                  Ustawienia
+                </Link>
+              </DropdownMenuItem>
+            </>
+          )}
+          <DropdownMenuSeparator />
+          <DropdownMenuItem asChild>
+            <form action={signOutAction} className="w-full">
+              <Button 
+                type="submit" 
+                variant="ghost" 
+                size="sm" 
+                className="w-full justify-start h-auto p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+              >
+                <LogIn className="w-4 h-4 mr-2" />
+                Wyloguj
+              </Button>
+            </form>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  }
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" size="sm" className="w-full py-3 text-base border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors font-medium tracking-widest uppercase flex items-center justify-center gap-2">
+          <User className="w-5 h-4" />
+          <span>Konto</span>
+          <ChevronDown className="w-4 h-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="center" className="w-48">
+        <DropdownMenuItem asChild>
+          <Link href="/sign-in" className="flex items-center gap-2 cursor-pointer py-3">
+            <LogIn className="w-4 h-4" />
+            Zaloguj
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link href="/sign-up" className="flex items-center gap-2 cursor-pointer py-3">
+            <User className="w-4 h-4" />
+            Rejestracja
+          </Link>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}

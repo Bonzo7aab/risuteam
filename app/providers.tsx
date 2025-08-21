@@ -1,6 +1,7 @@
 "use client";
 
 import { ThemeProvider } from "next-themes";
+import { UserAuthProvider } from "./context/user-auth-context";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -10,7 +11,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
       enableSystem={false}
       disableTransitionOnChange
     >
-      {children}
+      <UserAuthProvider>
+        {children}
+      </UserAuthProvider>
     </ThemeProvider>
   );
 }

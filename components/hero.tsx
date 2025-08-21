@@ -92,7 +92,7 @@ const Hero: React.FC<HeroProps> = ({ testimonials }) => {
             </TextAnimate>
           </div>
           <div
-            onClick={() => router.push("/zapisy")}
+            onClick={() => router.push("/dashboard")}
             className="text-6xl md:mx-0 mx-auto w-fit px-4 py-2 text-black rounded-sm bg-risu-500 flex items-center cursor-pointer hover:bg-gray-300 hover:text-risu-500 transition-all duration-300"
           >
             <span>DOŁĄCZ</span>

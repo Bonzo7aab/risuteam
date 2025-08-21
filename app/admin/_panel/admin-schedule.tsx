@@ -196,6 +196,18 @@ export default function AdminSchedulePanel() {
           />
         </div>
         <div>
+          <Label htmlFor="max_capacity">Maksymalna liczba uczestników</Label>
+          <Input
+            name="max_capacity"
+            type="number"
+            value={form.max_capacity || ""}
+            onChange={handleChange}
+            placeholder="20"
+            min="1"
+            max="100"
+          />
+        </div>
+        <div>
           <Label htmlFor="place">Miejsce</Label>
           <Select
             value={form.place_id ? String(form.place_id) : ""}
@@ -259,6 +271,20 @@ export default function AdminSchedulePanel() {
                 (p) => Number(p.id) === Number(row.place_id)
               );
               return place ? place.name : "—";
+            },
+          },
+          {
+            key: "capacity",
+            header: "Zapisy",
+            render: (row) => {
+              const current = row.current_registrations || 0;
+              const max = row.max_capacity || 20;
+              const isFull = current >= max;
+              return (
+                <span className={isFull ? "text-red-600 font-semibold" : "text-gray-700"}>
+                  {current}/{max}
+                </span>
+              );
             },
           },
           {

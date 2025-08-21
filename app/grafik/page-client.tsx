@@ -1,8 +1,10 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
+import { User } from "@supabase/supabase-js";
 
 import { fetchPlaces } from "@/app/actions";
+import { getUserSubscriptions, registerForClass, getUserRegistrations, cancelRegistration } from "@/app/actions";
 import {
   Accordion,
   AccordionContent,
@@ -16,10 +18,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { POLISH_DAY_ORDER } from "@/utils/constants";
 import { createClient } from "@/utils/supabase/client";
 
 import { PlaceType, ScheduleType, TrainerType } from "../types/types";
+import { useRouter } from "next/navigation";
+import AuthDialog from "@/components/auth-dialog";
 
 const Filters = ({
   filters,
@@ -165,6 +170,18 @@ const Filters = ({
 const Schedule = ({
   filters,
   onFilterOptions,
+  user,
+  onEnrollClick,
+  isClassFull,
+  onAuthRequired,
+  shouldShowEnrollmentButton,
+  userHasActiveSubscription,
+  getEnrollmentButtonConfig,
+  isUserRegisteredForClass,
+  onRemoveAttendance,
+  removingAttendanceId,
+  scheduleData,
+  refreshScheduleData,
 }: {
   filters: any;
   onFilterOptions: (opts: {
@@ -173,6 +190,18 @@ const Schedule = ({
     instructors: string[];
     places: string[];
   }) => void;
+  user: User | null;
+  onEnrollClick: (activity: ScheduleType & { trainer: string; place: string }) => void;
+  isClassFull: (activity: ScheduleType & { trainer: string; place: string }) => boolean;
+  onAuthRequired: (activity: ScheduleType & { trainer: string; place: string }) => void;
+  shouldShowEnrollmentButton: (activity: ScheduleType & { trainer: string; place: string }) => boolean;
+  userHasActiveSubscription: boolean;
+  getEnrollmentButtonConfig: (activity: ScheduleType & { trainer: string; place: string }) => { text: string; action: string };
+  isUserRegisteredForClass: (activity: ScheduleType & { trainer: string; place: string }) => boolean;
+  onRemoveAttendance: (activity: ScheduleType & { trainer: string; place: string }) => Promise<void>;
+  removingAttendanceId: number | null;
+  scheduleData: ScheduleType[];
+  refreshScheduleData: () => Promise<void>;
 }) => {
   const [schedule, setSchedule] = useState<ScheduleType[]>([]);
   const [trainers, setTrainers] = useState<TrainerType[]>([]);
@@ -220,8 +249,11 @@ const Schedule = ({
     fetchData();
   }, []);
 
+  // Use scheduleData from parent if available, otherwise use local schedule
+  const currentSchedule = scheduleData.length > 0 ? scheduleData : schedule;
+
   // Map trainer/place IDs to names
-  const scheduleWithNames = schedule.map((row) => ({
+  const scheduleWithNames = currentSchedule.map((row) => ({
     ...row,
     trainer:
       trainers.find((t) => t.id === Number(row.trainer_id))?.name ||
@@ -319,6 +351,19 @@ const Schedule = ({
 
   return (
     <div className="w-full p-4">
+      {/* Subscription Status Message */}
+      {user && userHasActiveSubscription && (
+        <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+          <div className="flex items-center gap-2 text-green-800">
+            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+            <span className="font-medium">Masz aktywny plan subskrypcji</span>
+          </div>
+          <p className="text-sm text-green-700 mt-1">
+            Możesz uczęszczać na dowolne dostępne zajęcia w ramach swojego limitu. Nie musisz kupować dodatkowych planów.
+          </p>
+        </div>
+      )}
+      
       <div className="gap-4 flex flex-col">
         {sortedFilteredEntries.map(([day, activities]) => (
           <Accordion type="single" collapsible className="w-full" key={day}>
@@ -352,7 +397,7 @@ const Schedule = ({
                 .map((activity, index) => (
                   <AccordionContent key={index}>
                     <div
-                      className={`flex flex-col gap-2 py-4 pl-4 border-x-2 border-risu-400 hover:bg-muted ${index % 2 === 1 ? "bg-risu-300/10" : ""}`}
+                      className={`flex flex-col gap-2 py-4 pl-4 border-x-2 border-risu-400 ${index % 2 === 1 ? "bg-risu-300/10" : ""}`}
                     >
                       <div className="flex justify-between items-center">
                         <span className="text-base font-semibold">
@@ -368,9 +413,85 @@ const Schedule = ({
                       </span>
                       <span className="text-sm flex justify-between items-center">
                         <span>Lokalizacja: {activity.place}</span>
-                        <span className="border-risu-400 border-l-2 px-4 py-2">
-                          Wolne miejsca: {activity.free_slots ? "Tak" : "Nie"}
-                        </span>
+                        <div className="flex items-center gap-4">
+                          {/* Enrollment Button */}
+                          <div className="flex justify-start">
+                            <TooltipProvider>
+                              {user ? (
+                                shouldShowEnrollmentButton(activity) ? (
+                                  (() => {
+                                    const config = getEnrollmentButtonConfig(activity);
+                                    if (config.action === "remove") {
+                                      const isRemoving = removingAttendanceId === activity.id;
+                                      return (
+                                        <Button 
+                                          onClick={() => onRemoveAttendance(activity)}
+                                          variant="ghost"
+                                          disabled={isRemoving}
+                                          className="text-green-600 hover:text-red-600 hover:bg-transparent p-0 h-auto font-medium group"
+                                        >
+                                          {isRemoving ? (
+                                            <>
+                                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600 mr-2"></div>
+                                              <span className="text-red-600">Usuwanie...</span>
+                                            </>
+                                          ) : (
+                                            <>
+                                              <span className="group-hover:hidden">{config.text}</span>
+                                              <span className="hidden group-hover:inline text-red-600">Usuń udział</span>
+                                            </>
+                                          )}
+                                        </Button>
+                                      );
+                                    } else if (config.action === "register") {
+                                      return (
+                                        <Button 
+                                          onClick={() => onEnrollClick(activity)}
+                                          variant="ghost"
+                                          className="text-risu-400 hover:text-risu-700 hover:bg-transparent p-0 h-auto font-medium"
+                                        >
+                                          {config.text}
+                                        </Button>
+                                      );
+                                    } else {
+                                      return (
+                                        <Button 
+                                          onClick={() => onEnrollClick(activity)}
+                                          variant="ghost"
+                                          className="text-risu-400 hover:text-risu-700 hover:bg-transparent p-0 h-auto font-medium"
+                                        >
+                                          {config.text}
+                                        </Button>
+                                      );
+                                    }
+                                  })()
+                                ) : isClassFull(activity) ? (
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button disabled variant="outline" className="cursor-not-allowed">
+                                        Brak miejsc
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>Na te zajęcia nie ma już wolnych miejsc</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                ) : null
+                              ) : (
+                                <Button 
+                                  onClick={() => onAuthRequired(activity)}
+                                  variant="ghost"
+                                  className="text-risu-400 hover:text-risu-700 hover:bg-transparent p-0 h-auto font-medium"
+                                >
+                                  Zapisz się
+                                </Button>
+                              )}
+                            </TooltipProvider>
+                          </div>
+                          <span className="border-risu-400 border-l-2 px-4 py-2">
+                            Miejsca: {activity.current_registrations || 0}/{activity.max_capacity || 20}
+                          </span>
+                        </div>
                       </span>
                     </div>
                   </AccordionContent>
@@ -383,7 +504,12 @@ const Schedule = ({
   );
 };
 
-const ScheduleClient = () => {
+interface ScheduleClientProps {
+  user: User | null;
+}
+
+const ScheduleClient = ({ user }: ScheduleClientProps) => {
+  const router = useRouter();
   const [filters, setFilters] = useState({
     selectedDay: null,
     selectedActivity: null,
@@ -402,6 +528,231 @@ const ScheduleClient = () => {
     places: [],
   });
 
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
+  const [pendingEnrollment, setPendingEnrollment] = useState<(ScheduleType & { trainer: string; place: string }) | null>(null);
+  const [userHasActiveSubscription, setUserHasActiveSubscription] = useState(false);
+  const [userRegistrations, setUserRegistrations] = useState<Set<number>>(new Set());
+  const [removingAttendanceId, setRemovingAttendanceId] = useState<number | null>(null);
+  const [scheduleData, setScheduleData] = useState<ScheduleType[]>([]);
+
+  // Check if user has active subscription
+  const checkUserSubscription = useCallback(async () => {
+    if (!user) {
+      setUserHasActiveSubscription(false);
+      return;
+    }
+
+    try {
+      const { data, error } = await getUserSubscriptions(user.id);
+      if (!error && data && data.length > 0) {
+        // Check if any subscription is active
+        const hasActive = data.some(sub => sub.status === "active");
+        setUserHasActiveSubscription(hasActive);
+      } else {
+        setUserHasActiveSubscription(false);
+      }
+    } catch (err) {
+      console.error("Error checking user subscription:", err);
+      setUserHasActiveSubscription(false);
+    }
+  }, [user]);
+
+  // Check user's class registrations
+  const checkUserRegistrations = useCallback(async () => {
+    if (!user) {
+      setUserRegistrations(new Set());
+      return;
+    }
+
+    try {
+      const { data, error } = await getUserRegistrations(user.id);
+      if (!error && data) {
+        // Create a set of schedule IDs where user is registered
+        const registrationIds = new Set(
+          data
+            .filter(reg => reg.status === "confirmed")
+            .map(reg => reg.schedule_id)
+        );
+        setUserRegistrations(registrationIds);
+      } else {
+        setUserRegistrations(new Set());
+      }
+    } catch (err) {
+      console.error("Error checking user registrations:", err);
+      setUserRegistrations(new Set());
+    }
+  }, [user]);
+
+  useEffect(() => {
+    checkUserSubscription();
+    checkUserRegistrations();
+  }, [checkUserSubscription, checkUserRegistrations]);
+
+  const handleEnrollClick = useCallback((classItem: ScheduleType & { trainer: string; place: string }) => {
+    // Ensure user is authenticated before proceeding
+    if (!user) {
+      console.warn("User not authenticated, cannot enroll");
+      return;
+    }
+    
+    // If user has active subscription, show class registration modal
+    if (userHasActiveSubscription) {
+      // For now, directly register the user without showing modal
+      handleClassRegistration(classItem);
+      return;
+    }
+    
+    // If user doesn't have subscription, redirect to dashboard subscriptions
+    router.push('/dashboard/subscriptions');
+  }, [user, userHasActiveSubscription, router]);
+
+  const handleAuthRequired = (activity: ScheduleType & { trainer: string; place: string }) => {
+    // If user already has active subscription, don't show auth dialog
+    if (userHasActiveSubscription) {
+      return;
+    }
+    
+    setPendingEnrollment(activity);
+    setShowAuthDialog(true);
+  };
+
+
+
+  const isClassFull = (classItem: ScheduleType & { trainer: string; place: string }) => {
+    const current = classItem.current_registrations || 0;
+    const max = classItem.max_capacity || 20;
+    return current >= max;
+  };
+
+  // Handle removing attendance from a class
+  const handleRemoveAttendance = async (classItem: ScheduleType & { trainer: string; place: string }) => {
+    if (!user) return;
+
+    try {
+      setRemovingAttendanceId(classItem.id);
+      
+      // Find the registration ID for this class
+      const { data, error } = await getUserRegistrations(user.id);
+      if (error || !data) {
+        throw new Error("Nie można pobrać informacji o zapisach");
+      }
+
+      const registration = data.find(reg => 
+        reg.schedule_id === classItem.id && reg.status === "confirmed"
+      );
+
+      if (!registration) {
+        throw new Error("Nie jesteś zapisany na te zajęcia");
+      }
+
+      // Cancel the registration
+      const cancelResult = await cancelRegistration(registration.id);
+      if (cancelResult.error) {
+        throw new Error(cancelResult.error);
+      }
+
+      // Refresh both user registrations and schedule data
+      await Promise.all([
+        checkUserRegistrations(),
+        refreshScheduleData()
+      ]);
+      
+    } catch (err) {
+      console.error("Error removing attendance:", err);
+      alert(err instanceof Error ? err.message : "Wystąpił błąd podczas usuwania zapisu");
+    } finally {
+      setRemovingAttendanceId(null);
+    }
+  };
+
+  // Check if user is registered for a specific class
+  const isUserRegisteredForClass = (classItem: ScheduleType & { trainer: string; place: string }) => {
+    return userRegistrations.has(classItem.id);
+  };
+
+  // Check if user should see enrollment button
+  const shouldShowEnrollmentButton = (classItem: ScheduleType & { trainer: string; place: string }) => {
+    // If class is full, don't show button
+    if (isClassFull(classItem)) {
+      return false;
+    }
+    
+    // If user is not logged in, show button (will trigger auth dialog)
+    if (!user) {
+      return true;
+    }
+    
+    // If user has active subscription, show button for class registration
+    if (userHasActiveSubscription) {
+      return true;
+    }
+    
+    // Show button for logged in users without subscription
+    return true;
+  };
+
+  // Get the appropriate button text and action based on user status
+  const getEnrollmentButtonConfig = (classItem: ScheduleType & { trainer: string; place: string }) => {
+    if (!user) {
+      return { text: "Zapisz się", action: "auth" };
+    }
+    
+    if (userHasActiveSubscription) {
+      if (isUserRegisteredForClass(classItem)) {
+        return { text: "Zapisany ✓", action: "remove" };
+      }
+      return { text: "Potwierdź udział", action: "register" };
+    }
+    
+    return { text: "Zapisz się", action: "subscribe" };
+  };
+
+  const handleClassRegistration = async (classItem: ScheduleType & { trainer: string; place: string }, notes?: string) => {
+    try {
+      const { error } = await registerForClass(user!.id, classItem.id, notes);
+      if (error) {
+        throw new Error(error);
+      }
+      
+      // Refresh both user registrations and schedule data
+      await Promise.all([
+        checkUserRegistrations(),
+        refreshScheduleData()
+      ]);
+      
+    } catch (err) {
+      console.error("Error registering for class:", err);
+      alert(err instanceof Error ? err.message : "Wystąpił błąd podczas zapisywania");
+    }
+  };
+
+  // Function to refresh schedule data after registration changes
+  const refreshScheduleData = useCallback(async () => {
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from("schedule")
+        .select("*")
+        .order("day");
+      
+      if (error) {
+        console.error("Error refreshing schedule:", error);
+        return;
+      }
+      
+      setScheduleData(data || []);
+    } catch (err) {
+      console.error("Error refreshing schedule data:", err);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (user && pendingEnrollment) {
+      handleEnrollClick(pendingEnrollment);
+      setPendingEnrollment(null);
+    }
+  }, [user, pendingEnrollment, handleEnrollClick]);
+
   return (
     <>
       <Filters
@@ -412,7 +763,39 @@ const ScheduleClient = () => {
         instructors={filterOptions.instructors}
         places={filterOptions.places}
       />
-      <Schedule filters={filters} onFilterOptions={setFilterOptions} />
+      <Schedule 
+        filters={filters} 
+        onFilterOptions={setFilterOptions}
+        user={user}
+        onEnrollClick={handleEnrollClick}
+        isClassFull={isClassFull}
+        onAuthRequired={handleAuthRequired}
+        shouldShowEnrollmentButton={shouldShowEnrollmentButton}
+        userHasActiveSubscription={userHasActiveSubscription}
+        getEnrollmentButtonConfig={getEnrollmentButtonConfig}
+        isUserRegisteredForClass={isUserRegisteredForClass}
+        onRemoveAttendance={handleRemoveAttendance}
+        removingAttendanceId={removingAttendanceId}
+        scheduleData={scheduleData}
+        refreshScheduleData={refreshScheduleData}
+      />
+      
+
+
+      {/* Auth Dialog */}
+      {showAuthDialog && (
+        <AuthDialog
+          isOpen={showAuthDialog}
+          onClose={() => {
+            setShowAuthDialog(false);
+            setPendingEnrollment(null); // Clear pending enrollment when dialog closes
+          }}
+          onSuccess={() => {
+            setShowAuthDialog(false);
+            // The useEffect will handle enrollment when user state updates
+          }}
+        />
+      )}
     </>
   );
 };

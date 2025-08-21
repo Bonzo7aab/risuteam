@@ -20,5 +20,6 @@ export async function GET(request: Request) {
   }
 
   // URL to redirect to after sign up process completes
-  return NextResponse.redirect(`${origin}/protected`);
+  // Redirect to dashboard instead of non-existent /protected route
+  return NextResponse.redirect(`${origin}/dashboard`);
 }

@@ -8,6 +8,7 @@ import {
   MapPin,
   Tent,
   Users,
+  CreditCard,
 } from "lucide-react";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
@@ -26,6 +27,7 @@ import AdminLocalizationsPanel from "./_panel/admin-localizations";
 import AdminSchedulePanel from "./_panel/admin-schedule";
 import AdminTrainersPanel from "./_panel/admin-trainers";
 import AdminHotelsPanel from "./_panel/admin-hotels";
+import AdminSubscriptionsPanel from "./_panel/admin-subscriptions";
 
 export const metadata: Metadata = {
   title: "Risu Team | Admin",
@@ -57,6 +59,7 @@ export default async function ProtectedPage({
     { label: "Galeria", href: "galeria", icon: <LucideImage /> },
     { label: "Obozy", href: "obozy", icon: <Tent /> },
     { label: "Hotele", href: "hotele", icon: <Hotel /> },
+    { label: "Subskrypcje", href: "subscriptions", icon: <CreditCard /> },
   ];
 
   // Use searchParams to get the section (App Router best practice)
@@ -72,6 +75,7 @@ export default async function ProtectedPage({
   else if (section === "testimonials") panel = <AdminTestimonialsPanel />;
   else if (section === "hotele") panel = <AdminHotelsPanel />;
   else if (section === "galeria") panel = <AdminGalleryPanel />;
+  else if (section === "subscriptions") panel = <AdminSubscriptionsPanel />;
 
   return (
     <div className="flex md:flex-row flex-col min-h-screen">

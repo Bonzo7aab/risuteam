@@ -28,4 +28,5 @@ export * from "./dropdown-menu";
 export * from "./input";
 export * from "./label";
 export { MultiSelect } from "./multi-select";
+export * from "./alert-dialog";
 // export { MultiSelect } from "./multi-select"; // Uncomment after adding the new component
