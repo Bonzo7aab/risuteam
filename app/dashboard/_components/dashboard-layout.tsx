@@ -35,7 +35,7 @@ export function DashboardLayout({ user, children }: DashboardLayoutProps) {
       name: "Subskrypcje",
       href: "/dashboard/subscriptions",
       icon: CreditCard,
-      description: "Zarządzaj swoimi planami subskrypcji"
+      description: "Zarządzaj swoimi subskrypcjami miejscowymi"
     },
     {
       name: "Moje zapisy",
@@ -160,7 +160,7 @@ export function DashboardLayout({ user, children }: DashboardLayoutProps) {
                         : 'text-gray-300 hover:text-white'
                       }
                       cursor-pointer
-                      focus:outline-none focus:ring-2 focus:ring-risu-500 focus:ring-offset-2
+                      
                     `}
                     role="tab"
                     aria-selected={isActive}

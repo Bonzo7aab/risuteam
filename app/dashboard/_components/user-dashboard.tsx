@@ -1,7 +1,7 @@
 "use client";
 
 import { User } from "@supabase/supabase-js";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -25,7 +25,7 @@ import {
   XCircle,
   Pause
 } from "lucide-react";
-import { getUserDashboardStats } from "@/app/actions";
+import { getUserDashboardStats, getPlaceBasedSubscriptionStats } from "@/app/actions";
 
 interface UserDashboardProps {
   user: User;
@@ -53,39 +53,52 @@ interface DashboardStats {
 }
 
 export function UserDashboard({ user }: UserDashboardProps) {
-  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchStats = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Get both registration stats and place-based subscription stats
+      const [regStats, subStats] = await Promise.all([
+        getUserDashboardStats(user.id),
+        getPlaceBasedSubscriptionStats(user.id)
+      ]);
+
+      if (regStats.error) {
+        setError(regStats.error);
+        return;
+      }
+
+      if (subStats.error) {
+        console.warn("Could not fetch subscription stats:", subStats.error);
+      }
+
+      // Combine the stats
+      setStats({
+        ...regStats.data,
+        subscriptions: subStats.data || {
+          total: 0,
+          active: 0,
+          paused: 0,
+          expired: 0,
+          nextRenewal: null,
+          totalClassesRemaining: 0
+        }
+      });
+    } catch (err) {
+      setError("Wystąpił błąd podczas pobierania danych");
+    } finally {
+      setLoading(false);
+    }
+  }, [user.id]);
 
   useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const { data, error } = await getUserDashboardStats(user.id);
-        if (!error && data) {
-          setStats(data);
-        } else if (error) {
-          console.error("Error fetching dashboard stats:", error);
-          // Set default stats on error
-          setStats({
-            subscriptions: { total: 0, active: 0, paused: 0, expired: 0 },
-            registrations: { total: 0, upcoming: 0, completed: 0, recent: [] },
-            activity: { lastLogin: user.last_sign_in_at || null, lastRegistration: null, lastClass: null }
-          });
-        }
-      } catch (err) {
-        console.error("Error fetching dashboard stats:", err);
-        // Set default stats on error
-        setStats({
-          subscriptions: { total: 0, active: 0, paused: 0, expired: 0 },
-          registrations: { total: 0, upcoming: 0, completed: 0, recent: [] },
-          activity: { lastLogin: user.last_sign_in_at || null, lastRegistration: null, lastClass: null }
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchStats();
-  }, [user.id, user.last_sign_in_at]);
+  }, [user.id, user.last_sign_in_at, fetchStats]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('pl-PL', {
@@ -202,12 +215,12 @@ export function UserDashboard({ user }: UserDashboardProps) {
           </CardContent>
         </Card>
 
-        {/* Subscription Overview */}
+        {/* Place-Based Subscription Overview */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <CreditCard className="w-5 h-5" />
-              Przegląd subskrypcji
+              Przegląd Subskrypcji Miejscowych
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -225,8 +238,8 @@ export function UserDashboard({ user }: UserDashboardProps) {
                 <div className="text-sm text-muted-foreground">Wygasłe</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">{stats?.subscriptions.total || 0}</div>
-                <div className="text-sm text-muted-foreground">Łącznie</div>
+                <div className="text-2xl font-bold text-blue-600">{stats?.subscriptions.totalClassesRemaining || 0}</div>
+                <div className="text-sm text-muted-foreground">Zajęcia do wykorzystania</div>
               </div>
             </div>
             
@@ -246,7 +259,7 @@ export function UserDashboard({ user }: UserDashboardProps) {
                 <div className="flex items-center gap-2 text-yellow-800">
                   <AlertCircle className="w-4 h-4" />
                   <span className="text-sm font-medium">
-                    Nie masz jeszcze żadnych subskrypcji. Zapisz się na zajęcia, aby rozpocząć!
+                    Nie masz jeszcze żadnych subskrypcji miejscowych. Zapisz się na zajęcia w wybranej lokalizacji!
                   </span>
                 </div>
               </div>
@@ -289,7 +302,7 @@ export function UserDashboard({ user }: UserDashboardProps) {
             {stats?.registrations.recent && stats.registrations.recent.length > 0 ? (
               <div className="space-y-3 mb-4">
                 <h4 className="font-medium text-sm text-muted-foreground">Ostatnie zapisy:</h4>
-                {stats.registrations.recent.slice(0, 3).map((reg) => { 
+                {stats.registrations.recent.slice(0, 3).map((reg: any) => { 
                   return ( 
                   <div key={reg.id} className="relative p-3 border border-blue-600 rounded-lg">
                     {/* Status Badge - Square and attached to corner */}

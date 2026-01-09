@@ -765,7 +765,7 @@ export async function registerForClass(userId: string, scheduleId: number, notes
     // Check if class is available
     const { data: schedule, error: scheduleError } = await supabase
       .from("schedule")
-      .select("current_registrations, max_capacity, is_active")
+      .select("current_registrations, max_capacity, is_active, activity, place_id")
       .eq("id", scheduleId)
       .single();
 
@@ -792,6 +792,33 @@ export async function registerForClass(userId: string, scheduleId: number, notes
 
     if (existingRegistration) {
       return { error: "Jesteś już zapisany na te zajęcia." };
+    }
+
+    // Check if user has an active subscription for this place and class type
+    const { data: activeSubscription } = await supabase
+      .from("place_based_subscriptions")
+      .select("id, status, end_date, max_classes_per_period, classes_used")
+      .eq("user_id", userId)
+      .eq("place_id", schedule.place_id)
+      .eq("class_type", schedule.activity)
+      .eq("status", "active")
+      .single();
+
+    if (!activeSubscription) {
+      return { error: "Aby zapisać się na te zajęcia, potrzebujesz aktywnej subskrypcji dla tego miejsca i typu zajęć. Przejdź do ustawień subskrypcji, aby utworzyć nową subskrypcję." };
+    }
+
+    // Check if subscription has expired (additional safety check)
+    const today = new Date();
+    const endDate = new Date(activeSubscription.end_date);
+    if (endDate < today) {
+      return { error: "Twoja subskrypcja wygasła. Aby zapisać się na nowe zajęcia, przedłuż subskrypcję w ustawieniach." };
+    }
+
+    // Check if user has remaining classes (if subscription has a limit)
+    if (activeSubscription.max_classes_per_period && 
+        activeSubscription.classes_used >= activeSubscription.max_classes_per_period) {
+      return { error: "Wykorzystałeś już wszystkie zajęcia w ramach swojej subskrypcji. Przedłuż subskrypcję, aby zapisać się na więcej zajęć." };
     }
 
     // Create registration
@@ -821,6 +848,22 @@ export async function registerForClass(userId: string, scheduleId: number, notes
       // Don't return error as registration was successful
     }
 
+    // Increment classes used in subscription (if subscription has a limit)
+    if (activeSubscription.max_classes_per_period) {
+      const { error: incrementError } = await supabase
+        .from("place_based_subscriptions")
+        .update({ 
+          classes_used: activeSubscription.classes_used + 1,
+          updated_at: new Date().toISOString()
+        })
+        .eq("id", activeSubscription.id);
+
+      if (incrementError) {
+        console.error("Error incrementing classes used:", incrementError);
+        // Don't return error as registration was successful
+      }
+    }
+
     return { error: null };
   } catch (err) {
     return { error: (err as Error).message };
@@ -831,10 +874,15 @@ export async function cancelRegistration(registrationId: number): Promise<{ erro
   try {
     const supabase = await createClient();
     
-    // Get registration details
+    // Get registration details with schedule and user info
     const { data: registration, error: regError } = await supabase
       .from("class_registrations")
-      .select("schedule_id, status")
+      .select(`
+        schedule_id, 
+        status, 
+        user_id,
+        schedule!schedule_id(activity, place_id)
+      `)
       .eq("id", registrationId)
       .single();
 
@@ -871,6 +919,34 @@ export async function cancelRegistration(registrationId: number): Promise<{ erro
     if (updateError) {
       console.error("Error updating schedule count:", updateError);
       // Don't return error as cancellation was successful
+    }
+
+    // Decrement classes_used in subscription (if user has an active subscription)
+    if (registration.schedule && Array.isArray(registration.schedule) && registration.schedule.length > 0) {
+      const scheduleData = registration.schedule[0];
+      const { data: activeSubscription } = await supabase
+        .from("place_based_subscriptions")
+        .select("id, classes_used, max_classes_per_period")
+        .eq("user_id", registration.user_id)
+        .eq("place_id", scheduleData.place_id)
+        .eq("class_type", scheduleData.activity)
+        .eq("status", "active")
+        .single();
+
+      if (activeSubscription && activeSubscription.max_classes_per_period && activeSubscription.classes_used > 0) {
+        const { error: decrementError } = await supabase
+          .from("place_based_subscriptions")
+          .update({ 
+            classes_used: Math.max(0, activeSubscription.classes_used - 1),
+            updated_at: new Date().toISOString()
+          })
+          .eq("id", activeSubscription.id);
+
+        if (decrementError) {
+          console.error("Error decrementing classes used:", decrementError);
+          // Don't return error as cancellation was successful
+        }
+      }
     }
 
     return { error: null };
@@ -1464,5 +1540,882 @@ export async function getUserDashboardStats(userId: string): Promise<{
     };
   } catch (err) {
     return { data: null, error: (err as Error).message };
+  }
+}
+
+// PLACE-BASED SUBSCRIPTION MANAGEMENT
+export async function createPlaceBasedSubscription(
+  userId: string,
+  placeId: number,
+  classType: string,
+  subscriptionType: "monthly" | "quarterly" | "yearly",
+  autoRenew: boolean = false,
+  maxClassesPerPeriod?: number,
+  notes?: string
+): Promise<{ error: string | null; subscriptionId?: number }> {
+  try {
+    const supabase = await createClient();
+    
+    // Check if user already has an active subscription for this place and class type
+    const { data: existingSubscription } = await supabase
+      .from("place_based_subscriptions")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("place_id", placeId)
+      .eq("class_type", classType)
+      .eq("status", "active")
+      .single();
+
+    if (existingSubscription) {
+      return { error: "Masz już aktywną subskrypcję dla tego miejsca i typu zajęć." };
+    }
+
+    // Calculate start and end dates based on subscription type
+    const startDate = new Date();
+    let endDate = new Date(startDate);
+    
+    switch (subscriptionType) {
+      case 'monthly':
+        endDate.setMonth(endDate.getMonth() + 1);
+        break;
+      case 'quarterly':
+        endDate.setMonth(endDate.getMonth() + 3);
+        break;
+      case 'yearly':
+        endDate.setFullYear(endDate.getFullYear() + 1);
+        break;
+    }
+    endDate.setDate(endDate.getDate() - 1); // End on the day before
+
+    // Set default max classes per period if not provided
+    const defaultMaxClasses = maxClassesPerPeriod || (subscriptionType === 'monthly' ? 8 : subscriptionType === 'quarterly' ? 24 : 96);
+
+    // Create subscription with the selected type
+    const { data: subscription, error: subscriptionError } = await supabase
+      .from("place_based_subscriptions")
+      .insert({
+        user_id: userId,
+        place_id: placeId,
+        class_type: classType,
+        subscription_type: subscriptionType, // Use the selected type
+        start_date: startDate.toISOString().split('T')[0],
+        end_date: endDate.toISOString().split('T')[0],
+        auto_renew: autoRenew,
+        status: 'active',
+        currency: 'PLN',
+        max_classes_per_period: defaultMaxClasses,
+        classes_used: 0,
+        notes: notes?.trim() || null,
+      })
+      .select()
+      .single();
+
+    if (subscriptionError) {
+      return { error: subscriptionError.message };
+    }
+
+    return { error: null, subscriptionId: subscription.id };
+  } catch (err) {
+    return { error: (err as Error).message };
+  }
+}
+
+export async function getUserPlaceBasedSubscriptions(userId: string): Promise<{
+  data: any[] | null;
+  error: string | null;
+}> {
+  try {
+    const supabase = await createClient();
+    
+    // Use a more explicit approach - fetch subscriptions first, then places separately
+    const { data: subscriptions, error: subError } = await supabase
+      .from("place_based_subscriptions")
+      .select("*")
+      .eq("user_id", userId)
+      .in("status", ["active", "paused", "expired", "cancelled"])
+      .order("created_at", { ascending: false });
+
+    if (subError) {
+      return { data: null, error: subError.message };
+    }
+
+    if (!subscriptions || subscriptions.length === 0) {
+      return { data: [], error: null };
+    }
+
+    // Get unique place IDs from subscriptions
+    const placeIds = [...new Set(subscriptions.map(sub => sub.place_id))];
+
+    // Fetch places data separately
+    const { data: places, error: placesError } = await supabase
+      .from("places")
+      .select("id, name, address")
+      .in("id", placeIds);
+
+    if (placesError) {
+      // Continue without place data rather than failing completely
+    }
+
+    // Create a map of place data for quick lookup
+    const placesMap = new Map();
+    if (places) {
+      places.forEach(place => {
+        placesMap.set(place.id, place);
+      });
+    }
+
+    // Combine subscription data with place data
+    const enrichedSubscriptions = subscriptions.map(subscription => {
+      const place = placesMap.get(subscription.place_id);
+      return {
+        ...subscription,
+        place: place || null
+      };
+    });
+
+    return { data: enrichedSubscriptions, error: null };
+
+  } catch (err) {
+    return { data: null, error: (err as Error).message };
+  }
+}
+
+export async function pausePlaceBasedSubscription(subscriptionId: number): Promise<{ error: string | null }> {
+  try {
+    const supabase = await createClient();
+    
+    const { error } = await supabase
+      .from("place_based_subscriptions")
+      .update({ 
+        status: "paused",
+        updated_at: new Date().toISOString()
+      })
+      .eq("id", subscriptionId);
+
+    if (error) {
+      return { error: error.message };
+    }
+
+    return { error: null };
+  } catch (err) {
+    return { error: (err as Error).message };
+  }
+}
+
+export async function resumePlaceBasedSubscription(subscriptionId: number): Promise<{ error: string | null }> {
+  try {
+    const supabase = await createClient();
+    
+    const { error } = await supabase
+      .from("place_based_subscriptions")
+      .update({ 
+        status: "active",
+        updated_at: new Date().toISOString()
+      })
+      .eq("id", subscriptionId);
+
+    if (error) {
+      return { error: error.message };
+    }
+
+    return { error: null };
+  } catch (err) {
+    return { error: (err as Error).message };
+  }
+}
+
+export async function cancelPlaceBasedSubscription(subscriptionId: number): Promise<{ error: string | null }> {
+  try {
+    const supabase = await createClient();
+    
+    const { error } = await supabase
+      .from("place_based_subscriptions")
+      .update({ 
+        status: "cancelled",
+        updated_at: new Date().toISOString()
+      })
+      .eq("id", subscriptionId);
+
+    if (error) {
+      return { error: error.message };
+    }
+
+    return { error: null };
+  } catch (err) {
+    return { error: (err as Error).message };
+  }
+}
+
+export async function deletePlaceBasedSubscription(subscriptionId: number): Promise<{ error: string | null }> {
+  try {
+    const supabase = await createClient();
+    
+    // First check if subscription exists and is cancelled
+    const { data: subscription, error: checkError } = await supabase
+      .from("place_based_subscriptions")
+      .select("status")
+      .eq("id", subscriptionId)
+      .single();
+
+    if (checkError) {
+      return { error: "Nie można znaleźć subskrypcji." };
+    }
+
+    if (subscription.status !== "cancelled") {
+      return { error: "Można usunąć tylko anulowane subskrypcje." };
+    }
+
+    // Delete the subscription
+    const { error } = await supabase
+      .from("place_based_subscriptions")
+      .delete()
+      .eq("id", subscriptionId);
+
+    if (error) {
+      return { error: error.message };
+    }
+
+    return { error: null };
+  } catch (err) {
+    return { error: (err as Error).message };
+  }
+}
+
+// Function to handle auto-renewal of expired subscriptions
+export async function processAutoRenewals(): Promise<{ error: string | null; renewedCount: number }> {
+  try {
+    const supabase = await createClient();
+    
+    // Get all expired subscriptions with auto-renewal enabled
+    const { data: expiredSubscriptions, error: fetchError } = await supabase
+      .from("place_based_subscriptions")
+      .select("*")
+      .eq("status", "active")
+      .eq("auto_renew", true)
+      .lt("end_date", new Date().toISOString().split('T')[0]);
+
+    if (fetchError) {
+      return { error: fetchError.message, renewedCount: 0 };
+    }
+
+    if (!expiredSubscriptions || expiredSubscriptions.length === 0) {
+      return { error: null, renewedCount: 0 };
+    }
+
+    let renewedCount = 0;
+
+    // Process each expired subscription
+    for (const subscription of expiredSubscriptions) {
+      try {
+        // Calculate new end date based on subscription type
+        const startDate = new Date();
+        let endDate = new Date(startDate);
+        
+        switch (subscription.subscription_type) {
+          case 'monthly':
+            endDate.setMonth(endDate.getMonth() + 1);
+            break;
+          case 'quarterly':
+            endDate.setMonth(endDate.getMonth() + 3);
+            break;
+          case 'yearly':
+            endDate.setFullYear(endDate.getFullYear() + 1);
+            break;
+        }
+        endDate.setDate(endDate.getDate() - 1); // End on the day before
+
+        // Create new subscription period
+        const { error: updateError } = await supabase
+          .from("place_based_subscriptions")
+          .update({
+            start_date: startDate.toISOString().split('T')[0],
+            end_date: endDate.toISOString().split('T')[0],
+            classes_used: 0, // Reset classes used for new period
+            updated_at: new Date().toISOString()
+          })
+          .eq("id", subscription.id);
+
+        if (!updateError) {
+          renewedCount++;
+        }
+      } catch (err) {
+        console.error(`Error renewing subscription ${subscription.id}:`, err);
+      }
+    }
+
+    return { error: null, renewedCount };
+  } catch (err) {
+    return { error: (err as Error).message, renewedCount: 0 };
+  }
+}
+
+// Function to toggle auto-renewal for a subscription
+export async function toggleAutoRenewal(subscriptionId: number, autoRenew: boolean): Promise<boolean> {
+  try {
+    const supabase = await createClient();
+    
+    const { error } = await supabase
+      .from("place_based_subscriptions")
+      .update({ 
+        auto_renew: autoRenew,
+        updated_at: new Date().toISOString()
+      })
+      .eq("id", subscriptionId);
+
+    if (error) {
+      console.error('Error updating auto-renewal:', error);
+      return false;
+    }
+
+    return true;
+  } catch (err) {
+    console.error('Exception in toggleAutoRenewal:', err);
+    return false;
+  }
+}
+
+// Function to update subscription status (including expiration)
+export async function updatePlaceBasedSubscriptionStatus(
+  subscriptionId: number, 
+  status: "active" | "paused" | "cancelled" | "expired"
+): Promise<{ error: string | null }> {
+  try {
+    const supabase = await createClient();
+    
+    const { error } = await supabase
+      .from("place_based_subscriptions")
+      .update({ 
+        status: status,
+        updated_at: new Date().toISOString()
+      })
+      .eq("id", subscriptionId);
+
+    if (error) {
+      return { error: error.message };
+    }
+
+    return { error: null };
+  } catch (err) {
+    return { error: (err as Error).message };
+  }
+}
+
+// Function to get all subscriptions including expired ones (for testing and admin purposes)
+export async function getAllUserPlaceBasedSubscriptions(userId: string): Promise<{
+  data: any[] | null;
+  error: string | null;
+}> {
+  try {
+    const supabase = await createClient();
+    
+    const { data: subscriptions, error: subError } = await supabase
+      .from("place_based_subscriptions")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
+
+    if (subError) {
+      return { data: null, error: subError.message };
+    }
+
+    if (!subscriptions || subscriptions.length === 0) {
+      return { data: [], error: null };
+    }
+
+    // Get unique place IDs from subscriptions
+    const placeIds = [...new Set(subscriptions.map(sub => sub.place_id))];
+
+    // Fetch places data separately
+    const { data: places, error: placesError } = await supabase
+      .from("places")
+      .select("id, name, address")
+      .in("id", placeIds);
+
+    if (placesError) {
+      // Continue without place data rather than failing completely
+    }
+
+    // Create a map of place data for quick lookup
+    const placesMap = new Map();
+    if (places) {
+      places.forEach(place => {
+        placesMap.set(place.id, place);
+      });
+    }
+
+    // Combine subscription data with place data
+    const enrichedSubscriptions = subscriptions.map(subscription => {
+      const place = placesMap.get(subscription.place_id);
+      return {
+        ...subscription,
+        place: place || null
+      };
+    });
+
+    return { data: enrichedSubscriptions, error: null };
+
+  } catch (err) {
+    return { data: null, error: (err as Error).message };
+  }
+}
+
+// Function to automatically expire subscriptions that have passed their end date
+export async function expirePlaceBasedSubscriptions(): Promise<{ 
+  error: string | null; 
+  expiredCount: number;
+  expiredIds: number[];
+}> {
+  try {
+    const supabase = await createClient();
+    
+    // Get all active subscriptions that have passed their end date
+    const { data: expiredSubscriptions, error: fetchError } = await supabase
+      .from("place_based_subscriptions")
+      .select("id")
+      .eq("status", "active")
+      .lt("end_date", new Date().toISOString().split('T')[0]);
+
+    if (fetchError) {
+      return { error: fetchError.message, expiredCount: 0, expiredIds: [] };
+    }
+
+    if (!expiredSubscriptions || expiredSubscriptions.length === 0) {
+      return { error: null, expiredCount: 0, expiredIds: [] };
+    }
+
+    const expiredIds = expiredSubscriptions.map(sub => sub.id);
+
+    // Update all expired subscriptions in a single query
+    const { error: updateError } = await supabase
+      .from("place_based_subscriptions")
+      .update({ 
+        status: "expired",
+        updated_at: new Date().toISOString()
+      })
+      .in("id", expiredIds);
+
+    if (updateError) {
+      return { error: updateError.message, expiredCount: 0, expiredIds: [] };
+    }
+
+    return { 
+      error: null, 
+      expiredCount: expiredSubscriptions.length, 
+      expiredIds: expiredIds 
+    };
+  } catch (err) {
+    return { error: (err as Error).message, expiredCount: 0, expiredIds: [] };
+  }
+}
+
+export async function getAvailableClassTypes(): Promise<{
+  data: string[] | null;
+  error: string | null;
+}> {
+  try {
+    const supabase = await createClient();
+    
+    // Get unique class types from schedule table
+    const { data, error } = await supabase
+      .from("schedule")
+      .select("activity")
+      .eq("is_active", true);
+
+    if (error) {
+      return { data: null, error: error.message };
+    }
+
+    // Extract unique class types
+    const uniqueTypes = [...new Set(data.map(item => item.activity))];
+    
+    return { data: uniqueTypes, error: null };
+  } catch (err) {
+    return { data: null, error: (err as Error).message };
+  }
+}
+
+export async function getPlaceBasedSubscriptionStats(userId: string): Promise<{
+  data: {
+    total: number;
+    active: number;
+    paused: number;
+    expired: number;
+    nextRenewal?: string;
+    totalClassesRemaining: number;
+  } | null;
+  error: string | null;
+}> {
+  try {
+    const supabase = await createClient();
+    
+    const { data: subscriptions, error } = await supabase
+      .from("place_based_subscriptions")
+      .select("status, end_date, auto_renew, max_classes_per_period, classes_used, start_date")
+      .eq("user_id", userId);
+
+    if (error) {
+      return { data: null, error: error.message };
+    }
+
+    // Helper function to calculate effective end date
+    const getEffectiveEndDate = (startDate: string, endDate: string) => {
+      // For now, just return the original end date
+      // Month extension logic has been removed
+      return endDate;
+    };
+
+    const stats = {
+      total: subscriptions?.length || 0,
+      active: subscriptions?.filter(s => s.status === "active").length || 0,
+      paused: subscriptions?.filter(s => s.status === "paused").length || 0,
+      expired: subscriptions?.filter(s => s.status === "expired").length || 0,
+      nextRenewal: subscriptions
+        ?.filter(s => s.status === "active" && s.auto_renew)
+        .map(s => getEffectiveEndDate(s.start_date, s.end_date))
+        .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())[0],
+      totalClassesRemaining: subscriptions
+        ?.filter(s => s.status === "active")
+        .reduce((total, s) => total + (s.max_classes_per_period || 0) - (s.classes_used || 0), 0) || 0
+    };
+
+    return { data: stats, error: null };
+  } catch (err) {
+    return { data: null, error: (err as Error).message };
+  }
+}
+
+// Function to get expired auto-renewal subscriptions
+export async function getExpiredAutoRenewSubscriptions(): Promise<{
+  data: any[] | null;
+  error: string | null;
+}> {
+  try {
+    const supabase = await createClient();
+    
+    const { data, error } = await supabase
+      .from("place_based_subscriptions")
+      .select("*")
+      .eq("status", "active")
+      .eq("auto_renew", true)
+      .lt("end_date", new Date().toISOString().split('T')[0]);
+
+    if (error) {
+      return { data: null, error: error.message };
+    }
+
+    return { data, error: null };
+  } catch (err) {
+    return { data: null, error: (err as Error).message };
+  }
+}
+
+// Function to manually trigger auto-renewal processing (for testing/admin use)
+export async function triggerAutoRenewalProcessing(): Promise<{
+  error: string | null;
+  renewedCount: number;
+  message: string;
+}> {
+  try {
+    const result = await processAutoRenewals();
+    
+    if (result.error) {
+      return { error: result.error, renewedCount: 0, message: "Auto-renewal processing failed" };
+    }
+
+    if (result.renewedCount === 0) {
+      return { error: null, renewedCount: 0, message: "No subscriptions needed renewal" };
+    }
+
+    return { 
+      error: null, 
+      renewedCount: result.renewedCount, 
+      message: `Successfully renewed ${result.renewedCount} subscription(s)` 
+    };
+  } catch (err) {
+    return { error: (err as Error).message, renewedCount: 0, message: "Auto-renewal processing failed" };
+  }
+}
+
+// Function to get subscription details with registration information and available slots
+export async function getSubscriptionWithRegistrations(userId: string): Promise<{
+  data: {
+    subscriptions: any[];
+    weeklySlots: {
+      [key: string]: {
+        used: number;
+        remaining: number;
+        maxPerWeek: number;
+        registrations: any[];
+      };
+    };
+  } | null;
+  error: string | null;
+}> {
+  try {
+    if (!userId) {
+      return { data: null, error: "User ID is required" };
+    }
+
+    const supabase = await createClient();
+    if (!supabase) {
+      return { data: null, error: "Failed to create Supabase client" };
+    }
+    
+    // Get user's place-based subscriptions (active and expired to show classes)
+    const { data: subscriptions, error: subError } = await supabase
+      .from("place_based_subscriptions")
+      .select(`
+        *,
+        places!place_id(id, name, address)
+      `)
+      .eq("user_id", userId)
+      .in("status", ["active", "expired"]);
+
+    if (subError) {
+      console.warn("Error fetching subscriptions:", subError);
+      return { data: null, error: subError.message };
+    }
+
+    // Get user's confirmed registrations for this week
+    const now = new Date();
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - now.getDay()); // Start of current week (Sunday)
+    startOfWeek.setHours(0, 0, 0, 0);
+    
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6); // End of current week (Saturday)
+    endOfWeek.setHours(23, 59, 59, 999);
+
+
+
+    // First try to get registrations for this week
+    let { data: registrations, error: regError } = await supabase
+      .from("class_registrations")
+      .select(`
+        *,
+        schedule!schedule_id(
+          *,
+          places!place_id(id, name),
+          trainers!trainer_id(id, name)
+        )
+      `)
+      .eq("user_id", userId)
+      .eq("status", "confirmed")
+      .order("created_at", { ascending: false });
+
+    // If no registrations found for this week, get all recent registrations as fallback
+    if (!registrations || registrations.length === 0) {
+      const { data: allRegistrations, error: allRegError } = await supabase
+        .from("class_registrations")
+        .select(`
+          *,
+          schedule!schedule_id(
+            *,
+            places!place_id(id, name),
+            trainers!trainer_id(id, name)
+          )
+        `)
+        .eq("user_id", userId)
+        .eq("status", "confirmed")
+        .order("created_at", { ascending: false })
+        .limit(10);
+
+      if (allRegError) {
+        console.warn("Could not fetch all registrations:", allRegError);
+      } else {
+        registrations = allRegistrations;
+        console.log("Debug - Found registrations (fallback):", registrations);
+      }
+    }
+
+    if (regError) {
+      console.warn("Could not fetch registrations:", regError);
+    }
+
+    // Calculate weekly slots for each subscription
+    const weeklySlots: { [key: string]: any } = {};
+    
+    if (subscriptions && Array.isArray(subscriptions)) {
+      subscriptions.forEach(subscription => {
+        if (subscription && typeof subscription === 'object') {
+          const placeId = subscription.place_id;
+          const placeName = subscription.places?.name || `Place ${placeId}`;
+          
+          // Get registrations for this place
+          const placeRegistrations = registrations?.filter(reg => {
+            const regPlaceId = reg?.schedule?.places?.id;
+            return reg && regPlaceId === placeId;
+          }) || [];
+          
+          // Calculate used and remaining slots
+          const maxPerWeek = 2; // Each subscription gives 2 classes per week
+          const used = placeRegistrations.length;
+          const remaining = Math.max(0, maxPerWeek - used);
+          
+          weeklySlots[placeName] = {
+            used,
+            remaining,
+            maxPerWeek,
+            registrations: placeRegistrations,
+            placeId
+          };
+        }
+      });
+    }
+
+    return {
+      data: {
+        subscriptions: subscriptions || [],
+        weeklySlots
+      },
+      error: null
+    };
+  } catch (err) {
+    console.error("Error in getSubscriptionWithRegistrations:", err);
+    return { data: null, error: (err as Error).message };
+  }
+}
+
+// Function to extend a subscription for the same period
+export async function extendSubscription(
+  subscriptionId: number,
+  extendBySamePeriod: boolean = true,
+  newSubscriptionType?: "monthly" | "quarterly" | "yearly"
+): Promise<{ error: string | null; newEndDate?: string; originalEndDate?: string }> {
+  try {
+    const supabase = await createClient();
+    
+    // Get current subscription details
+    const { data: subscription, error: fetchError } = await supabase
+      .from("place_based_subscriptions")
+      .select("*")
+      .eq("id", subscriptionId)
+      .single();
+
+    if (fetchError) {
+      return { error: "Nie można znaleźć subskrypcji." };
+    }
+
+    if (!subscription) {
+      return { error: "Subskrypcja nie istnieje." };
+    }
+
+    if (subscription.status !== "active" && subscription.status !== "expired") {
+      return { error: "Można przedłużyć tylko aktywne lub wygasłe subskrypcje." };
+    }
+
+    // Store original end date before extending
+    const originalEndDate = subscription.end_date;
+
+    // Calculate new end date
+    const currentEndDate = new Date(subscription.end_date);
+    const newEndDate = new Date(currentEndDate);
+    
+    // Determine which subscription type to use for extension
+    const subscriptionTypeToUse = newSubscriptionType || subscription.subscription_type;
+    
+    if (extendBySamePeriod) {
+      // Extend by the specified period type
+      switch (subscriptionTypeToUse) {
+        case 'monthly':
+          newEndDate.setMonth(newEndDate.getMonth() + 1);
+          break;
+        case 'quarterly':
+          newEndDate.setMonth(newEndDate.getMonth() + 3);
+          break;
+        case 'yearly':
+          newEndDate.setFullYear(newEndDate.getFullYear() + 1);
+          break;
+      }
+    } else {
+      // Extend by 1 month as default
+      newEndDate.setMonth(newEndDate.getMonth() + 1);
+    }
+
+    // Update the subscription with new end date, store original, and reactivate if expired
+    const updateData: any = {
+      end_date: newEndDate.toISOString().split('T')[0],
+      original_end_date: originalEndDate, // Store the original end date
+      updated_at: new Date().toISOString()
+    };
+
+    // If subscription was expired, reactivate it
+    if (subscription.status === "expired") {
+      updateData.status = "active";
+    }
+
+    // If a new subscription type is provided, update it
+    if (newSubscriptionType && newSubscriptionType !== subscription.subscription_type) {
+      updateData.subscription_type = newSubscriptionType;
+    }
+
+    const { error: updateError } = await supabase
+      .from("place_based_subscriptions")
+      .update(updateData)
+      .eq("id", subscriptionId);
+
+    if (updateError) {
+      return { error: updateError.message };
+    }
+
+    return { 
+      error: null, 
+      newEndDate: newEndDate.toISOString().split('T')[0],
+      originalEndDate: originalEndDate
+    };
+  } catch (err) {
+    return { error: (err as Error).message };
+  }
+}
+
+// Function to remove extension and revert to original end date
+export async function removeExtension(subscriptionId: number): Promise<{ error: string | null; revertedEndDate?: string }> {
+  try {
+    const supabase = await createClient();
+    
+    // Get current subscription details
+    const { data: subscription, error: fetchError } = await supabase
+      .from("place_based_subscriptions")
+      .select("*")
+      .eq("id", subscriptionId)
+      .single();
+
+    if (fetchError) {
+      return { error: "Nie można znaleźć subskrypcji." };
+    }
+
+    if (!subscription) {
+      return { error: "Subskrypcja nie istnieje." };
+    }
+
+    if (subscription.status !== "active") {
+      return { error: "Można cofnąć przedłużenie tylko dla aktywnych subskrypcji." };
+    }
+
+    // Check if subscription was extended (has original_end_date)
+    if (!subscription.original_end_date) {
+      return { error: "Ta subskrypcja nie została przedłużona." };
+    }
+
+    // Revert to original end date
+    const { error: updateError } = await supabase
+      .from("place_based_subscriptions")
+      .update({
+        end_date: subscription.original_end_date,
+        original_end_date: null, // Clear the original end date
+        updated_at: new Date().toISOString()
+      })
+      .eq("id", subscriptionId);
+
+    if (updateError) {
+      return { error: updateError.message };
+    }
+
+    return { 
+      error: null, 
+      revertedEndDate: subscription.original_end_date
+    };
+  } catch (err) {
+    return { error: (err as Error).message };
   }
 }

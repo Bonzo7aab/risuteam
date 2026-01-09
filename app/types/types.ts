@@ -222,4 +222,50 @@ interface SubscriptionSessionType {
   created_at: string;
 }
 
-export type { ActivityType, AmenityType, CampContent, CampImage, CampIncluded, CampLocation, CampPayment, CampTab, ClassRegistrationType, ClassSubscriptionType, ContactFormType, FaqType, GalleryImageType, Hotel, HotelAmenity, PlaceType, ScheduleType, SubscriptionSessionType, TrainerType, TestimonialType };
+interface PlaceBasedSubscriptionType {
+  id: number;
+  user_id: string;
+  place_id: number;
+  class_type: string; // e.g., "pilates", "yoga", "fitness"
+  subscription_type: "monthly" | "quarterly" | "yearly";
+  start_date: string;
+  end_date: string;
+  auto_renew: boolean;
+  status: "active" | "paused" | "cancelled" | "expired";
+  price?: number;
+  currency: string;
+  max_classes_per_period?: number; // e.g., 8 classes per month
+  classes_used: number; // how many classes used in current period
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+  place?: {
+    id: number;
+    name: string;
+    address: string;
+  };
+}
+
+export type { 
+  ActivityType, 
+  AmenityType, 
+  CampContent, 
+  CampImage, 
+  CampIncluded,
+  CampLocation,
+  CampPayment,
+  ClassRegistrationType,
+  ClassSubscriptionType,
+  ContactFormType,
+  FaqType,
+  GalleryImageType,
+  Hotel,
+  HotelAmenity,
+  ImageFile,
+  PlaceBasedSubscriptionType,
+  PlaceType,
+  ScheduleType,
+  SubscriptionSessionType,
+  TestimonialType,
+  TrainerType
+};
