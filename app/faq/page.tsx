@@ -37,7 +37,7 @@ export default async function FAQ() {
               <AccordionTrigger className="text-lg text-left">
                 {question}
               </AccordionTrigger>
-              <AccordionContent className="m-2 text-slate-400 border-x-2 px-4 border-risu-400/20">
+              <AccordionContent className="mb-2 p-4 bg-risu-500/20">
                 {answer}
               </AccordionContent>
             </AccordionItem>

@@ -53,6 +53,7 @@ const Onas = () => {
       <div className="container px-5 py-24 mx-auto">
         <h1 className="w-full text-center text-4xl mb-16">Nasze statystyki</h1>
         <div className="flex flex-wrap -m-4 text-center">
+
           <div className="p-4 md:w-1/4 sm:w-1/2 w-full">
             <div className="border-2 border-risu-300 px-4 py-6 rounded-lg">
               <div className=" flex w-full justify-center">
@@ -64,6 +65,7 @@ const Onas = () => {
               <p className="leading-relaxed">Dzieci</p>
             </div>
           </div>
+          
           <div className="p-4 md:w-1/4 sm:w-1/2 w-full">
             <div className="border-2 border-risu-300 px-4 py-6 rounded-lg">
               <div className=" flex w-full justify-center">
@@ -110,7 +112,7 @@ const Onas = () => {
           </TextAnimate>
         </div>
         <div className="md:w-1/2 px-4 md:px-16 flex pt-8 md:pt-0">
-          <ul className="list-none flex-wrap flex capitalize text-risu-200">
+          <ul className="list-none flex-wrap flex capitalize text-risu-300">
             <li className="w-1/3">sport</li>
             <li className="w-1/3">zabawa</li>
             <li className="w-1/3">dyscyplina</li>

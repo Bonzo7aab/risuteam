@@ -15,7 +15,18 @@ export const AnimatedTestimonials = ({
 }) => {
   const [active, setActive] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const router = useRouter();
+
+  // Generate deterministic rotation values based on testimonial ID
+  // This ensures server and client render the same values
+  const getRotateY = (id: string | number, offset: number = 0) => {
+    // Use a simple hash-like function to generate consistent values
+    const seed = typeof id === 'string' 
+      ? id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
+      : id;
+    return ((seed + offset) % 21) - 10;
+  };
 
   const handleNext = () => {
     setActive((prev) => (prev + 1) % testimonials.length);
@@ -29,16 +40,17 @@ export const AnimatedTestimonials = ({
     return index === active;
   };
 
+  // Set mounted state after hydration to prevent mismatches
   useEffect(() => {
-    if (autoplay && !isHovered) {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (autoplay && !isHovered && mounted) {
       const interval = setInterval(handleNext, 5000);
       return () => clearInterval(interval);
     }
-  }, [autoplay, isHovered]);
-
-  const randomRotateY = () => {
-    return Math.floor(Math.random() * 21) - 10;
-  };
+  }, [autoplay, isHovered, mounted]);
 
   return (
     <div className="max-w-sm px-4 py-20 mx-auto font-sans antialiased md:max-w-4xl md:px-8 lg:px-12">
@@ -90,37 +102,43 @@ export const AnimatedTestimonials = ({
               </svg>
             </button>
             <AnimatePresence>
-              {testimonials.map((testimonial, index) => (
-                <motion.div
-                  key={testimonial.id}
-                  initial={{
-                    opacity: 0,
-                    scale: 0.9,
-                    z: -100,
-                    rotate: randomRotateY(),
-                  }}
-                  animate={{
-                    opacity: isActive(index) ? 1 : 0.7,
-                    scale: isActive(index) ? 1 : 0.95,
-                    z: isActive(index) ? 0 : -100,
-                    rotate: isActive(index) ? 0 : randomRotateY(),
-                    zIndex: isActive(index)
-                      ? 40
-                      : testimonials.length + 2 - index,
-                    y: isActive(index) ? [0, -80, 0] : 0,
-                  }}
-                  exit={{
-                    opacity: 0,
-                    scale: 0.9,
-                    z: 100,
-                    rotate: randomRotateY(),
-                  }}
-                  transition={{
-                    duration: 0.4,
-                    ease: "easeInOut",
-                  }}
-                  className="absolute inset-0 origin-bottom"
-                >
+              {testimonials.map((testimonial, index) => {
+                // Use deterministic rotation values based on testimonial ID
+                const initialRotate = getRotateY(testimonial.id, 0);
+                const inactiveRotate = getRotateY(testimonial.id, 1);
+                const exitRotate = getRotateY(testimonial.id, 2);
+                
+                return (
+                  <motion.div
+                    key={testimonial.id}
+                    initial={{
+                      opacity: 0,
+                      scale: 0.9,
+                      z: -100,
+                      rotate: initialRotate,
+                    }}
+                    animate={{
+                      opacity: isActive(index) ? 1 : 0.7,
+                      scale: isActive(index) ? 1 : 0.95,
+                      z: isActive(index) ? 0 : -100,
+                      rotate: isActive(index) ? 0 : inactiveRotate,
+                      zIndex: isActive(index)
+                        ? 40
+                        : testimonials.length + 2 - index,
+                      y: 0,
+                    }}
+                    exit={{
+                      opacity: 0,
+                      scale: 0.9,
+                      z: 100,
+                      rotate: exitRotate,
+                    }}
+                    transition={{
+                      duration: 0.4,
+                      ease: "easeInOut",
+                    }}
+                    className="absolute inset-0 origin-bottom"
+                  >
                   <Image
                     src={testimonial.src}
                     alt={testimonial.name}
@@ -155,7 +173,8 @@ export const AnimatedTestimonials = ({
                     </motion.div>
                   )}
                 </motion.div>
-              ))}
+                );
+              })}
             </AnimatePresence>
           </div>
         </div>

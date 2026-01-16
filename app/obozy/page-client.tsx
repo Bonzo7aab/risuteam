@@ -129,34 +129,34 @@ const CampContent = ({ camp, places }: { camp: Camp; places: PlaceType[] }) => {
           </Dialog>
         </div>
         <div className="flex flex-col gap-4 basis-full md:basis-1/3">
-          <div className="bg-risu-400 text-black p-4 flex flex-col gap-2">
+          <div className="bg-risu-500 backdrop-blur-sm p-4 flex flex-col gap-2">
             <span className="flex gap-2">
               <CalendarDays />
               <span className="text-base md:text-lg">Termin</span>
             </span>
-            <span className="text-slate-600 text-right">
+            <span className="text-slate-200 text-right">
               {camp.date_from && camp.date_to
                 ? formatDateRange(camp.date_from, camp.date_to)
                 : "Brak daty"}
             </span>
           </div>
-          <div className="bg-risu-400 text-black p-4 flex flex-col gap-2">
+          <div className="bg-risu-500 p-4 flex flex-col gap-2">
             <span className="flex gap-2">
               <Tag />
               <span className="text-base md:text-lg">Cena</span>
             </span>
-            <span className="text-slate-600 text-right">
+            <span className="text-slate-200 text-right">
               {camp.price !== undefined && camp.price !== null
                 ? `${camp.price} zł`
                 : "Brak ceny"}
             </span>
           </div>
-          <div className="bg-risu-400 text-black p-4 flex flex-col gap-2">
+          <div className="bg-risu-500 p-4 flex flex-col gap-2">
             <span className="flex gap-2">
               <MapPinned />
               <span className="text-base md:text-lg">Lokalizacja</span>
             </span>
-            <span className="text-slate-600 text-right">
+            <span className="text-slate-200 text-right">
               {placeName || "Brak lokalizacji"}
             </span>
           </div>
@@ -253,7 +253,7 @@ const CampContent = ({ camp, places }: { camp: Camp; places: PlaceType[] }) => {
                       {payment.amount} zł
                     </div>
                     {payment.due && (
-                      <div className="text-sm text-slate-500 mb-2">
+                      <div className="text-sm text-slate-300 mb-2">
                         Termin płatności: {payment.due}
                       </div>
                     )}
@@ -274,7 +274,7 @@ const CampContent = ({ camp, places }: { camp: Camp; places: PlaceType[] }) => {
               <div className="p-4 md:p-6 font-mono text-sm md:text-base">
                 <div className="mb-2 flex flex-col md:flex-row justify-center gap-2 md:gap-4">
                   <strong>Numer Konta:</strong>
-                  <span className="text-slate-400">
+                  <span className="text-slate-300">
                     28 1090 1694 0000 0001 3471 6556
                   </span>
                   <button
@@ -288,11 +288,11 @@ const CampContent = ({ camp, places }: { camp: Camp; places: PlaceType[] }) => {
                 </div>
                 <div className="mb-2">
                   <strong>Odbiorca: </strong>
-                  <span className="text-slate-400">Kacper Lewandowski</span>
+                  <span className="text-slate-300">Kacper Lewandowski</span>
                 </div>
                 <div className="mb-0">
                   <strong>Tytuł Przelewu:</strong>
-                  <span className="text-slate-400 block md:inline p-3 rounded mt-1">
+                  <span className="text-slate-300 block md:inline p-3 rounded mt-1">
                     [Rodzinny obóz letni 5-12 lipca 2025], imiona i nazwiska
                     uczestników, [nr wpłacanej raty]
                   </span>
@@ -390,9 +390,9 @@ const CampsClient = () => {
               type="button"
               className={`py-4 px-1 inline-flex items-center gap-x-2 border-b-2 ${
                 activeTab === tab
-                  ? "border-risu-600 text-risu-600"
-                  : "border-transparent text-gray-500"
-              } text-sm whitespace-nowrap hover:text-risu-600 focus:outline-hidden focus:text-risu-600 disabled:opacity-50 disabled:pointer-events-none`}
+                  ? "border-risu-400 text-risu-400"
+                  : "border-transparent text-gray-300"
+              } text-sm whitespace-nowrap hover:text-risu-400 focus:outline-hidden focus:text-risu-400 disabled:opacity-50 disabled:pointer-events-none`}
               id={`tabs-with-icons-item-${tab}`}
               aria-selected={activeTab === tab}
               onClick={() => handleTabClick(tab as TabType)}

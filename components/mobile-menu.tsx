@@ -141,7 +141,6 @@ export const MobileMenu = () => {
       >
         {isOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
-
       {/* Mobile Menu Overlay */}
       <div
         className={cn(
@@ -167,7 +166,7 @@ export const MobileMenu = () => {
         <div className="w-full max-w-xs mx-auto flex flex-col items-center pt-8 pb-4">
           {/* Avatar */}
           <div className="w-36 h-36 rounded-full overflow-hidden shadow-md bg-risu-400 shadow-gray-400 mb-4 flex justify-center items-center">
-            <Link href="/" className="h-24 w-24" passHref>
+            <Link href="/" className="h-24 w-24">
               <Logo fill="#fff" className="h-full w-auto drop-shadow-md" />
             </Link>
           </div>

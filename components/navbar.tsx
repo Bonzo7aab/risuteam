@@ -52,6 +52,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
@@ -165,7 +166,7 @@ export const Navbar = () => {
   return (
     <nav className="sticky top-0 z-50 flex justify-center w-full h-32 shadow-md bg-black md:bg-transparent md:backdrop-filter md:backdrop-blur-md">
       <div className="flex items-center justify-between w-full p-4 px-5 max-w-7xl">
-        <Link href="/" className="h-24 w-auto flex items-center" passHref>
+        <Link href="/" className="h-24 w-auto flex items-center">
           <Logo fill="#fff" className="h-full w-auto drop-shadow-md" />
         </Link>
 
@@ -193,7 +194,7 @@ export const Navbar = () => {
                   <ul className="grid gap-3 p-6 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr] bg-white rounded-md shadow-lg">
                     <li className="row-span-3">
                       <NavigationMenuLink asChild>
-                        <a
+                        <Link
                           className="group flex flex-col justify-end w-full h-full p-6 no-underline rounded-md outline-none select-none bg-gradient-to-b from-orange-100 to-orange-200 hover:from-orange-200 hover:to-risu-300 focus:shadow-md"
                           href="/obozy?tab=nocowanka"
                         >
@@ -206,7 +207,7 @@ export const Navbar = () => {
                           <p className="text-sm leading-tight text-orange-800 group-hover:text-gray-800">
                             Noclegi i zajęcia dla dzieci w wieku szkolnym.
                           </p>
-                        </a>
+                        </Link>
                       </NavigationMenuLink>
                     </li>
                     <ListItem href="/obozy?tab=letnie" title="Obozy letnie">
@@ -242,52 +243,56 @@ export const Navbar = () => {
                 </NavigationMenuContent>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <Link href="/grafik" legacyBehavior passHref>
-                  <NavigationMenuLink
+                <NavigationMenuLink asChild>
+                  <Link
+                    href="/grafik"
                     className={cn(
                       navigationMenuTriggerStyle(),
                       "text-white font-medium hover:bg-risu-400 hover:text-black"
                     )}
                   >
                     Grafik
-                  </NavigationMenuLink>
-                </Link>
+                  </Link>
+                </NavigationMenuLink>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <Link href="/lokalizacja" legacyBehavior passHref>
-                  <NavigationMenuLink
+                <NavigationMenuLink asChild>
+                  <Link
+                    href="/lokalizacja"
                     className={cn(
                       navigationMenuTriggerStyle(),
                       "text-white font-medium hover:bg-risu-400 hover:text-black"
                     )}
                   >
                     Gdzie trenujemy
-                  </NavigationMenuLink>
-                </Link>
+                  </Link>
+                </NavigationMenuLink>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <Link href="/galeria" legacyBehavior passHref>
-                  <NavigationMenuLink
+                <NavigationMenuLink asChild>
+                  <Link
+                    href="/galeria"
                     className={cn(
                       navigationMenuTriggerStyle(),
                       "text-white font-medium hover:bg-risu-400 hover:text-black"
                     )}
                   >
                     Galeria
-                  </NavigationMenuLink>
-                </Link>
+                  </Link>
+                </NavigationMenuLink>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <Link href="/kontakt" legacyBehavior passHref>
-                  <NavigationMenuLink
+                <NavigationMenuLink asChild>
+                  <Link
+                    href="/kontakt"
                     className={cn(
                       navigationMenuTriggerStyle(),
                       "text-white font-medium hover:bg-risu-400 hover:text-black"
                     )}
                   >
                     Kontakt
-                  </NavigationMenuLink>
-                </Link>
+                  </Link>
+                </NavigationMenuLink>
               </NavigationMenuItem>
 
               <NavigationMenuItem>
@@ -318,7 +323,6 @@ const MobileMenu = () => {
       >
         {isOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
-
       {/* Mobile Menu Overlay */}
       <div
         className={cn(
@@ -344,7 +348,7 @@ const MobileMenu = () => {
         <div className="w-full max-w-xs mx-auto flex flex-col items-center pt-8 pb-4">
           {/* Avatar */}
           <div className="w-36 h-36 rounded-full overflow-hidden shadow-md bg-risu-400 shadow-gray-400 mb-4 flex justify-center items-center">
-            <Link href="/" className="h-24 w-24" passHref>
+            <Link href="/" className="h-24 w-24">
               <Logo fill="#fff" className="h-full w-auto drop-shadow-md" />
             </Link>
           </div>
@@ -444,11 +448,12 @@ interface ListItemProps extends React.HTMLAttributes<HTMLAnchorElement> {
   children: React.ReactNode;
 }
 
-const ListItem = ({ className, title, children, ...props }: ListItemProps) => {
+const ListItem = ({ className, title, children, href, ...props }: ListItemProps) => {
   return (
     <li>
       <NavigationMenuLink asChild>
-        <a
+        <Link
+          href={href}
           className={cn(
             "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-risu-500 group",
             className
@@ -461,7 +466,7 @@ const ListItem = ({ className, title, children, ...props }: ListItemProps) => {
           <p className="text-sm leading-snug line-clamp-2 text-orange-700 group-hover:text-gray-700">
             {children}
           </p>
-        </a>
+        </Link>
       </NavigationMenuLink>
     </li>
   );
@@ -504,19 +509,28 @@ function AuthButton() {
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 hover:text-white p-2">
-            <User className="w-5 h-5" />
+          <Button variant="ghost" className={cn(
+            navigationMenuTriggerStyle(),
+            "text-white font-medium hover:bg-risu-400 hover:text-black"
+          )}>
+            <User className="w-5 h-5 mr-1" />
+            <span>Konto</span>
             <ChevronDown className="w-4 h-4 ml-1" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56">
-          <div className="px-2 py-1.5 text-sm text-slate-600 border-b border-slate-200">
-            Witaj, {user.email}
-          </div>
+          <DropdownMenuLabel>
+            <div className="flex flex-col space-y-1">
+              <p className="text-sm font-medium leading-none">{user.email}</p>
+              <p className="text-xs leading-none text-muted-foreground">
+                {user.app_metadata?.role === "admin" ? "Administrator" : "Użytkownik"}
+              </p>
+            </div>
+          </DropdownMenuLabel>
           <DropdownMenuSeparator />
           {user.app_metadata?.role === "admin" ? (
             <DropdownMenuItem asChild>
-              <Link href="/admin" className="flex items-center gap-2 cursor-pointer">
+              <Link href="/admin" className="flex items-center gap-2">
                 <User className="w-4 h-4" />
                 Panel Admina
               </Link>
@@ -524,19 +538,19 @@ function AuthButton() {
           ) : (
             <>
               <DropdownMenuItem asChild>
-                <Link href="/dashboard" className="flex items-center gap-2 cursor-pointer">
+                <Link href="/dashboard" className="flex items-center gap-2">
                   <User className="w-4 h-4" />
                   Panel
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href="/dashboard/subscriptions" className="flex items-center gap-2 cursor-pointer">
+                <Link href="/dashboard/subscriptions" className="flex items-center gap-2">
                   <CreditCard className="w-4 h-4" />
                   Subskrypcje
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href="/dashboard/settings" className="flex items-center gap-2 cursor-pointer">
+                <Link href="/dashboard/settings" className="flex items-center gap-2">
                   <Settings className="w-4 h-4" />
                   Ustawienia
                 </Link>
@@ -544,19 +558,14 @@ function AuthButton() {
             </>
           )}
           <DropdownMenuSeparator />
-          <DropdownMenuItem asChild>
-            <form action={signOutAction} className="w-full">
-              <Button 
-                type="submit" 
-                variant="ghost" 
-                size="sm" 
-                className="w-full justify-start h-auto p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
-              >
-                <LogIn className="w-4 h-4 mr-2" />
+          <form action={signOutAction}>
+            <DropdownMenuItem asChild>
+              <button type="submit" className="flex items-center gap-2 w-full text-red-600 focus:text-red-600 focus:bg-red-50">
+                <LogIn className="w-4 h-4" />
                 Wyloguj
-              </Button>
-            </form>
-          </DropdownMenuItem>
+              </button>
+            </DropdownMenuItem>
+          </form>
         </DropdownMenuContent>
       </DropdownMenu>
     );
@@ -565,21 +574,25 @@ function AuthButton() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 hover:text-white p-2">
-          <User className="w-5 h-5" />
+        <Button variant="ghost" className={cn(
+          navigationMenuTriggerStyle(),
+          "text-white font-medium hover:bg-risu-400 hover:text-black"
+        )}>
+          <User className="w-5 h-5 mr-1" />
+          <span>Konto</span>
           <ChevronDown className="w-4 h-4 ml-1" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48">
+      <DropdownMenuContent align="end">
         <DropdownMenuItem asChild>
-          <Link href="/sign-in" className="flex items-center gap-2 cursor-pointer">
+          <Link href="/sign-in" className="flex items-center gap-2">
             <LogIn className="w-4 h-4" />
             Zaloguj
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link href="/sign-up" className="flex items-center gap-2 cursor-pointer">
+          <Link href="/sign-up" className="flex items-center gap-2">
             <User className="w-4 h-4" />
             Rejestracja
           </Link>
