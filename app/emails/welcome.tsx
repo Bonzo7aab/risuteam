@@ -21,6 +21,10 @@ interface ContactUserEmailProps {
   message?: string;
 }
 
+const emailLogoUrl =
+  (typeof process !== "undefined" && process.env?.NEXT_PUBLIC_APP_URL) ||
+  "https://risuteam.pl";
+
 export const ContactUserEmail = ({
   username,
   email,
@@ -38,16 +42,16 @@ export const ContactUserEmail = ({
           <Container className="bg-black my-16 border border-solid border-[#fcd100] rounded mx-auto p-[20px] max-w-[465px]">
             <Section className="mt-[32px]">
               <Img
-                src={`https://filmsmk.pl/logoTransparent.png`}
-                width="60"
-                height="60"
-                alt="filmsmk_logo"
+                src={`${emailLogoUrl}/logoWithBorder.png`}
+                width="96"
+                height="96"
+                alt="Risu Team"
                 className="mx-auto my-0"
               />
             </Section>
             <Heading className="text-white text-[24px] font-normal text-center p-0 my-[30px] mx-0">
               Kontakt od <strong>{username}</strong> z{" "}
-              <strong>filmsmk.pl</strong>
+              <strong>risuteam.pl</strong>
             </Heading>
             <Text className="text-white text-[14px] leading-[24px]">
               <strong>{username}</strong> (

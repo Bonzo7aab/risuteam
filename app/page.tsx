@@ -1,11 +1,17 @@
-import Hero from "@/components/hero";
-import SummerCamp from "./obozy/letnie/page";
+import { HeroHome } from "@/components/sections/hero-home";
+import { DisciplinesGrid } from "@/components/sections/disciplines-grid";
+import { WhyKidsLove } from "@/components/sections/why-kids-love";
+import { TestimonialsSection } from "@/components/sections/testimonials-section";
+import { PricingSection } from "@/components/sections/pricing-section";
 
-export default async function Home() {
+export default function Home() {
   return (
-    <main className="flex flex-col flex-1 gap-6 px-2">
-      <Hero />
-      <SummerCamp />
-    </main>
+    <div className="flex-grow flex flex-col bg-[#FDFBF7] dark:bg-background-dark blob-bg">
+      <HeroHome />
+      <DisciplinesGrid />
+      <WhyKidsLove />
+      <PricingSection />
+      <TestimonialsSection />
+    </div>
   );
 }

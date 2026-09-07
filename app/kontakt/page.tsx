@@ -1,264 +1,244 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { useState, FormEvent } from "react";
+import dynamic from "next/dynamic";
+import Image from "next/image";
+import { contactSchema } from "@/lib/schemas";
+import { firstZodMessage } from "@/lib/validation";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import React, { FormEvent, useRef, useState } from "react";
-import { z } from "zod";
+import { Skeleton } from "@/components/ui/skeleton";
+import { locationCenter, locationPlaces } from "@/lib/location-data";
+import type { Place } from "@/components/map/location-map";
 
-const Contact = () => {
-  const ref = useRef<HTMLFormElement>(null);
-  const [buttonDisabled, setButtonDisabled] = useState(false);
+const DynamicLocationMap = dynamic(
+  () =>
+    import("@/components/map/location-map").then((mod) => ({
+      default: mod.LocationMap,
+    })),
+  {
+    ssr: false,
+    loading: () => (
+      <Skeleton className="w-full aspect-video rounded-2xl" />
+    ),
+  }
+);
 
-  const sendEmail = async (e: FormEvent<HTMLFormElement>) => {
+export default function KontaktPage() {
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setButtonDisabled(true);
-    const formData = new FormData(e.currentTarget);
-    const form_values = Object.fromEntries(formData);
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData) as Record<string, string>;
+    const payload = {
+      firstname: data.firstname,
+      lastname: data.lastname,
+      email: data.email,
+      phone_number: data.phone_number,
+      message: data.message,
+      subject: data.subject,
+    };
 
-    const response = await fetch("/api/send", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form_values),
-    });
+    const parsed = contactSchema.safeParse(payload);
+    if (!parsed.success) {
+      setError(firstZodMessage(parsed.error));
+      return;
+    }
 
-    // if(response.status === 200) {
-    //     toast.success('Wiadomość została wysłana!')
-    // } else {
-    //     toast.error('Błąd wysłania wiadomości. Skontaktuj się ze mną inaczej.')
-    // }
-    setButtonDisabled(false);
+    setSending(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(parsed.data),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Błąd wysyłania");
+      setSent(true);
+      form.reset();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Nie udało się wysłać wiadomości");
+    } finally {
+      setSending(false);
+    }
   };
 
-  const User = z.object({
-    firstname: z.string(),
-    lastname: z.string(),
-    email: z.string(),
-    phone_numer: z.string(),
-    details: z.string(),
-  });
-
   return (
-    <div className="max-w-5xl mx-auto text-muted-foreground">
-      <div className="text-center">
-        <h1 className="text-3xl font-bold sm:text-4xl">Kontakt</h1>
-        <p className="mt-1 text-muted-foreground/50">Skontaktuj się z nami!</p>
-      </div>
+    <div className="min-h-screen bg-background-light dark:bg-background-dark">
+      <section className="px-4 sm:px-6 py-12 md:py-16">
+        <div className="max-w-5xl mx-auto">
+          <div className="rounded-2xl bg-white dark:bg-stone-900/80 shadow-soft border border-stone-200 dark:border-stone-700 p-6 md:p-8 lg:p-10">
+            <div className="grid md:grid-cols-[1fr,minmax(280px,340px)] gap-8 lg:gap-12">
+              {/* Left column: form */}
+              <div className="space-y-6">
+                <span className="inline-block rounded-full bg-primary/10 dark:bg-primary/20 px-3 py-1 text-xs font-bold text-primary">
+                  Kontakt
+                </span>
+                <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-text-main dark:text-white">
+                  Połącz się z nami
+                </h1>
+                <p className="text-text-light dark:text-stone-400 text-sm md:text-base">
+                  Masz pytania, sugestie lub potrzebujesz pomocy? Jesteśmy do Twojej dyspozycji.
+                </p>
 
-      <div className="grid items-center gap-6 mt-12 lg:grid-cols-2 lg:gap-16">
-        <div className="flex flex-col p-4 border rounded-xl sm:p-6 lg:p-8">
-          <h2 className="mb-8 text-xl font-semibold">
-            Wypełnij formularz poniżej
-          </h2>
+                {sent && (
+                  <div className="p-4 rounded-xl bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 text-sm border border-green-200 dark:border-green-800/50">
+                    Wiadomość została wysłana. Odpowiemy wkrótce.
+                  </div>
+                )}
+                {error && (
+                  <div className="p-4 rounded-xl bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 text-sm border border-red-200 dark:border-red-800/50">
+                    {error}
+                  </div>
+                )}
 
-          <form
-            ref={ref}
-            onSubmit={async (formData) => {
-              await sendEmail(formData);
-              ref.current?.reset();
-            }}
-          >
-            <div className="grid gap-4">
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div>
-                  <Label htmlFor="firstname" className="sr-only">
-                    Imię
-                  </Label>
-                  <Input
-                    required
-                    type="text"
-                    name="firstname"
-                    id="firstname"
-                    className="focus-visible:ring-transparent"
-                    placeholder="Imię"
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="firstname" className="text-text-main dark:text-stone-300 text-sm font-medium">
+                        Imię
+                      </Label>
+                      <Input
+                        id="firstname"
+                        name="firstname"
+                        placeholder="Wpisz imię..."
+                        required
+                        className="rounded-xl border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-text-main dark:text-white placeholder:text-text-light dark:placeholder:text-stone-500 focus-visible:ring-primary"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="lastname" className="text-text-main dark:text-stone-300 text-sm font-medium">
+                        Nazwisko
+                      </Label>
+                      <Input
+                        id="lastname"
+                        name="lastname"
+                        placeholder="Wpisz nazwisko..."
+                        required
+                        className="rounded-xl border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-text-main dark:text-white placeholder:text-text-light dark:placeholder:text-stone-500 focus-visible:ring-primary"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="text-text-main dark:text-stone-300 text-sm font-medium">
+                      Email
+                    </Label>
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      placeholder="Wpisz adres e-mail..."
+                      required
+                      className="rounded-xl border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-text-main dark:text-white placeholder:text-text-light dark:placeholder:text-stone-500 focus-visible:ring-primary"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="phone_number" className="text-text-main dark:text-stone-300 text-sm font-medium">
+                      Telefon
+                    </Label>
+                    <Input
+                      id="phone_number"
+                      name="phone_number"
+                      type="tel"
+                      placeholder="Numer telefonu (opcjonalnie)"
+                      className="rounded-xl border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-text-main dark:text-white placeholder:text-text-light dark:placeholder:text-stone-500 focus-visible:ring-primary"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="message" className="text-text-main dark:text-stone-300 text-sm font-medium">
+                      Wiadomość
+                    </Label>
+                    <Textarea
+                      id="message"
+                      name="message"
+                      rows={4}
+                      placeholder="Wpisz wiadomość..."
+                      required
+                      className="rounded-xl border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-text-main dark:text-white placeholder:text-text-light dark:placeholder:text-stone-500 focus-visible:ring-primary resize-none"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={sending}
+                    className="w-full rounded-xl h-12 bg-primary text-primary-foreground font-bold hover:bg-primary-hover disabled:opacity-70 transition-colors flex items-center justify-center gap-2"
+                  >
+                    {sending ? (
+                      "Wysyłanie…"
+                    ) : (
+                      <>
+                        Wyślij wiadomość
+                        <span className="material-symbols-outlined text-xl" aria-hidden>
+                          send
+                        </span>
+                      </>
+                    )}
+                  </button>
+                </form>
+              </div>
+
+              {/* Right column: logo + contact cards */}
+              <div className="space-y-4 flex flex-col">
+                <div className="hidden md:flex rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800/80 aspect-[4/5] min-h-[200px] flex-shrink-0 overflow-hidden items-center justify-center p-6">
+                  <Image
+                    src="/logoWithBorder.png"
+                    alt="Risu Team"
+                    width={288}
+                    height={96}
+                    className="w-full h-auto max-w-[240px] md:max-w-[280px] object-contain dark:invert"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="lastname" className="sr-only">
-                    Nazwisko
-                  </Label>
-                  <Input
-                    required
-                    type="text"
-                    name="lastname"
-                    id="lastname"
-                    className="focus-visible:ring-transparent"
-                    placeholder="Nazwisko"
-                  />
+                <div className="rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800/50 p-4 flex gap-4 shadow-soft">
+                  <span className="material-symbols-outlined text-2xl text-primary flex-shrink-0" aria-hidden>
+                    call
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-text-light dark:text-stone-400 text-sm font-medium">Telefon</p>
+                    <a
+                      href="tel:+48777888999"
+                      className="text-text-main dark:text-white font-semibold hover:text-primary transition-colors"
+                    >
+                      +48 777 888 999
+                    </a>
+                  </div>
+                </div>
+                <div className="rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800/50 p-4 flex gap-4 shadow-soft">
+                  <span className="material-symbols-outlined text-2xl text-primary flex-shrink-0" aria-hidden>
+                    mail
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-text-light dark:text-stone-400 text-sm font-medium">Email</p>
+                    <a
+                      href="mailto:kontakt@risuteam.pl"
+                      className="text-text-main dark:text-white font-semibold hover:text-primary transition-colors break-all"
+                    >
+                      kontakt@risuteam.pl
+                    </a>
+                  </div>
                 </div>
               </div>
-              <div>
-                <Label htmlFor="email" className="sr-only">
-                  Email
-                </Label>
-                <Input
-                  required
-                  type="email"
-                  name="email"
-                  id="email"
-                  autoComplete="email"
-                  className="focus-visible:ring-transparent"
-                  placeholder="Email"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="phone_number" className="sr-only">
-                  Numer telefonu
-                </Label>
-                <Input
-                  type="text"
-                  name="phone_number"
-                  id="phone_number"
-                  className="focus-visible:ring-transparent"
-                  placeholder="Numer telefonu (opcjonalnie)"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="about" className="sr-only">
-                  Wiadomość
-                </Label>
-                <Textarea
-                  required
-                  id="about"
-                  name="about"
-                  rows={4}
-                  className="focus-visible:ring-transparent"
-                  placeholder="Wiadomość"
-                ></Textarea>
-              </div>
-            </div>
-
-            <div className="grid mt-4">
-              <Button
-                type="submit"
-                disabled={buttonDisabled}
-                className="bg-blue-400 hover:bg-blue-500"
-              >
-                Wyślij
-              </Button>
-            </div>
-
-            <div className="mt-3 text-center">
-              <p className="text-sm text-gray-500">
-                Odpowiadamy zazwyczaj w ciągu 1-2 dni.
-              </p>
-            </div>
-          </form>
-        </div>
-
-        <div className="divide-y">
-          <div className="flex py-6 gap-x-7">
-            <svg
-              className="shrink-0 size-6 mt-1.5 "
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M14 9a2 2 0 0 1-2 2H6l-4 4V4c0-1.1.9-2 2-2h8a2 2 0 0 1 2 2v5Z" />
-              <path d="M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1" />
-            </svg>
-            <div className="grow">
-              <h3 className="font-semibold ">FAQ</h3>
-              <p className="mt-1 text-sm text-gray-500">
-                Najczęściej zadawane pytania
-              </p>
-              <a
-                className="inline-flex items-center mt-2 text-sm font-medium text-gray-600 gap-x-2 focus:outline-hidden"
-                href="#"
-              >
-                Przejdź
-                <svg
-                  className="shrink-0 size-2.5 transition ease-in-out group-hover:translate-x-1 group-focus:translate-x-1"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    fillRule="evenodd"
-                    clip-rule="evenodd"
-                    d="M0.975821 6.92249C0.43689 6.92249 -3.50468e-07 7.34222 -3.27835e-07 7.85999C-3.05203e-07 8.37775 0.43689 8.79749 0.975821 8.79749L12.7694 8.79748L7.60447 13.7596C7.22339 14.1257 7.22339 14.7193 7.60447 15.0854C7.98555 15.4515 8.60341 15.4515 8.98449 15.0854L15.6427 8.68862C16.1191 8.23098 16.1191 7.48899 15.6427 7.03134L8.98449 0.634573C8.60341 0.268455 7.98555 0.268456 7.60447 0.634573C7.22339 1.00069 7.22339 1.59428 7.60447 1.9604L12.7694 6.92248L0.975821 6.92249Z"
-                    fill="currentColor"
-                  />
-                </svg>
-              </a>
             </div>
           </div>
 
-          <div className="flex py-6 gap-x-7">
-            <svg
-              className="shrink-0 size-6 mt-1.5 "
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="m7 11 2-2-2-2" />
-              <path d="M11 13h4" />
-              <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
-            </svg>
-            <div className="grow">
-              <h3 className="font-semibold ">Telefon</h3>
-              <p className="mt-1 text-sm text-gray-500">
-                W razie pilnych spraw zapraszamy do kontaktu telefonicznego.
-              </p>
-              <a
-                className="inline-flex items-center mt-2 text-sm font-medium text-gray-600 gap-x-2 focus:outline-hidden"
-                href="#"
-              >
-                777-888-999
-              </a>
-            </div>
-          </div>
-
-          <div className="flex py-6 gap-x-7">
-            <svg
-              className="shrink-0 size-6 mt-1.5 "
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M21.2 8.4c.5.38.8.97.8 1.6v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V10a2 2 0 0 1 .8-1.6l8-6a2 2 0 0 1 2.4 0l8 6Z" />
-              <path d="m22 10-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 10" />
-            </svg>
-            <div className="grow">
-              <h3 className="font-semibold ">Email</h3>
-              <p className="mt-1 text-sm text-gray-500">
-                Zapraszamy do kontaktu przez email.
-              </p>
-              <a
-                className="inline-flex items-center mt-2 text-sm font-medium text-gray-600 gap-x-2 focus:outline-hidden"
-                href="#"
-              >
-                example@site.com
-              </a>
+          {/* Map below card */}
+          <div className="mt-10 md:mt-12">
+            <h2 className="text-xl font-bold text-text-main dark:text-white mb-4">Lokalizacja</h2>
+            <div className="rounded-xl overflow-hidden border border-stone-200 dark:border-stone-700 h-[400px]">
+              <DynamicLocationMap
+                center={locationCenter}
+                zoom={11}
+                places={locationPlaces as Place[]}
+                className="h-full w-full"
+              />
             </div>
           </div>
         </div>
-      </div>
+      </section>
     </div>
   );
-};
-
-export default Contact;
+}

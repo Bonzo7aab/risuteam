@@ -1,29 +1,28 @@
-import { Resend } from 'resend';
-import { NextRequest, NextResponse } from 'next/server';
-import ContactUserEmail from '@/app/emails/welcome';
-
-const resend = new Resend(process.env.NEXT_PUBLIC_RESEND_API_KEY);
+import { NextRequest, NextResponse } from "next/server";
+import { sendBrevoEmail } from "@/lib/brevo";
 
 export async function POST(req: NextRequest) {
-    const data = await req.json()
-    const { username, email, phone, message } = data;
+  const data = await req.json();
+  const { username, email, phone, message } = data;
 
-    try {
-        const data = await resend.emails.send({
-            from: 'Filmsmk.pl - Kontakt <contact@filmsmk.pl>',
-            to: ['smk.filmproduction@gmail.com'],
-            subject: `Kontakt od ${username}`,
-            text: 'Email from filmsmk.pl contact form',
-            react: ContactUserEmail({
-                username,
-                email,
-                phone,
-                message
-            }),
-        });
-    
-        return NextResponse.json(data);
-    } catch (error) {
-        return NextResponse.json({ error });
-    }
+  try {
+    await sendBrevoEmail({
+      to: { email: process.env.CONTACT_EMAIL || "kontakt@risuteam.pl" },
+      subject: `Kontakt od ${username}`,
+      htmlContent: `
+        <h2>Nowa wiadomość z formularza kontaktowego Risu Team</h2>
+        <p><strong>Imię i nazwisko:</strong> ${username}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Telefon:</strong> ${phone}</p>
+        <hr />
+        <p>${message}</p>
+      `,
+    });
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : String(error) },
+      { status: 500 }
+    );
+  }
 }

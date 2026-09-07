@@ -1,84 +1,204 @@
-import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
-import Link from "next/link";
+import { Metadata } from "next";
+import {
+  CampHero,
+  FeatureCards,
+  DailyProgram,
+  WhatToBringPricing,
+  InstructorCards,
+  CampGallery,
+} from "@/components/obozy";
+import { CampRegistrationClosedBanner } from "@/components/obozy/camp-registration-closed-banner";
 
-const features = [
+export const metadata: Metadata = {
+  title: "Półkolonie letnie Warszawa | Risu Team",
+  description:
+    "Aktywne półkolonie w Warszawie — sport, zabawy i nowe znajomości. Opieka od rana do popołudnia. Zapisz dziecko na półkolonie letnie.",
+};
+
+const HERO_IMAGE =
+  "https://images.pexels.com/photos/3764011/pexels-photo-3764011.jpeg?auto=compress&cs=tinysrgb&w=600";
+
+const FEATURE_CARDS = [
   {
-    category: "Marketing and Sales",
-    title: "Collect and enrich leads your way",
-    details:
-      "Take control over how and when to follow up with your leads. Store and reference leads in multiple tables and, from there, automatically send them personalized emails.",
-    tutorialLink: "#",
+    icon: "sports_soccer",
+    title: "Sport i ruch",
+    description:
+      "Treningi judo, gimnastyka, gry zespołowe i zajęcia na świeżym powietrzu. Każdy dzień to dawka zdrowego ruchu i dobrej zabawy.",
   },
   {
-    category: "Project Management",
-    title: "Streamline your workflows effortlessly",
-    details:
-      "Organize tasks, deadlines, and team collaboration in one place. Use customizable boards to manage projects efficiently and automate routine updates.",
-    tutorialLink: "#",
+    icon: "celebration",
+    title: "Zabawy i animacje",
+    description:
+      "Warsztaty plastyczne, gry integracyjne i atrakcje dostosowane do wieku. Dzieci nie mają czasu na nudę.",
   },
   {
-    category: "Customer Support",
-    title: "Deliver seamless customer experiences",
-    details:
-      "Track and resolve customer queries faster with an integrated ticketing system. Set priorities, automate follow-ups, and enhance satisfaction with personalized responses.",
-    tutorialLink: "#",
-  },
-  {
-    category: "Team Collaboration",
-    title: "Stay connected with your team",
-    details:
-      "Simplify communication and align team efforts with shared boards and real-time updates. Enable transparent goal tracking and instant feedback for better results.",
-    tutorialLink: "#",
-  },
-  {
-    category: "Product Development",
-    title: "Accelerate innovation with ease",
-    details:
-      "Bring your product ideas to life by managing prototypes, feedback, and iterations in one place. Collaborate with your team to refine features and release with confidence.",
-    tutorialLink: "#",
+    icon: "shield",
+    title: "Bezpieczna opieka",
+    description:
+      "Kadra z doświadczeniem w pracy z dziećmi. Opieka od rana do popołudnia w małych grupach.",
   },
 ];
 
-const Features06Page = () => {
+const DAILY_SCHEDULE = [
+  {
+    time: "08:00",
+    title: "Przyjazd i powitanie",
+    description: "Zbiórka, krótka rozgrzewka i plan dnia.",
+  },
+  {
+    time: "09:00",
+    title: "Zajęcia sportowe",
+    description: "Trening judo, gimnastyka lub gry zespołowe.",
+  },
+  {
+    time: "10:30",
+    title: "Przerwa i drugie śniadanie",
+    description: "Posiłek i chwila odpoczynku.",
+  },
+  {
+    time: "11:00",
+    title: "Zajęcia tematyczne",
+    description: "Warsztaty, animacje lub wyjście na świeże powietrze.",
+  },
+  {
+    time: "13:00",
+    title: "Obiad",
+    description: "Wspólny posiłek.",
+    highlight: true,
+  },
+  {
+    time: "14:00",
+    title: "Zajęcia popołudniowe",
+    description: "Gry, zabawy lub zajęcia ruchowe.",
+  },
+  {
+    time: "16:00",
+    title: "Odbiór dzieci",
+    description: "Zakończenie dnia, odbiór przez rodziców.",
+  },
+];
+
+const WHAT_TO_BRING = [
+  "Ubrania na zmianę",
+  "Obuwie sportowe",
+  "Nakrycie głowy i krem z filtrem",
+  "Bidon lub butelka na wodę",
+  "Drugie śniadanie (opcjonalnie)",
+  "Ręcznik i przybory toaletowe",
+];
+
+const PRICE_INCLUDED = [
+  "Opieka od 08:00 do 16:00",
+  "Obiad w cenie",
+  "Program zajęć sportowych i animacji",
+  "Ubezpieczenie NNW",
+  "Materiały na warsztaty",
+];
+
+const INSTRUCTORS = [
+  {
+    name: "Piotr Nowak",
+    role: "Główny trener Judo",
+    image:
+      "https://images.pexels.com/photos/3771074/pexels-photo-3771074.jpeg?auto=compress&cs=tinysrgb&w=600",
+  },
+  {
+    name: "Anna Kowalska",
+    role: "Trenerka gimnastyki, animatorka",
+    image:
+      "https://images.pexels.com/photos/3764011/pexels-photo-3764011.jpeg?auto=compress&cs=tinysrgb&w=600",
+  },
+];
+
+const GALLERY_IMAGES = [
+  { src: HERO_IMAGE, alt: "Półkolonie letnie Warszawa" },
+  {
+    src: "https://images.pexels.com/photos/3771074/pexels-photo-3771074.jpeg?auto=compress&cs=tinysrgb&w=600",
+    alt: "Zajęcia sportowe",
+  },
+  {
+    src: "https://images.pexels.com/photos/3763188/pexels-photo-3763188.jpeg?auto=compress&cs=tinysrgb&w=600",
+    alt: "Uczestnicy półkolonii",
+  },
+];
+
+export default function PolkoloniePage() {
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="w-full max-w-screen-lg px-6 py-10">
-        <h2 className="text-4xl md:text-5xl md:leading-[3.5rem] font-bold tracking-tight max-w-xl md:text-center md:mx-auto">
-          Boost Your Strategy with Smart Features
-        </h2>
-        <div className="w-full mx-auto mt-8 space-y-20 md:mt-16">
-          {features.map((feature) => (
-            <div
-              key={feature.category}
-              className="flex flex-col items-center md:flex-row gap-x-20 gap-y-6 md:odd:flex-row-reverse"
-            >
-              <div className="w-full aspect-[6/4] bg-muted rounded-xl border border-border/50 basis-1/2" />
-              <div className="basis-1/2 shrink-0">
-                <span className="text-sm font-semibold uppercase text-muted-foreground">
-                  {feature.category}
-                </span>
-                <h4 className="my-3 text-3xl font-semibold tracking-tight">
-                  {feature.title}
-                </h4>
-                <p className="text-muted-foreground text-[17px]">
-                  {feature.details}
-                </p>
-                <Button
-                  asChild
-                  className="mt-6 rounded-full min-w-40 text-[15px]"
-                >
-                  <Link href={feature.tutorialLink}>
-                    Learn More <ArrowRight />
-                  </Link>
-                </Button>
-              </div>
-            </div>
-          ))}
+    <div className="min-h-screen bg-stone-50 dark:bg-stone-900/30">
+      <CampRegistrationClosedBanner slug="polkolonie" />
+      <CampHero
+        badge="LATO 2025"
+        titlePart1="Półkolonie letnie"
+        titlePart2="Warszawa"
+        image={HERO_IMAGE}
+        imageAlt="Półkolonie letnie Risu Team w Warszawie"
+        meta={[
+          { icon: "calendar_today", text: "Lipiec–sierpień 2025" },
+          { icon: "location_on", text: "Warszawa" },
+          { icon: "person", text: "6–12 lat" },
+        ]}
+        ctaPrimary={{
+          label: "Zapisz się teraz",
+          href: "/obozy/polkolonie/rejestracja",
+        }}
+        ctaSecondary={{
+          label: "Pobierz ofertę PDF",
+          href: "#",
+        }}
+      />
+
+      <FeatureCards
+        title="Dlaczego półkolonie z nami?"
+        subtitle="Aktywne półkolonie w Warszawie — sport, zabawy i nowe znajomości w bezpiecznej atmosferze."
+        cards={FEATURE_CARDS}
+      />
+
+      <DailyProgram
+        title="Program dnia"
+        subtitle="Przykładowy plan dnia (może ulec zmianom)"
+        items={DAILY_SCHEDULE}
+      />
+
+      <WhatToBringPricing
+        whatToBringTitle="Co zabrać?"
+        whatToBringItems={WHAT_TO_BRING}
+        priceTitle="Cena"
+        price="600 PLN / tydz."
+        priceIncluded={PRICE_INCLUDED}
+        bookButtonLabel="Zarezerwuj miejsce"
+        bookButtonHref="/obozy/polkolonie/rejestracja"
+        showDropdowns={true}
+      />
+
+      <section className="py-8 bg-stone-50 dark:bg-stone-900/30 border-t border-stone-200 dark:border-stone-700">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm text-stone-600 dark:text-stone-400">
+          <p className="font-semibold text-stone-800 dark:text-stone-300 mb-2">
+            Liczba miejsc ograniczona. Płatności wyłącznie przelewem na konto.
+          </p>
+          <p className="mb-1">
+            Możliwość wykupienia pojedynczych tygodni. Zapisy na wybrane turnusy.
+          </p>
+          <p>
+            Santander Bank: 28 1090 1694 0000 0001 3471 6556. Zapisy: 533-020-048
+            / risu.biuro@gmail.com
+          </p>
         </div>
-      </div>
+      </section>
+
+      <InstructorCards
+        title="Kadra"
+        subtitle="Doświadczeni trenerzy i animatorzy na półkoloniach."
+        instructors={INSTRUCTORS}
+      />
+
+      <CampGallery
+        title="Galeria z poprzednich edycji"
+        mainImage={{
+          src: HERO_IMAGE,
+          alt: "Uczestnicy półkolonii letnich w Warszawie",
+        }}
+        gridImages={GALLERY_IMAGES}
+      />
     </div>
   );
-};
-
-export default Features06Page;
+}
