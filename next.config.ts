@@ -1,5 +1,11 @@
 import type { NextConfig } from "next";
 
+if (process.env.VERCEL && !process.env.NEXT_PUBLIC_CONVEX_URL) {
+  throw new Error(
+    "Missing NEXT_PUBLIC_CONVEX_URL. Add it in Vercel → Project Settings → Environment Variables (Preview and Production).",
+  );
+}
+
 const nextConfig: NextConfig = {
   /* config options here */
   async redirects() {
