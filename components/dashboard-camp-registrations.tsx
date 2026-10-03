@@ -126,12 +126,12 @@ export function DashboardCampRegistrations({
               {campHref ? (
                 <Link
                   href={campHref}
-                  className="flex gap-4 items-stretch rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 p-4 shadow-sm hover:border-primary/40 hover:shadow-md transition-all"
+                  className="flex gap-4 items-stretch rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 p-4 shadow-xs hover:border-primary/40 hover:shadow-md transition-all"
                 >
                   {rowInner}
                 </Link>
               ) : (
-                <div className="flex gap-4 items-stretch rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 p-4 shadow-sm">
+                <div className="flex gap-4 items-stretch rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 p-4 shadow-xs">
                   {rowInner}
                 </div>
               )}

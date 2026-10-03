@@ -16,7 +16,7 @@ const Aktualnosci = () => {
           </div>
 
           <div className="pt-4">
-            <h3 className="relative inline-block font-medium text-lg text-black before:absolute before:bottom-0.5 before:start-0 before:-z-1 before:w-full before:h-1 before:bg-lime-400 before:transition before:origin-left before:scale-x-0 group-hover:before:scale-x-100">
+            <h3 className="relative inline-block font-medium text-lg text-black before:absolute before:bottom-0.5 before:inset-s-0 before:-z-1 before:w-full before:h-1 before:bg-lime-400 before:transition before:origin-left before:scale-x-0 group-hover:before:scale-x-100">
               eYoga
             </h3>
             <p className="mt-1 text-gray-600">
@@ -49,7 +49,7 @@ const Aktualnosci = () => {
           </div>
 
           <div className="pt-4">
-            <h3 className="relative inline-block font-medium text-lg text-black before:absolute before:bottom-0.5 before:start-0 before:-z-1 before:w-full before:h-1 before:bg-lime-400 before:transition before:origin-left before:scale-x-0 group-hover:before:scale-x-100">
+            <h3 className="relative inline-block font-medium text-lg text-black before:absolute before:bottom-0.5 before:inset-s-0 before:-z-1 before:w-full before:h-1 before:bg-lime-400 before:transition before:origin-left before:scale-x-0 group-hover:before:scale-x-100">
               Nike React
             </h3>
             <p className="mt-1 text-gray-600">
@@ -79,7 +79,7 @@ const Aktualnosci = () => {
           </div>
 
           <div className="pt-4">
-            <h3 className="relative inline-block font-medium text-lg text-black before:absolute before:bottom-0.5 before:start-0 before:-z-1 before:w-full before:h-1 before:bg-lime-400 before:transition before:origin-left before:scale-x-0 group-hover:before:scale-x-100">
+            <h3 className="relative inline-block font-medium text-lg text-black before:absolute before:bottom-0.5 before:inset-s-0 before:-z-1 before:w-full before:h-1 before:bg-lime-400 before:transition before:origin-left before:scale-x-0 group-hover:before:scale-x-100">
               Day Spa
             </h3>
             <p className="mt-1 text-gray-600">Designing a new cocktail can</p>
@@ -107,7 +107,7 @@ const Aktualnosci = () => {
           </div>
 
           <div className="pt-4">
-            <h3 className="relative inline-block font-medium text-lg text-black before:absolute before:bottom-0.5 before:start-0 before:-z-1 before:w-full before:h-1 before:bg-lime-400 before:transition before:origin-left before:scale-x-0 group-hover:before:scale-x-100">
+            <h3 className="relative inline-block font-medium text-lg text-black before:absolute before:bottom-0.5 before:inset-s-0 before:-z-1 before:w-full before:h-1 before:bg-lime-400 before:transition before:origin-left before:scale-x-0 group-hover:before:scale-x-100">
               Diamond Dynamics
             </h3>
             <p className="mt-1 text-gray-600">

@@ -35,7 +35,7 @@ function ActivityCard({
   style: { bg: string; icon: string };
 }) {
   return (
-    <div className="rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 p-4 shadow-sm">
+    <div className="rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 p-4 shadow-xs">
       <div className="flex flex-col items-center text-center">
         <div
           className={cn(

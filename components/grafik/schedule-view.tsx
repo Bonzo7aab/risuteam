@@ -137,7 +137,7 @@ function CompactFilterPopover({
         <button
           type="button"
           className={cn(
-            "inline-flex min-w-0 w-full max-w-full items-center gap-3 rounded-2xl border border-stone-200/90 bg-white px-3 py-2.5 pr-3 shadow-sm transition-colors sm:w-auto sm:max-w-[min(100%,18rem)] sm:rounded-full",
+            "inline-flex min-w-0 w-full max-w-full items-center gap-3 rounded-2xl border border-stone-200/90 bg-white px-3 py-2.5 pr-3 shadow-xs transition-colors sm:w-auto sm:max-w-[min(100%,18rem)] sm:rounded-full",
             "hover:border-stone-300 hover:bg-stone-50/80",
             "dark:border-stone-600 dark:bg-stone-900 dark:hover:border-stone-500 dark:hover:bg-stone-800/80"
           )}
@@ -325,7 +325,7 @@ function ClassCard({
       onMouseEnter={() => onHoverClassId?.(slot.classId)}
       onMouseLeave={() => onHoverClassId?.(null)}
       className={cn(
-        "flex w-full min-h-[8.5rem] flex-col overflow-hidden rounded-xl border-2 text-left transition-all",
+        "flex w-full min-h-34 flex-col overflow-hidden rounded-xl border-2 text-left transition-all",
         hasOtherClassFocused && "opacity-50",
         isClassFocused && "ring-2 ring-primary/70 ring-offset-2 ring-offset-background",
         isInactive && !isClassFocused && "opacity-55 saturate-65",
@@ -347,23 +347,23 @@ function ClassCard({
         onClick={handlePrimaryOpen}
         onFocus={() => onHoverClassId?.(slot.classId)}
         onBlur={() => onHoverClassId?.(null)}
-        className="flex flex-1 flex-col px-2.5 pt-2.5 pb-2 text-left outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        className="flex flex-1 flex-col px-2.5 pt-2.5 pb-2 text-left outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
       >
         <div className="mb-3 flex items-start justify-between gap-2">
           <span
-            className="min-w-0 max-w-[55%] truncate rounded-full bg-white/95 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary shadow-sm ring-1 ring-primary/20 dark:bg-stone-900/95 dark:ring-primary/30"
+            className="min-w-0 max-w-[55%] truncate rounded-full bg-white/95 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary shadow-xs ring-1 ring-primary/20 dark:bg-stone-900/95 dark:ring-primary/30"
             title={c?.discipline}
           >
             {c?.discipline ?? "—"}
           </span>
           <div className="flex shrink-0 flex-col items-end gap-1">
             {duration && (
-              <span className="rounded bg-stone-900 px-1.5 py-0.5 text-[9px] font-black tracking-wide text-white shadow-sm dark:bg-stone-200 dark:text-stone-900">
+              <span className="rounded bg-stone-900 px-1.5 py-0.5 text-[9px] font-black tracking-wide text-white shadow-xs dark:bg-stone-200 dark:text-stone-900">
                 {duration}
               </span>
             )}
             {isNew && (
-              <span className="rounded bg-emerald-600 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wide text-white shadow-sm">
+              <span className="rounded bg-emerald-600 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wide text-white shadow-xs">
                 NOWE
               </span>
             )}
@@ -373,7 +373,7 @@ function ClassCard({
               </span>
             )}
             {isInactive && (
-              <span className="rounded bg-stone-600 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wide text-white shadow-sm dark:bg-stone-500">
+              <span className="rounded bg-stone-600 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wide text-white shadow-xs dark:bg-stone-500">
                 NIEAKTYWNA
               </span>
             )}
@@ -651,7 +651,7 @@ function GrafikActiveFilterBeans({
         <div
           key={c.id}
           role="listitem"
-          className="inline-flex max-w-full items-center gap-1 rounded-full border border-amber-200/90 bg-amber-50 py-1 pl-3 pr-0.5 text-sm shadow-sm dark:border-amber-900/50 dark:bg-amber-950/35"
+          className="inline-flex max-w-full items-center gap-1 rounded-full border border-amber-200/90 bg-amber-50 py-1 pl-3 pr-0.5 text-sm shadow-xs dark:border-amber-900/50 dark:bg-amber-950/35"
         >
           <span className="min-w-0 truncate">
             <span className="font-medium text-amber-900/70 dark:text-amber-200/80">
@@ -1019,7 +1019,7 @@ export function ScheduleView({
               aria-expanded={mobileFiltersExpanded}
               aria-controls="grafik-extra-filters"
               onClick={() => setMobileFiltersExpanded((v) => !v)}
-              className="mr-1.5 shrink-0 rounded-lg px-1 py-2 text-sm font-bold text-primary underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              className="mr-1.5 shrink-0 rounded-lg px-1 py-2 text-sm font-bold text-primary underline underline-offset-4 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
               {mobileFiltersExpanded ? "Mniej" : "Więcej"}
             </button>

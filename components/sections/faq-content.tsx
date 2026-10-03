@@ -281,7 +281,7 @@ export function FaqContent() {
               +48 777 888 999
             </a>
           </div>
-          <div className="relative hidden lg:block rounded-2xl overflow-hidden aspect-[4/3] bg-stone-100 dark:bg-stone-800">
+          <div className="relative hidden lg:block rounded-2xl overflow-hidden aspect-4/3 bg-stone-100 dark:bg-stone-800">
             <Image
               src="https://lh3.googleusercontent.com/aida-public/AB6AXuDwuRdVARpR_0ExfqHNPi_eE5De9yCF9EgcnSwwoPw1-ph3hHx0dWsJyCgpw70Zg1V5vAmIb7sxPn4a91VxOXiY7I8Xn4kIxH_SN-TkSko7I8vQs9L9eFR52DfMSeB4DUU9AXEYf3rK0X38QY46kebX2g3ixUIEE8PxA8gczZfX6nJP9aXtsYn2HxCbNQ8NpB2vi_blIV4jICf3e2Wl5YWtx41vRXTxV2cJ0C2-kck_zI99lPpxKUmRWoyb8ykkiIaS-MCPnRAQ5bed"
               alt="Risu Team maskotka"
@@ -289,7 +289,7 @@ export function FaqContent() {
               className="object-cover"
               unoptimized
             />
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+            <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/70 to-transparent p-4">
               <p className="text-white font-bold text-sm">Risu — Twój przyjaciel w sporcie</p>
             </div>
           </div>

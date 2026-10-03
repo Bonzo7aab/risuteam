@@ -125,7 +125,7 @@ export function DashboardHome() {
           <Link
             key={item.href}
             href={item.href}
-            className="flex flex-col items-center gap-2 rounded-xl border border-stone-200 bg-white px-2 py-3 shadow-sm transition-all active:scale-[0.98] dark:border-stone-700 dark:bg-stone-900/80 hover:border-primary/40 hover:shadow-md"
+            className="flex flex-col items-center gap-2 rounded-xl border border-stone-200 bg-white px-2 py-3 shadow-xs transition-all active:scale-[0.98] dark:border-stone-700 dark:bg-stone-900/80 hover:border-primary/40 hover:shadow-md"
           >
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/15 dark:bg-primary/20">
               <span className="material-symbols-outlined text-primary text-[22px]">
@@ -148,7 +148,7 @@ export function DashboardHome() {
               Moje dzieci
             </h2>
             {home.childrenRows.length === 0 ? (
-              <div className="rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 p-8 text-center shadow-sm">
+              <div className="rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 p-8 text-center shadow-xs">
                 <p className="text-text-light dark:text-stone-400 mb-4">
                   Nie masz jeszcze dodanych dzieci.
                 </p>
@@ -166,7 +166,7 @@ export function DashboardHome() {
                   return (
                   <div
                     key={ch.childId}
-                    className="flex-1 min-w-[260px] max-w-md rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 p-4 shadow-sm"
+                    className="flex-1 min-w-[260px] max-w-md rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 p-4 shadow-xs"
                   >
                     <div className="flex gap-4">
                       <div
@@ -227,7 +227,7 @@ export function DashboardHome() {
                       type="button"
                       onClick={() => setClassDetail(row)}
                       aria-label={`Szczegóły zajęć: ${row.className}`}
-                      className="flex gap-4 items-stretch w-full text-left rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 p-4 shadow-sm hover:border-primary/40 hover:shadow-md transition-all cursor-pointer"
+                      className="flex gap-4 items-stretch w-full text-left rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 p-4 shadow-xs hover:border-primary/40 hover:shadow-md transition-all cursor-pointer"
                     >
                       <div
                         className={cn(
@@ -290,7 +290,7 @@ export function DashboardHome() {
             <h2 className="text-lg font-bold text-text-main dark:text-white mb-4">
               Płatności
             </h2>
-            <div className="rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 p-5 shadow-sm">
+            <div className="rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 p-5 shadow-xs">
               <div className="flex items-start justify-between gap-2 mb-1">
                 <span className="text-xs font-bold uppercase tracking-wide text-stone-400">
                   Do zapłaty
@@ -345,7 +345,7 @@ export function DashboardHome() {
                     ? "/dashboard/aktywnosci?tab=do_zaplaty"
                     : "/cennik"
                 }
-                className="flex items-center justify-center gap-2 w-full rounded-xl h-12 font-bold bg-primary text-primary-foreground hover:bg-primary-hover transition-colors shadow-sm"
+                className="flex items-center justify-center gap-2 w-full rounded-xl h-12 font-bold bg-primary text-primary-foreground hover:bg-primary-hover transition-colors shadow-xs"
               >
                 {home.pendingCount > 0 ? "Opłać teraz" : "Zobacz cennik"}
                 <ArrowRightIcon className="text-[1.1em]" />
@@ -381,7 +381,7 @@ export function DashboardHome() {
                 <li key={a.href}>
                   <Link
                     href={a.href}
-                    className="flex gap-4 p-4 rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 shadow-sm hover:border-primary/30 hover:shadow-md transition-all"
+                    className="flex gap-4 p-4 rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 shadow-xs hover:border-primary/30 hover:shadow-md transition-all"
                   >
                     <div className="h-11 w-11 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
                       <span className="material-symbols-outlined text-primary text-xl">

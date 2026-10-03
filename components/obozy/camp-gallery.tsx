@@ -22,7 +22,7 @@ export function CampGallery({
         </h2>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
           <BlurFade delay={0.1} inView inViewMargin="-40px" blur="8px" duration={0.5} className="lg:col-span-2">
-            <div className="relative aspect-[4/3] rounded-2xl overflow-hidden border border-stone-200 dark:border-stone-700 shadow-md">
+            <div className="relative aspect-4/3 rounded-2xl overflow-hidden border border-stone-200 dark:border-stone-700 shadow-md">
               <PixelImage
                 src={mainImage.src}
                 alt={mainImage.alt}

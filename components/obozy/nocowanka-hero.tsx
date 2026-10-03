@@ -95,7 +95,7 @@ export function NocowankaHero({
                     plugins={[autoplayPlugin.current as unknown as never]}
                     className="w-full"
                   >
-                    <CarouselContent className="-ml-0">
+                    <CarouselContent className="ml-0">
                       {heroImages.map((src, idx) => {
                         const alt = imageAlt
                           ? `${imageAlt} - zdjęcie ${idx + 1}`

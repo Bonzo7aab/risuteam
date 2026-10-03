@@ -55,7 +55,7 @@ export function RouteSplashOverlay() {
   return (
     <motion.div
       className={cn(
-        "fixed inset-0 z-[100] flex flex-col items-center justify-center gap-8 px-6 font-display",
+        "fixed inset-0 z-100 flex flex-col items-center justify-center gap-8 px-6 font-display",
         "bg-[#FDFBF7] text-[#111827] dark:bg-background-dark dark:text-slate-50",
         fullyHidden && "invisible",
       )}

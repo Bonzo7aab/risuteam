@@ -27,7 +27,7 @@ export function DailyProgram({ title, subtitle, items }: DailyProgramProps) {
           {items.map((item) => (
             <div
               key={item.time + item.title}
-              className={`rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 p-4 md:p-5 shadow-sm flex gap-4 ${
+              className={`rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 p-4 md:p-5 shadow-xs flex gap-4 ${
                 item.highlight ? "border-l-4 border-l-primary" : ""
               }`}
             >

@@ -103,7 +103,7 @@ export default function GaleriaPage() {
                       <button
                         type="button"
                         aria-label={`Powiększ: ${item.title ?? "Zdjęcie"}`}
-                        className="relative group overflow-hidden rounded-2xl aspect-[4/3] bg-stone-100 dark:bg-stone-800 w-full text-left"
+                        className="relative group overflow-hidden rounded-2xl aspect-4/3 bg-stone-100 dark:bg-stone-800 w-full text-left"
                       >
                         <PixelImage
                           src={item.imageUrl ?? ""}
@@ -113,7 +113,7 @@ export default function GaleriaPage() {
                           className="absolute inset-0 w-full h-full rounded-2xl group-hover:scale-105 transition-transform duration-500"
                           aspectRatio=""
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4 z-10">
+                        <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4 z-10">
                           <span className="text-xs font-bold text-primary uppercase tracking-wider">
                             {item.categoryId ? categoryById.get(item.categoryId)?.name ?? "" : ""}
                           </span>
@@ -127,7 +127,7 @@ export default function GaleriaPage() {
                       target="_blank"
                       rel="noreferrer"
                       aria-label={`Otwórz wideo: ${item.title ?? "Wideo"}`}
-                      className="relative group overflow-hidden rounded-2xl aspect-[4/3] bg-stone-100 dark:bg-stone-800 w-full text-left block"
+                      className="relative group overflow-hidden rounded-2xl aspect-4/3 bg-stone-100 dark:bg-stone-800 w-full text-left block"
                     >
                       {item.thumbnailUrl ? (
                         <PixelImage
@@ -139,14 +139,14 @@ export default function GaleriaPage() {
                           aspectRatio=""
                         />
                       ) : (
-                        <div className="absolute inset-0 bg-gradient-to-br from-stone-200 to-stone-100 dark:from-stone-900 dark:to-stone-800" />
+                        <div className="absolute inset-0 bg-linear-to-br from-stone-200 to-stone-100 dark:from-stone-900 dark:to-stone-800" />
                       )}
                       <div className="absolute inset-0 flex items-center justify-center bg-black/20 z-10">
                         <div className="flex size-14 items-center justify-center rounded-full bg-white/90 text-primary shadow-lg">
                           <span className="material-symbols-outlined text-3xl">play_arrow</span>
                         </div>
                       </div>
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4 z-10">
+                      <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4 z-10">
                         <span className="text-xs font-bold text-primary uppercase tracking-wider">
                           {item.categoryId ? categoryById.get(item.categoryId)?.name ?? "" : ""}
                         </span>

@@ -22,7 +22,7 @@ function formatAdminTimestamp(ts: number): string {
 /** Przycisk dodawania wydarzenia (obóz / nocowanka) */
 function addEventButtonClassName() {
   return cn(
-    "font-semibold shadow-sm transition-colors",
+    "font-semibold shadow-xs transition-colors",
     "border border-emerald-700/25 bg-emerald-600 text-white hover:bg-emerald-700",
     "focus-visible:ring-emerald-500 dark:border-emerald-400/30 dark:bg-emerald-600 dark:hover:bg-emerald-500"
   );
@@ -122,7 +122,7 @@ export default function AdminWydarzeniaPage() {
                             href={`/admin/rejestracje/oboz/${encodeURIComponent(camp.slug)}`}
                             className={cn(
                               "font-semibold text-text-main transition-colors hover:text-primary dark:text-white",
-                              "rounded focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                              "rounded focus:outline-hidden focus:ring-2 focus:ring-primary focus:ring-offset-2"
                             )}
                           >
                             {camp.name}
@@ -192,7 +192,7 @@ export default function AdminWydarzeniaPage() {
                             href={`/admin/rejestracje/nocowanka/${encodeURIComponent(item.slug)}`}
                             className={cn(
                               "font-semibold text-text-main transition-colors hover:text-primary dark:text-white",
-                              "rounded focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                              "rounded focus:outline-hidden focus:ring-2 focus:ring-primary focus:ring-offset-2"
                             )}
                           >
                             {item.name}

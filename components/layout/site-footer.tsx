@@ -66,7 +66,7 @@ export function SiteFooter() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={item.label}
-                className="flex size-12 items-center justify-center rounded-xl bg-white text-primary shadow-sm transition-colors hover:bg-stone-100 dark:bg-stone-900 dark:hover:bg-stone-800"
+                className="flex size-12 items-center justify-center rounded-xl bg-white text-primary shadow-xs transition-colors hover:bg-stone-100 dark:bg-stone-900 dark:hover:bg-stone-800"
               >
                 <span className="material-symbols-outlined text-[1.35rem]">
                   {item.icon}
@@ -109,7 +109,7 @@ export function SiteFooter() {
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={item.label}
-                    className="flex size-10 items-center justify-center rounded-lg bg-white text-primary shadow-sm transition-colors hover:bg-stone-100 dark:bg-stone-900 dark:hover:bg-stone-800"
+                    className="flex size-10 items-center justify-center rounded-lg bg-white text-primary shadow-xs transition-colors hover:bg-stone-100 dark:bg-stone-900 dark:hover:bg-stone-800"
                   >
                     <span className="material-symbols-outlined text-[1.2rem]">
                       {item.icon}

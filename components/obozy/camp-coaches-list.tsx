@@ -44,7 +44,7 @@ export function CampCoachesList({ title, subtitle, coaches }: CampCoachesListPro
                 href={`/trenerzy#${coach.id}`}
                 className="flex gap-4 rounded-2xl border border-stone-200 bg-stone-50/80 p-4 transition-colors hover:border-primary/40 hover:bg-stone-100/90 dark:border-stone-700 dark:bg-stone-900/60 dark:hover:border-primary/50 dark:hover:bg-stone-800/80"
               >
-                <div className="relative size-[4.25rem] shrink-0 overflow-hidden rounded-full ring-2 ring-stone-200 dark:ring-stone-600 sm:size-[4.75rem]">
+                <div className="relative size-17 shrink-0 overflow-hidden rounded-full ring-2 ring-stone-200 dark:ring-stone-600 sm:size-19">
                   <Image
                     src={coach.photoUrl ?? FALLBACK}
                     alt={coach.imageAlt}

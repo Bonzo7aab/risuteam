@@ -74,7 +74,7 @@ export default function KontaktPage() {
       <section className="px-4 sm:px-6 py-12 md:py-16">
         <div className="max-w-5xl mx-auto">
           <div className="rounded-2xl bg-white dark:bg-stone-900/80 shadow-soft border border-stone-200 dark:border-stone-700 p-6 md:p-8 lg:p-10">
-            <div className="grid md:grid-cols-[1fr,minmax(280px,340px)] gap-8 lg:gap-12">
+            <div className="grid md:grid-cols-[1fr_minmax(280px,340px)] gap-8 lg:gap-12">
               {/* Left column: form */}
               <div className="space-y-6">
                 <span className="inline-block rounded-full bg-primary/10 dark:bg-primary/20 px-3 py-1 text-xs font-bold text-primary">
@@ -184,7 +184,7 @@ export default function KontaktPage() {
 
               {/* Right column: logo + contact cards */}
               <div className="space-y-4 flex flex-col">
-                <div className="hidden md:flex rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800/80 aspect-[4/5] min-h-[200px] flex-shrink-0 overflow-hidden items-center justify-center p-6">
+                <div className="hidden md:flex rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800/80 aspect-4/5 min-h-[200px] shrink-0 overflow-hidden items-center justify-center p-6">
                   <Image
                     src="/logoWithBorder.png"
                     alt="Risu Team"
@@ -194,7 +194,7 @@ export default function KontaktPage() {
                   />
                 </div>
                 <div className="rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800/50 p-4 flex gap-4 shadow-soft">
-                  <span className="material-symbols-outlined text-2xl text-primary flex-shrink-0" aria-hidden>
+                  <span className="material-symbols-outlined text-2xl text-primary shrink-0" aria-hidden>
                     call
                   </span>
                   <div className="min-w-0">
@@ -208,7 +208,7 @@ export default function KontaktPage() {
                   </div>
                 </div>
                 <div className="rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800/50 p-4 flex gap-4 shadow-soft">
-                  <span className="material-symbols-outlined text-2xl text-primary flex-shrink-0" aria-hidden>
+                  <span className="material-symbols-outlined text-2xl text-primary shrink-0" aria-hidden>
                     mail
                   </span>
                   <div className="min-w-0">

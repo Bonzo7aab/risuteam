@@ -78,8 +78,8 @@ export function CookieConsent({
   return (
     <div
       className={cn(
-        "fixed bottom-4 left-1/2 z-[60] w-[min(560px,calc(100vw-2rem))] -translate-x-1/2",
-        "rounded-2xl border border-stone-100 dark:border-stone-800 bg-white/95 dark:bg-[#15100a]/90 backdrop-blur shadow-soft px-4 py-3"
+        "fixed bottom-4 left-1/2 z-60 w-[min(560px,calc(100vw-2rem))] -translate-x-1/2",
+        "rounded-2xl border border-stone-100 dark:border-stone-800 bg-white/95 dark:bg-[#15100a]/90 backdrop-blur-sm shadow-soft px-4 py-3"
       )}
       role="dialog"
       aria-live="polite"

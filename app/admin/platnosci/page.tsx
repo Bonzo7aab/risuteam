@@ -678,7 +678,7 @@ export default function AdminPlatnosciPage() {
           <div className="flex flex-wrap items-center gap-2">
             <Button
               type="button"
-              variant={openEventType === "camp" && closedEventKey === "all" ? "default" : "outline"}
+              variant={openEventType === "camp" && closedEventKey === "all" ? "default" : "outline-solid"}
               size="sm"
               onClick={() => {
                 setOpenEventType("camp");
@@ -690,7 +690,7 @@ export default function AdminPlatnosciPage() {
             </Button>
             <Button
               type="button"
-              variant={openEventType === "nocowanka" && closedEventKey === "all" ? "default" : "outline"}
+              variant={openEventType === "nocowanka" && closedEventKey === "all" ? "default" : "outline-solid"}
               size="sm"
               onClick={() => {
                 setOpenEventType("nocowanka");
@@ -790,7 +790,7 @@ export default function AdminPlatnosciPage() {
               setDateFrom(e.target.value);
               setPage(0);
             }}
-            className="w-[10.5rem]"
+            className="w-42"
           />
           <Input
             type="date"
@@ -799,7 +799,7 @@ export default function AdminPlatnosciPage() {
               setDateTo(e.target.value);
               setPage(0);
             }}
-            className="w-[10.5rem]"
+            className="w-42"
           />
           <Button
             className="ml-auto bg-amber-600 text-white hover:bg-amber-700 dark:bg-amber-500 dark:hover:bg-amber-600"

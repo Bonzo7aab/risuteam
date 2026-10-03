@@ -303,9 +303,9 @@ function ObozyContent() {
                       }
                     }}
                     title={`Zobacz szczegóły: ${c.title}`}
-                    className="rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col md:flex-row cursor-pointer"
+                    className="rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 overflow-hidden shadow-xs hover:shadow-md transition-shadow flex flex-col md:flex-row cursor-pointer"
                   >
-                    <div className="relative w-full md:w-[min(45%,380px)] md:min-h-[240px] aspect-[4/3] md:aspect-auto shrink-0">
+                    <div className="relative w-full md:w-[min(45%,380px)] md:min-h-[240px] aspect-4/3 md:aspect-auto shrink-0">
                       <Image
                         src={c.image}
                         alt={c.title}
@@ -448,9 +448,9 @@ function ObozyContent() {
                         }
                       }}
                       title={`Zobacz szczegóły: ${n.title}`}
-                      className="rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col md:flex-row cursor-pointer"
+                      className="rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 overflow-hidden shadow-xs hover:shadow-md transition-shadow flex flex-col md:flex-row cursor-pointer"
                     >
-                      <div className="relative w-full md:w-[min(45%,380px)] md:min-h-[240px] aspect-[4/3] md:aspect-auto shrink-0 bg-stone-100 dark:bg-stone-800 flex items-center justify-center">
+                      <div className="relative w-full md:w-[min(45%,380px)] md:min-h-[240px] aspect-4/3 md:aspect-auto shrink-0 bg-stone-100 dark:bg-stone-800 flex items-center justify-center">
                         <span className="material-symbols-outlined text-6xl text-stone-300 dark:text-stone-600">
                           nightlight
                         </span>
@@ -509,7 +509,7 @@ function ObozyContent() {
           )}
 
           {/* Newsletter CTA */}
-          <div className="mt-20 rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 shadow-sm p-8 md:p-12 text-center">
+          <div className="mt-20 rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 shadow-xs p-8 md:p-12 text-center">
             <h2 className="text-xl font-bold text-stone-900 dark:text-white mb-2">
               Bądź na bieżąco
             </h2>

@@ -5,10 +5,10 @@ import { Highlighter } from "@/components/ui/highlighter";
 import { cn } from "@/lib/utils";
 
 const heroLogoCircle =
-  "flex size-[7rem] shrink-0 items-center justify-center rounded-full bg-black/40 p-2 shadow-[0_8px_24px_-8px_rgba(0,0,0,0.45)] ring-1 ring-white/15 backdrop-blur-sm";
+  "flex size-28 shrink-0 items-center justify-center rounded-full bg-black/40 p-2 shadow-[0_8px_24px_-8px_rgba(0,0,0,0.45)] ring-1 ring-white/15 backdrop-blur-xs";
 
 const formRowLogoCircle =
-  "flex size-[5rem] shrink-0 items-center justify-center rounded-full bg-stone-200/90 p-1.5 shadow-md ring-1 ring-stone-300/80 backdrop-blur-sm dark:bg-black/40 dark:ring-white/15 dark:shadow-[0_8px_24px_-8px_rgba(0,0,0,0.35)]";
+  "flex size-20 shrink-0 items-center justify-center rounded-full bg-stone-200/90 p-1.5 shadow-md ring-1 ring-stone-300/80 backdrop-blur-xs dark:bg-black/40 dark:ring-white/15 dark:shadow-[0_8px_24px_-8px_rgba(0,0,0,0.35)]";
 
 export type RisuTeamLogoTitleMarkProps = {
   className?: string;
@@ -31,8 +31,8 @@ export function RisuTeamLogoTitleMark({
   const circle = variant === "formRow" ? formRowLogoCircle : heroLogoCircle;
   const titleSize =
     variant === "formRow"
-      ? "text-2xl font-bold tracking-tight drop-shadow-sm"
-      : "text-4xl font-bold tracking-tight drop-shadow-sm";
+      ? "text-2xl font-bold tracking-tight drop-shadow-xs"
+      : "text-4xl font-bold tracking-tight drop-shadow-xs";
 
   return (
     <div className={cn("flex flex-col items-center gap-2 text-center", className)}>

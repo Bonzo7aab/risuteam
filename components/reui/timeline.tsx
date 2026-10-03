@@ -109,7 +109,7 @@ function TimelineDate({
   return (
     <Comp
       className={cn(
-        "text-muted-foreground mb-1 block text-xs font-medium group-data-[orientation=vertical]/timeline:max-sm:h-4",
+        "text-muted-foreground mb-1 block text-xs font-medium max-sm:group-data-[orientation=vertical]/timeline:h-4",
         className
       )}
       data-slot="timeline-date"
@@ -167,7 +167,7 @@ function TimelineItem({ step, className, ...props }: TimelineItemProps) {
   return (
     <div
       className={cn(
-        "group/timeline-item has-[+[data-completed]]:**:data-[slot=timeline-separator]:bg-primary relative flex flex-1 flex-col gap-0.5 group-data-[orientation=horizontal]/timeline:mt-8 group-data-[orientation=horizontal]/timeline:not-last:pe-8 group-data-[orientation=vertical]/timeline:ms-8 group-data-[orientation=vertical]/timeline:not-last:pb-6",
+        "group/timeline-item data-[slot=timeline-separator]:**:has-[+[data-completed]]:bg-primary relative flex flex-1 flex-col gap-0.5 group-data-[orientation=horizontal]/timeline:mt-8 not-last:group-data-[orientation=horizontal]/timeline:pe-8 group-data-[orientation=vertical]/timeline:ms-8 not-last:group-data-[orientation=vertical]/timeline:pb-6",
         className
       )}
       data-completed={step <= activeStep || undefined}

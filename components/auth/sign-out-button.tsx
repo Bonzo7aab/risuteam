@@ -11,7 +11,7 @@ export function SignOutButton({
 }: {
   children?: React.ReactNode;
   className?: string;
-  variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
+  variant?: "default" | "destructive" | "outline-solid" | "secondary" | "ghost" | "link";
 }) {
   const { signOut } = useAuthActions();
   const router = useRouter();

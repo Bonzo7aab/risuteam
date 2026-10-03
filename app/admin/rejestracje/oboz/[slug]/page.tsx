@@ -103,7 +103,7 @@ export default function AdminRejestracjeObozPage() {
   const szczegolyObozuCollapsible = (
     <Accordion type="single" collapsible className="border border-stone-200 dark:border-stone-700 rounded-lg bg-card overflow-hidden">
       <AccordionItem value="szczegoly-obozu" className="border-b-0">
-        <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-muted/30 [&[data-state=open]]:bg-muted/20">
+        <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-muted/30 data-[state=open]:bg-muted/20">
           <div className="flex items-center gap-3">
             <span className="font-semibold text-text-main dark:text-white">
               Szczegóły obozu

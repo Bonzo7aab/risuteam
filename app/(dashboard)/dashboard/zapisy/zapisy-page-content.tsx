@@ -48,7 +48,7 @@ export function ZapisyPageContent({ steps }: { steps: Step[] }) {
           className={cn(
             "px-4 py-2.5 rounded-lg font-bold text-sm transition-colors",
             tab === "zajecia"
-              ? "bg-white dark:bg-stone-800 text-primary shadow-sm"
+              ? "bg-white dark:bg-stone-800 text-primary shadow-xs"
               : "text-text-main dark:text-stone-400 hover:text-primary"
           )}
         >
@@ -60,7 +60,7 @@ export function ZapisyPageContent({ steps }: { steps: Step[] }) {
           className={cn(
             "px-4 py-2.5 rounded-lg font-bold text-sm transition-colors",
             tab === "obozy"
-              ? "bg-white dark:bg-stone-800 text-primary shadow-sm"
+              ? "bg-white dark:bg-stone-800 text-primary shadow-xs"
               : "text-text-main dark:text-stone-400 hover:text-primary"
           )}
         >
@@ -72,7 +72,7 @@ export function ZapisyPageContent({ steps }: { steps: Step[] }) {
           className={cn(
             "px-4 py-2.5 rounded-lg font-bold text-sm transition-colors",
             tab === "nocowanki"
-              ? "bg-white dark:bg-stone-800 text-primary shadow-sm"
+              ? "bg-white dark:bg-stone-800 text-primary shadow-xs"
               : "text-text-main dark:text-stone-400 hover:text-primary"
           )}
         >

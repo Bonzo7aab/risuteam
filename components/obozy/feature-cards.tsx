@@ -29,7 +29,7 @@ export function FeatureCards({ title, subtitle, cards, cardsGridClassName }: Fea
           {cards.map((card) => (
             <div
               key={card.title}
-              className="rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 p-6 lg:p-8 shadow-sm hover:shadow-md transition-shadow"
+              className="rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 p-6 lg:p-8 shadow-xs hover:shadow-md transition-shadow"
             >
               <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center mb-4">
                 <span

@@ -27,8 +27,8 @@ export function Marquee({
       className={cn(
         "group flex overflow-hidden p-2 [--duration:40s] [--gap:1rem]",
         {
-          "flex-row [gap:var(--gap)]": !vertical,
-          "flex-col [gap:var(--gap)]": vertical,
+          "flex-row gap-(--gap)": !vertical,
+          "flex-col gap-(--gap)": vertical,
         },
         className
       )}
@@ -41,8 +41,8 @@ export function Marquee({
             className={cn(
               "flex shrink-0 justify-around",
               {
-                "animate-marquee flex-row [gap:var(--gap)]": !vertical,
-                "animate-marquee-vertical flex-col [gap:var(--gap)]": vertical,
+                "animate-marquee flex-row gap-(--gap)": !vertical,
+                "animate-marquee-vertical flex-col gap-(--gap)": vertical,
                 "group-hover:[animation-play-state:paused]": pauseOnHover,
                 "[animation-direction:reverse]": reverse,
               }

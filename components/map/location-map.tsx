@@ -111,7 +111,7 @@ function PopupContent({ place }: { place: Place }) {
       <div className="mt-2 flex flex-col gap-1.5 md:mt-3 md:gap-2">
         <Link
           href="/dashboard/zapisy"
-          className="inline-flex justify-center rounded-lg bg-primary px-2.5 py-1.5 text-xs font-semibold text-primary-foreground shadow hover:bg-primary-hover transition-colors md:px-3 md:py-2 md:text-sm"
+          className="inline-flex justify-center rounded-lg bg-primary px-2.5 py-1.5 text-xs font-semibold text-primary-foreground shadow-sm hover:bg-primary-hover transition-colors md:px-3 md:py-2 md:text-sm"
         >
           Zapisz się na zajęcia
         </Link>
@@ -147,7 +147,7 @@ export function LocationMap({
       className={cn(
         "w-full h-full min-h-[300px] rounded-2xl z-0",
         "[&_.leaflet-popup-content-wrapper]:rounded-xl",
-        "[&_.leaflet-popup-content]:!m-2 md:[&_.leaflet-popup-content]:!m-3",
+        "[&_.leaflet-popup-content]:m-2! md:[&_.leaflet-popup-content]:m-3!",
         className
       )}
       scrollWheelZoom

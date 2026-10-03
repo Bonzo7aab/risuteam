@@ -218,13 +218,13 @@ export default function AdminGaleriaPage() {
         </div>
         <div className="flex gap-2">
           <Button
-            variant={tab === "media" ? "default" : "outline"}
+            variant={tab === "media" ? "default" : "outline-solid"}
             onClick={() => setTab("media")}
           >
             Media
           </Button>
           <Button
-            variant={tab === "categories" ? "default" : "outline"}
+            variant={tab === "categories" ? "default" : "outline-solid"}
             onClick={() => setTab("categories")}
           >
             Kategorie
@@ -462,7 +462,7 @@ function GalleryItemRow(props: {
   return (
     <div className="rounded-xl border p-4 flex flex-col gap-4 lg:flex-row lg:items-start">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start min-w-0 flex-1">
-        <div className="relative h-40 w-full max-w-[13.5rem] shrink-0 rounded-xl bg-muted overflow-hidden flex items-center justify-center border border-border/60">
+        <div className="relative h-40 w-full max-w-54 shrink-0 rounded-xl bg-muted overflow-hidden flex items-center justify-center border border-border/60">
           {previewUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={previewUrl} alt="" className="h-full w-full object-cover" />
@@ -476,7 +476,7 @@ function GalleryItemRow(props: {
           </div>
           {!metaEditorOpen && (
             <>
-              <div className="font-semibold text-base text-foreground leading-snug break-words">
+              <div className="font-semibold text-base text-foreground leading-snug wrap-break-word">
                 {title.trim() ? title : "Bez tytułu"}
               </div>
               <div className="text-sm text-muted-foreground">{selectedCategoryLabel}</div>

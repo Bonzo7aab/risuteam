@@ -12,7 +12,7 @@ const navLinkBaseParent =
 const navLinkInactiveParent =
   "hover:bg-stone-100/80 dark:hover:bg-stone-800/80 hover:text-text-main dark:hover:text-stone-200";
 const navLinkActiveParent =
-  "bg-primary/20 text-primary dark:bg-primary/25 dark:text-primary shadow-sm ring-1 ring-primary/15";
+  "bg-primary/20 text-primary dark:bg-primary/25 dark:text-primary shadow-xs ring-1 ring-primary/15";
 
 const navLinkBaseAdmin =
   "flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-text-main dark:text-stone-300 hover:text-primary transition-colors";

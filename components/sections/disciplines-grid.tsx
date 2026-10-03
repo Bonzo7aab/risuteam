@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { ArrowRightIcon } from "@/components/icons/arrow-right";
+import { BlurFade } from "@/components/ui/blur-fade";
+import { cn } from "@/lib/utils";
 
 const disciplines = [
   {
@@ -34,7 +36,7 @@ export function DisciplinesGrid() {
       className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16"
       id="disciplines"
     >
-      <div className="flex flex-col gap-3 mb-10 text-center max-w-2xl mx-auto">
+      <BlurFade inView delay={0.04} offset={10} blur="0px" className="flex flex-col gap-3 mb-10 text-center max-w-2xl mx-auto">
         <h2 className="text-3xl md:text-4xl font-black text-text-main dark:text-white tracking-tight">
           Wybierz swoją ścieżkę mocy
         </h2>
@@ -42,39 +44,46 @@ export function DisciplinesGrid() {
           W Risu wybierasz dyscyplinę, która pasuje do temperamentu Twojego dziecka. Razem z trenerami
           budujemy pewność siebie, dyscyplinę i radość z ruchu.
         </p>
-      </div>
+      </BlurFade>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
-        {disciplines.map((d) => (
-          <div
-            key={d.title}
-            className="flex flex-col gap-3 rounded-2xl bg-white/70 dark:bg-[#1c150d]/35 backdrop-blur border border-stone-100 dark:border-stone-800 shadow-sm hover:shadow-md transition-shadow p-6"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-primary/10 text-primary">
-                <span className="material-symbols-outlined text-2xl">{d.icon}</span>
-              </div>
-              <h3 className="text-xl font-black text-text-main dark:text-white">
-                {d.title}
-              </h3>
-            </div>
-
-            <p className="text-xs font-bold uppercase tracking-wider text-text-light dark:text-stone-400 mt-1">
-              {d.tagline}
-            </p>
-
-            <p className="text-sm text-text-light dark:text-stone-400 leading-relaxed">
-              {d.description}
-            </p>
-
+        {disciplines.map((d, i) => (
+          <BlurFade key={d.title} inView delay={0.08 + i * 0.08} offset={16} blur="0px">
             <Link
               href={d.href}
-              className="inline-flex items-center gap-2 text-sm font-bold text-text-main dark:text-stone-300 hover:text-primary transition-colors mt-auto"
+              className={cn(
+                "risu-card risu-card-hover group relative flex h-full flex-col gap-3 overflow-hidden rounded-2xl p-6",
+              )}
             >
-              Poznaj ofertę
-              <ArrowRightIcon className="text-primary text-[1em]" />
+              <span
+                aria-hidden
+                className="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl"
+              >
+                <span className="absolute inset-y-0 left-0 w-1/3 bg-linear-to-r from-transparent via-white/55 to-transparent opacity-0 group-hover:animate-shine group-hover:opacity-100 dark:via-white/15" />
+              </span>
+              <div className="flex items-center gap-3">
+                <div className="risu-icon-well size-11 transition-transform duration-300 group-hover:scale-110 motion-reduce:group-hover:scale-100">
+                  <span className="material-symbols-outlined text-2xl">{d.icon}</span>
+                </div>
+                <h3 className="text-xl font-black text-text-main dark:text-white">
+                  {d.title}
+                </h3>
+              </div>
+
+              <p className="text-xs font-bold uppercase tracking-wider text-text-light dark:text-stone-400 mt-1">
+                {d.tagline}
+              </p>
+
+              <p className="text-sm text-text-light dark:text-stone-400 leading-relaxed">
+                {d.description}
+              </p>
+
+              <span className="inline-flex items-center gap-2 text-sm font-bold text-text-main dark:text-stone-300 transition-colors mt-auto group-hover:text-primary">
+                Poznaj ofertę
+                <ArrowRightIcon className="text-primary text-[1em] transition-transform duration-300 group-hover:translate-x-1" />
+              </span>
             </Link>
-          </div>
+          </BlurFade>
         ))}
       </div>
     </section>

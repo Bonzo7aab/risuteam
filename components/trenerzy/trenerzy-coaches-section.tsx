@@ -42,7 +42,7 @@ export function TrenerzyCoachesSection() {
             key={i}
             className="overflow-hidden rounded-2xl border border-stone-200 bg-stone-100 dark:border-stone-700 dark:bg-stone-800/80"
           >
-            <div className="aspect-[5/4] animate-pulse bg-stone-200 dark:bg-stone-700 sm:aspect-[16/10]" />
+            <div className="aspect-5/4 animate-pulse bg-stone-200 dark:bg-stone-700 sm:aspect-16/10" />
             <div className="space-y-3 p-6 sm:p-8">
               <div className="h-3 w-16 animate-pulse rounded bg-stone-200 dark:bg-stone-600" />
               <div className="h-8 w-3/4 max-w-xs animate-pulse rounded bg-stone-200 dark:bg-stone-600" />
@@ -75,7 +75,7 @@ export function TrenerzyCoachesSection() {
             id={c._id}
             className="scroll-mt-28 flex flex-col overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-soft transition-shadow hover:shadow-glow dark:border-stone-700 dark:bg-stone-900/80"
           >
-            <div className="relative aspect-[5/4] w-full shrink-0 sm:aspect-[16/10]">
+            <div className="relative aspect-5/4 w-full shrink-0 sm:aspect-16/10">
               <Image
                 src={c.photoUrl ?? FALLBACK_IMAGE}
                 alt={c.name}
@@ -84,7 +84,7 @@ export function TrenerzyCoachesSection() {
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 priority={index < 2}
               />
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+              <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-black/50 via-transparent to-transparent" />
               <div className="absolute right-3 top-3 flex size-10 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md">
                 <span className="material-symbols-outlined text-xl">
                   sports_martial_arts

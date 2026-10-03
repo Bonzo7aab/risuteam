@@ -88,7 +88,7 @@ function MoreSection({
   if (variant === "panel") {
     return (
       <section className="mt-5 first:mt-0">
-        <div className="-mx-4 bg-primary/[0.09] px-4 py-4 dark:bg-primary/[0.14]">
+        <div className="-mx-4 bg-primary/9 px-4 py-4 dark:bg-primary/[0.14]">
           <h3
             className={cn(
               "text-base font-black tracking-tight text-primary dark:text-amber-100",
@@ -219,7 +219,7 @@ export function SiteMobileBottomNav() {
   return (
     <div className="md:hidden">
       <nav
-        className="fixed inset-x-0 bottom-0 z-50 border-t border-stone-200/80 bg-white/95 px-1.5 pb-[max(0.65rem,calc(env(safe-area-inset-bottom,0px)+0.45rem))] pt-1.5 backdrop-blur dark:border-stone-700/80 dark:bg-[#2a2015]/95"
+        className="fixed inset-x-0 bottom-0 z-50 border-t border-stone-200/80 bg-white/95 px-1.5 pb-[max(0.65rem,calc(env(safe-area-inset-bottom,0px)+0.45rem))] pt-1.5 backdrop-blur-sm dark:border-stone-700/80 dark:bg-[#2a2015]/95"
         aria-label="Nawigacja mobilna"
       >
         <div className="mx-auto flex w-full min-w-0 max-w-3xl items-stretch gap-1 px-0.5">
@@ -295,7 +295,7 @@ export function SiteMobileBottomNav() {
                         );
                       })}
                     </div>
-                    <SignOutButton className="mt-1 w-full justify-center rounded-none border-0 bg-transparent py-3.5 text-sm font-semibold text-text-main shadow-none hover:bg-black/[0.04] dark:text-stone-200 dark:hover:bg-white/[0.06]" />
+                    <SignOutButton className="mt-1 w-full justify-center rounded-none border-0 bg-transparent py-3.5 text-sm font-semibold text-text-main shadow-none hover:bg-black/4 dark:text-stone-200 dark:hover:bg-white/6" />
                   </MoreSection>
                 )}
 
@@ -321,7 +321,7 @@ export function SiteMobileBottomNav() {
                         );
                       })}
                     </div>
-                    <SignOutButton className="mt-1 w-full justify-center rounded-none border-0 bg-transparent py-3.5 text-sm font-semibold text-text-main shadow-none hover:bg-black/[0.04] dark:text-stone-200 dark:hover:bg-white/[0.06]" />
+                    <SignOutButton className="mt-1 w-full justify-center rounded-none border-0 bg-transparent py-3.5 text-sm font-semibold text-text-main shadow-none hover:bg-black/4 dark:text-stone-200 dark:hover:bg-white/6" />
                   </MoreSection>
                 )}
 

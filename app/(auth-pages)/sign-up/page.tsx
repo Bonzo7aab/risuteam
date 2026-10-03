@@ -17,7 +17,7 @@ export default async function SignUpPage(props: {
 
   return (
     <>
-      <aside className="hidden min-h-screen flex-col border-r border-stone-200 bg-gradient-to-br from-primary/20 to-primary/5 px-12 pb-16 pt-[max(env(safe-area-inset-top),2rem)] dark:border-stone-800 dark:from-primary/30 dark:to-primary/10 lg:flex xl:px-20">
+      <aside className="hidden min-h-screen flex-col border-r border-stone-200 bg-linear-to-br from-primary/20 to-primary/5 px-12 pb-16 pt-[max(env(safe-area-inset-top),2rem)] dark:border-stone-800 dark:from-primary/30 dark:to-primary/10 lg:flex xl:px-20">
         <div className="flex justify-center">
           <RisuTeamLogoTitleMark
             className="items-center text-center"

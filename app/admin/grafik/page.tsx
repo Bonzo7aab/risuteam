@@ -979,7 +979,7 @@ function AdminGrafikPageInner() {
                         filteredEnrollments.map((e) => (
                           <li
                             key={e._id}
-                            className="flex min-h-[3.25rem] items-center gap-3 rounded-xl p-2 hover:bg-stone-100 dark:hover:bg-stone-800/50"
+                            className="flex min-h-13 items-center gap-3 rounded-xl p-2 hover:bg-stone-100 dark:hover:bg-stone-800/50"
                           >
                             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
                               {e.child
@@ -1025,7 +1025,7 @@ function AdminGrafikPageInner() {
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent
-                        className="z-[70] w-[calc(100vw-2rem)] max-w-sm p-0 sm:w-80"
+                        className="z-70 w-[calc(100vw-2rem)] max-w-sm p-0 sm:w-80"
                         align="center"
                         side="bottom"
                         sideOffset={8}

@@ -32,7 +32,7 @@ export function CampPricePaymentSection({
         </h2>
         <div className="grid md:grid-cols-2 gap-6 md:gap-8">
           {/* Wszystko w cenie */}
-          <div className="rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 p-6 shadow-sm">
+          <div className="rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 p-6 shadow-xs">
             <p className="text-sm text-stone-600 dark:text-stone-400 mb-4">
               {priceDescription}
             </p>
@@ -54,7 +54,7 @@ export function CampPricePaymentSection({
           </div>
 
           {/* Płatność w ratach */}
-          <div className="rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 p-6 shadow-sm">
+          <div className="rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 p-6 shadow-xs">
             <h3 className="text-lg font-bold text-stone-900 dark:text-white mb-4">
               Płatność w ratach 0%
             </h3>

@@ -89,7 +89,7 @@ export function HistoriaParentsTrust() {
         <div className="relative mx-auto w-full max-w-md lg:max-w-none">
           <div className="grid grid-cols-2 gap-3 sm:gap-4">
             <div className="flex flex-col gap-3 sm:gap-4 pt-0 sm:pt-8">
-              <div className="relative aspect-[4/5] overflow-hidden rounded-[1.75rem] shadow-[0_12px_40px_-12px_rgba(0,0,0,0.18)] dark:shadow-none ring-1 ring-black/5 dark:ring-white/10">
+              <div className="relative aspect-4/5 overflow-hidden rounded-[1.75rem] shadow-[0_12px_40px_-12px_rgba(0,0,0,0.18)] dark:shadow-none ring-1 ring-black/5 dark:ring-white/10">
                 <Image
                   src={gallery[0].src}
                   alt={gallery[0].alt}
@@ -118,7 +118,7 @@ export function HistoriaParentsTrust() {
                   sizes="(max-width: 1024px) 45vw, 280px"
                 />
               </div>
-              <div className="relative aspect-[5/4] overflow-hidden rounded-[1.75rem] shadow-[0_12px_40px_-12px_rgba(0,0,0,0.18)] dark:shadow-none ring-1 ring-black/5 dark:ring-white/10">
+              <div className="relative aspect-5/4 overflow-hidden rounded-[1.75rem] shadow-[0_12px_40px_-12px_rgba(0,0,0,0.18)] dark:shadow-none ring-1 ring-black/5 dark:ring-white/10">
                 <Image
                   src={gallery[3].src}
                   alt={gallery[3].alt}

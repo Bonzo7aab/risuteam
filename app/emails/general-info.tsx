@@ -71,7 +71,7 @@ export function GeneralInfoEmail({
       <Preview>{previewText}</Preview>
       <Tailwind>
         <Body className="mx-auto my-auto font-sans bg-[#f5f0eb] px-2 py-8">
-          <Container className="mx-auto max-w-[600px] rounded-t-2xl bg-white shadow-sm">
+          <Container className="mx-auto max-w-[600px] rounded-t-2xl bg-white shadow-xs">
             {/* Header */}
             <Section className="flex flex-row items-center justify-between px-6 pt-6 pb-2">
               <Link href={baseUrl} className="flex items-center gap-2 no-underline">

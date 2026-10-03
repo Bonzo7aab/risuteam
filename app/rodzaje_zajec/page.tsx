@@ -103,7 +103,7 @@ export default function RodzajeZajecPage() {
             <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full transform scale-90" />
             <div className="relative grid grid-cols-2 gap-4">
               <div className="space-y-4 pt-8">
-                <div className="w-full aspect-[4/5] rounded-2xl overflow-hidden shadow-xl relative">
+                <div className="w-full aspect-4/5 rounded-2xl overflow-hidden shadow-xl relative">
                   <Image
                     src="https://lh3.googleusercontent.com/aida-public/AB6AXuDwuRdVARpR_0ExfqHNPi_eE5De9yCF9EgcnSwwoPw1-ph3hHx0dWsJyCgpw70Zg1V5vAmIb7sxPn4a91VxOXiY7I8Xn4kIxH_SN-TkSko7I8vQs9L9eFR52DfMSeB4DUU9AXEYf3rK0X38QY46kebX2g3ixUIEE8PxA8gczZfX6nJP9aXtsYn2HxCbNQ8NpB2vi_blIV4jICf3e2Wl5YWtx41vRXTxV2cJ0C2-kck_zI99lPpxKUmRWoyb8ykkiIaS-MCPnRAQ5bed"
                     alt="Dziecko w karate"
@@ -114,7 +114,7 @@ export default function RodzajeZajecPage() {
                 </div>
               </div>
               <div className="space-y-4">
-                <div className="w-full aspect-[4/5] rounded-2xl overflow-hidden shadow-xl relative">
+                <div className="w-full aspect-4/5 rounded-2xl overflow-hidden shadow-xl relative">
                   <Image
                     src="https://lh3.googleusercontent.com/aida-public/AB6AXuBlbRn92vGdbX1QHQKejfR1_MwhDVwqnKB1l9dIsAbob6ALTveqNAvqsdOEERYLonMB8y4kksowHuqr-1IhwsUbcCpYJOtVICppi0lBazp9-H9ugB5wj-YNrbWMqtygyqvB8BbsYxWNDr53cPFFR__igx-MulvIr52bKPtyX6rmHoXUb9ytjHE9P5Jk-samiwBABtvQi4pgOEVxJ342Ds-osWIo3azhtwxCJpSMYBvHvT61Lu_iFZ5gJcg_WOQMT4q5OI-h34yP6QHk"
                     alt="Dziewczynka na równoważni"
@@ -174,7 +174,7 @@ export default function RodzajeZajecPage() {
                       className="object-cover"
                       unoptimized
                     />
-                    <div className="absolute bottom-4 left-4 bg-white/90 dark:bg-black/80 backdrop-blur-sm px-4 py-2 rounded-lg shadow-sm">
+                    <div className="absolute bottom-4 left-4 bg-white/90 dark:bg-black/80 backdrop-blur-xs px-4 py-2 rounded-lg shadow-xs">
                       <span className="flex items-center gap-2 text-sm font-bold text-primary">
                         <span className="material-symbols-outlined">verified</span>
                         {d.ages}

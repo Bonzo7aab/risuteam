@@ -114,7 +114,7 @@ export default function LokalizacjaPage() {
                     key={activity}
                     type="button"
                     onClick={() => setActivityFilter(activity)}
-                    className={`rounded-full px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-stone-900 ${
+                    className={`rounded-full px-4 py-2 text-sm font-medium transition-colors focus:outline-hidden focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-stone-900 ${
                       activityFilter === activity
                         ? "bg-primary text-primary-foreground hover:bg-primary-hover shadow-md"
                         : "bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-700"
@@ -156,7 +156,7 @@ export default function LokalizacjaPage() {
                         )}
                         <Button
                           size="sm"
-                          variant={isSelected ? "default" : "outline"}
+                          variant={isSelected ? "default" : "outline-solid"}
                           className={`mt-3 w-fit rounded-xl ${
                             isSelected
                               ? ""

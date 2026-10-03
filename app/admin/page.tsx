@@ -72,7 +72,7 @@ function formatRegistrationDate(ts: number): string {
 
 function registrationStatusLabel(
   status?: string
-): { label: string; variant: "default" | "secondary" | "destructive" | "outline" } {
+): { label: string; variant: "default" | "secondary" | "destructive" | "outline-solid" } {
   const s = status?.toLowerCase() ?? "";
   if (s === "new") return { label: "Nowa", variant: "secondary" };
   if (s === "confirmed") return { label: "Potwierdzona", variant: "default" };

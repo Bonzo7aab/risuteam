@@ -239,7 +239,7 @@ export function EventRegistrationsView({
           Rejestracje
         </Link>
         <span className="mx-1.5 sm:mx-2">/</span>
-        <span className="break-words text-text-main dark:text-white">
+        <span className="wrap-break-word text-text-main dark:text-white">
           {eventTitle}
         </span>
       </nav>
@@ -280,7 +280,7 @@ export function EventRegistrationsView({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="min-h-11 min-w-0 touch-manipulation px-2 text-xs sm:min-h-9 sm:min-w-[10rem] sm:px-3 sm:text-sm"
+                  className="min-h-11 min-w-0 touch-manipulation px-2 text-xs sm:min-h-9 sm:min-w-40 sm:px-3 sm:text-sm"
                   asChild
                 >
                   <Link href={formQuestionsHref} className="truncate">
@@ -293,7 +293,7 @@ export function EventRegistrationsView({
                 <Button
                   variant="secondary"
                   size="sm"
-                  className="min-h-11 min-w-0 touch-manipulation px-2 text-xs sm:min-h-9 sm:min-w-[10rem] sm:px-3 sm:text-sm"
+                  className="min-h-11 min-w-0 touch-manipulation px-2 text-xs sm:min-h-9 sm:min-w-40 sm:px-3 sm:text-sm"
                   asChild
                 >
                   <Link href={editCampHref} className="truncate">
@@ -306,7 +306,7 @@ export function EventRegistrationsView({
                 <Button
                   variant={isRegistrationOpen ? "destructive" : "default"}
                   size="sm"
-                  className="min-h-11 min-w-0 touch-manipulation px-2 text-xs sm:min-h-9 sm:min-w-[10rem] sm:px-3 sm:text-sm"
+                  className="min-h-11 min-w-0 touch-manipulation px-2 text-xs sm:min-h-9 sm:min-w-40 sm:px-3 sm:text-sm"
                   onClick={onToggleRegistrationOpen}
                 >
                   <span className="truncate sm:max-w-none">
@@ -326,7 +326,7 @@ export function EventRegistrationsView({
               <Button
                 type="button"
                 size="sm"
-                className="min-h-11 w-full touch-manipulation sm:min-h-9 sm:w-auto sm:min-w-[10rem]"
+                className="min-h-11 w-full touch-manipulation sm:min-h-9 sm:w-auto sm:min-w-40"
                 onClick={newRegistrationOnClick}
               >
                 + Nowa rejestracja
@@ -335,7 +335,7 @@ export function EventRegistrationsView({
               <Button
                 asChild
                 size="sm"
-                className="min-h-11 w-full touch-manipulation sm:min-h-9 sm:w-auto sm:min-w-[10rem]"
+                className="min-h-11 w-full touch-manipulation sm:min-h-9 sm:w-auto sm:min-w-40"
               >
                 <Link href={newRegistrationHref}>+ Nowa rejestracja</Link>
               </Button>
@@ -381,7 +381,7 @@ export function EventRegistrationsView({
                 </div>
               </CardContent>
             </Card>
-            <div className="min-w-0 sm:col-span-1 sm:h-full [&>*]:h-full">
+            <div className="min-w-0 sm:col-span-1 sm:h-full *:h-full">
               {slotAboveStats}
             </div>
           </div>
@@ -421,7 +421,7 @@ export function EventRegistrationsView({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="min-h-11 w-full touch-manipulation sm:min-h-9 sm:w-auto sm:min-w-[10rem]"
+                  className="min-h-11 w-full touch-manipulation sm:min-h-9 sm:w-auto sm:min-w-40"
                   asChild
                 >
                   <Link href={formQuestionsHref}>Pytania formularza</Link>
@@ -431,7 +431,7 @@ export function EventRegistrationsView({
                 <Button
                   variant="secondary"
                   size="sm"
-                  className="min-h-11 w-full touch-manipulation sm:min-h-9 sm:w-auto sm:min-w-[10rem]"
+                  className="min-h-11 w-full touch-manipulation sm:min-h-9 sm:w-auto sm:min-w-40"
                   asChild
                 >
                   <Link href={editCampHref}>Edytuj obóz</Link>
@@ -441,7 +441,7 @@ export function EventRegistrationsView({
                 <Button
                   variant={isRegistrationOpen ? "destructive" : "default"}
                   size="sm"
-                  className="min-h-11 w-full touch-manipulation sm:min-h-9 sm:w-auto sm:min-w-[10rem]"
+                  className="min-h-11 w-full touch-manipulation sm:min-h-9 sm:w-auto sm:min-w-40"
                   onClick={onToggleRegistrationOpen}
                 >
                   {isRegistrationOpen
@@ -453,7 +453,7 @@ export function EventRegistrationsView({
                 <Button
                   type="button"
                   size="sm"
-                  className="min-h-11 w-full touch-manipulation sm:min-h-9 sm:w-auto sm:min-w-[10rem]"
+                  className="min-h-11 w-full touch-manipulation sm:min-h-9 sm:w-auto sm:min-w-40"
                   onClick={newRegistrationOnClick}
                 >
                   + Nowa rejestracja
@@ -462,7 +462,7 @@ export function EventRegistrationsView({
                 <Button
                   asChild
                   size="sm"
-                  className="min-h-11 w-full touch-manipulation sm:min-h-9 sm:w-auto sm:min-w-[10rem]"
+                  className="min-h-11 w-full touch-manipulation sm:min-h-9 sm:w-auto sm:min-w-40"
                 >
                   <Link href={newRegistrationHref}>+ Nowa rejestracja</Link>
                 </Button>
@@ -597,7 +597,7 @@ export function EventRegistrationsView({
                     }}
                     className={cn(
                       filterFieldClass,
-                      "max-sm:flex-[2] max-sm:min-w-0 sm:w-full"
+                      "max-sm:flex-2 max-sm:min-w-0 sm:w-full"
                     )}
                   />
                   <Button
@@ -619,7 +619,7 @@ export function EventRegistrationsView({
                   }}
                   className={cn(
                     filterFieldClass,
-                    "px-3 py-2 sm:w-auto sm:min-w-[11rem]",
+                    "px-3 py-2 sm:w-auto sm:min-w-44",
                     !moreFiltersOpen && "max-sm:hidden"
                   )}
                 >
@@ -636,7 +636,7 @@ export function EventRegistrationsView({
                   }}
                   className={cn(
                     filterFieldClass,
-                    "px-3 py-2 sm:w-auto sm:min-w-[11rem]",
+                    "px-3 py-2 sm:w-auto sm:min-w-44",
                     !moreFiltersOpen && "max-sm:hidden"
                   )}
                 >

@@ -29,7 +29,7 @@ export function AdminMobileMenuCards() {
             key={item.href}
             href={item.href}
             className={cn(
-              "flex flex-col items-center gap-2 rounded-xl border px-2 py-3 shadow-sm transition-all active:scale-[0.98]",
+              "flex flex-col items-center gap-2 rounded-xl border px-2 py-3 shadow-xs transition-all active:scale-[0.98]",
               active
                 ? "border-primary bg-primary/10 dark:bg-primary/15"
                 : "border-stone-200 bg-white hover:border-primary/40 hover:shadow-md dark:border-stone-700 dark:bg-stone-900/80"

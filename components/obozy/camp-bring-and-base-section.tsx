@@ -28,7 +28,7 @@ export function CampBringAndBaseSection({
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid md:grid-cols-2 gap-6 md:gap-8">
           {/* Co zabrać? */}
-          <div className="rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 p-6 shadow-sm">
+          <div className="rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 p-6 shadow-xs">
             <h2 className="text-lg font-bold text-stone-900 dark:text-white mb-4 flex items-center gap-2">
               <span className="material-symbols-outlined text-primary text-xl">luggage</span>
               Co zabrać?
@@ -49,7 +49,7 @@ export function CampBringAndBaseSection({
 
           {/* Nasza baza */}
           {hasLocation ? (
-            <div className="rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 overflow-hidden shadow-sm">
+            <div className="rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 overflow-hidden shadow-xs">
               <h2 className="text-lg font-bold text-stone-900 dark:text-white p-6 pb-2 flex items-center gap-2">
                 <span className="material-symbols-outlined text-primary text-xl">home</span>
                 Nasza baza
@@ -67,7 +67,7 @@ export function CampBringAndBaseSection({
                     referrerPolicy="no-referrer-when-downgrade"
                   />
                 </div>
-                <div className="mt-3 flex items-start gap-2 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 p-3 shadow-sm">
+                <div className="mt-3 flex items-start gap-2 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 p-3 shadow-xs">
                   <span className="material-symbols-outlined text-primary text-lg shrink-0 mt-0.5">location_on</span>
                   <div>
                     <p className="font-medium text-stone-900 dark:text-white">{location!.name}</p>
@@ -79,7 +79,7 @@ export function CampBringAndBaseSection({
               </div>
             </div>
           ) : (
-            <div className="rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 p-6 shadow-sm flex items-center justify-center min-h-[200px]">
+            <div className="rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 p-6 shadow-xs flex items-center justify-center min-h-[200px]">
               <p className="text-sm text-stone-500 dark:text-stone-400">Brak lokalizacji</p>
             </div>
           )}

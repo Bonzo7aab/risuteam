@@ -65,7 +65,7 @@ export function DobPicker({
       </PopoverTrigger>
       <PopoverContent
         container={inDialog ? popoverContainer ?? undefined : undefined}
-        className={cn("w-auto p-0", inDialog ? "z-[100]" : "z-[60]")}
+        className={cn("w-auto p-0", inDialog ? "z-100" : "z-60")}
         align="start"
       >
         <Calendar

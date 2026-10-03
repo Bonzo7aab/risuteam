@@ -99,7 +99,7 @@ export default function AdminRejestracjePage() {
                             href={`/admin/rejestracje/oboz/${encodeURIComponent(camp.slug)}`}
                             className={cn(
                               "font-semibold text-text-main transition-colors hover:text-primary dark:text-white",
-                              "rounded focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                              "rounded focus:outline-hidden focus:ring-2 focus:ring-primary focus:ring-offset-2"
                             )}
                           >
                             {camp.name}
@@ -156,7 +156,7 @@ export default function AdminRejestracjePage() {
                             href={`/admin/rejestracje/nocowanka/${encodeURIComponent(item.slug)}`}
                             className={cn(
                               "font-semibold text-text-main transition-colors hover:text-primary dark:text-white",
-                              "rounded focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                              "rounded focus:outline-hidden focus:ring-2 focus:ring-primary focus:ring-offset-2"
                             )}
                           >
                             {item.name}

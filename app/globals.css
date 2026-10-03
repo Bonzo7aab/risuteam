@@ -1,17 +1,245 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+@plugin 'tailwindcss-animate';
 
-/* Fix to close button on InfoWindow in Google Maps https://github.com/visgl/react-google-maps/issues/378 */
-.gm-style-iw-chr {
-  position: absolute;
-  display: flex;
-  top: 0;
-  right: 0;
+@custom-variant dark (&:is(.dark *));
+
+@utility container {
+  margin-inline: auto;
+  padding-inline: 2rem;
+  @media (width >= 1400px) {
+    max-width: 1400px;
+  }
 }
 
-.gm-style-iw.gm-style-iw-c {
-  padding-top: 14px !important;
+@theme inline {
+  --font-display: var(--font-display), 'Plus Jakarta Sans', sans-serif;
+}
+
+@theme {
+  --background-image-risuhero: url('/risuhero.jpg');
+
+  --shadow-soft: 0 10px 40px -10px rgba(0, 0, 0, 0.08);
+  --shadow-glow: 0 0 20px -5px rgba(244, 157, 37, 0.4);
+  --shadow-card:
+    0 1px 2px rgba(28, 22, 13, 0.04), 0 8px 24px -8px rgba(28, 22, 13, 0.12);
+  --shadow-card-hover:
+    0 2px 4px rgba(28, 22, 13, 0.06), 0 16px 40px -12px rgba(28, 22, 13, 0.18);
+  --shadow-card-dark:
+    0 1px 2px rgba(0, 0, 0, 0.24), 0 12px 32px -10px rgba(0, 0, 0, 0.45);
+  --shadow-card-dark-hover:
+    0 2px 6px rgba(0, 0, 0, 0.3), 0 20px 48px -12px rgba(0, 0, 0, 0.55);
+
+  --color-primary-hover: #e38b14;
+  --color-background-light: #f8f7f5;
+  --color-background-dark: #221a10;
+  --color-text-main: #1c160d;
+  --color-text-light: #9c7a49;
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+
+  --radius: 0.5rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-2xl: 2rem;
+  --radius-3xl: 2.5rem;
+  --radius-full: 9999px;
+  --radius-lgVar: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+  --animate-marquee: marquee var(--duration, 40s) infinite linear;
+  --animate-marquee-vertical: marquee-vertical var(--duration, 40s) linear
+    infinite;
+  --animate-float: float 5.5s ease-in-out infinite;
+  --animate-kenburns: kenburns 22s ease-out forwards;
+  --animate-shine: shine 0.85s ease-out;
+  --animate-orb-drift: orb-drift 9s ease-in-out infinite;
+
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(calc(-100% - var(--gap, 1rem)));
+    }
+  }
+  @keyframes marquee-vertical {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(calc(-100% - var(--gap, 1rem)));
+    }
+  }
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-8px);
+    }
+  }
+  @keyframes kenburns {
+    0% {
+      transform: scale(1);
+    }
+    100% {
+      transform: scale(1.07);
+    }
+  }
+  @keyframes shine {
+    0% {
+      transform: translateX(-150%) skewX(-16deg);
+    }
+    100% {
+      transform: translateX(280%) skewX(-16deg);
+    }
+  }
+  @keyframes orb-drift {
+    0%,
+    100% {
+      transform: translate(0, 0) scale(1);
+    }
+    50% {
+      transform: translate(14px, -10px) scale(1.08);
+    }
+  }
+}
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+}
+
+@utility risu-underline {
+  text-decoration-line: none;
+  text-decoration-color: currentColor;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.22em;
+
+  &:hover {
+    text-decoration-line: underline;
+  }
+
+  &:focus-visible {
+    text-decoration-line: underline;
+  }
+}
+
+@utility risu-underline-primary {
+  text-decoration-color: hsl(var(--primary));
+}
+
+@utility risu-card {
+  @apply relative bg-white ring-1 ring-black/5 dark:bg-[#2a2015] dark:ring-white/10;
+  transition-property:
+    box-shadow, transform, background-color, color, border-color;
+  transition-duration: 300ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 1px 2px rgba(28, 22, 13, 0.05),
+    0 10px 28px -8px rgba(28, 22, 13, 0.14);
+
+  .dark & {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      0 1px 2px rgba(0, 0, 0, 0.35),
+      0 16px 36px -10px rgba(0, 0, 0, 0.55);
+  }
+}
+
+@utility risu-card-hover {
+  @apply will-change-transform;
+
+  &:hover {
+    @apply -translate-y-1;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.7),
+      0 2px 4px rgba(28, 22, 13, 0.06),
+      0 16px 40px -12px rgba(28, 22, 13, 0.18);
+  }
+
+  .dark &:hover {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      0 2px 6px rgba(0, 0, 0, 0.3),
+      0 20px 48px -12px rgba(0, 0, 0, 0.55);
+  }
+}
+
+@utility risu-icon-well {
+  @apply flex shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary shadow-[inset_0_1px_0_rgba(255,255,255,0.7),0_1px_2px_rgba(28,22,13,0.06)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_1px_2px_rgba(0,0,0,0.25)];
+}
+
+@layer utilities {
+  /* Fix to close button on InfoWindow in Google Maps https://github.com/visgl/react-google-maps/issues/378 */
+  .gm-style-iw-chr {
+    position: absolute;
+    display: flex;
+    top: 0;
+    right: 0;
+  }
+
+  .gm-style-iw.gm-style-iw-c {
+    padding-top: 14px !important;
+  }
 }
 
 @layer base {
@@ -84,24 +312,6 @@
   }
 }
 
-@layer utilities {
-  .risu-underline {
-    text-decoration-line: none;
-    text-decoration-color: currentColor;
-    text-decoration-thickness: 2px;
-    text-underline-offset: 0.22em;
-  }
-
-  .risu-underline:hover,
-  .risu-underline:focus-visible {
-    text-decoration-line: underline;
-  }
-
-  .risu-underline-primary {
-    text-decoration-color: hsl(var(--primary));
-  }
-}
-
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
@@ -122,6 +332,20 @@
     radial-gradient(circle at 10% 20%, rgba(244, 157, 37, 0.05) 0%, transparent 40%),
     radial-gradient(circle at 90% 80%, rgba(74, 144, 226, 0.05) 0%, transparent 40%),
     radial-gradient(circle at 50% 50%, rgba(248, 231, 28, 0.05) 0%, transparent 50%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-float,
+  .animate-kenburns,
+  .animate-shine,
+  .animate-orb-drift,
+  .animate-ping {
+    animation: none !important;
+  }
+
+  .risu-card-hover:hover {
+    transform: none;
+  }
 }
 
 /* Driver.js onboarding (dashboard tour) */

@@ -36,7 +36,7 @@ export function PixelImage({
   maxAnimationDelay = 1200,
   colorRevealDelay = 1500,
   className,
-  aspectRatio = "aspect-[4/3]",
+  aspectRatio = "aspect-4/3",
 }: PixelImageProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [inView, setInView] = useState(false);

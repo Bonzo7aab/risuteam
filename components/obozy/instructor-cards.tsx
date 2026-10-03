@@ -53,8 +53,8 @@ export function InstructorCards({
                 key={instructor.name + (instructor.nickname ?? "")}
                 className={cn(
                   isStaff
-                    ? "rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 p-6 shadow-sm flex flex-col items-center text-center"
-                    : "rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 overflow-hidden shadow-sm text-center"
+                    ? "rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 p-6 shadow-xs flex flex-col items-center text-center"
+                    : "rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 overflow-hidden shadow-xs text-center"
                 )}
               >
                 <div
