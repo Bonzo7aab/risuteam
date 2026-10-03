@@ -87,6 +87,8 @@ export default defineSchema({
     category: v.optional(v.string()),
     ageGroup: v.optional(v.string()),
     heroImageUrl: v.optional(v.string()),
+    /** Optional full-bleed mid-page promo strip on camp detail */
+    promoBannerUrl: v.optional(v.string()),
     galleryImageUrls: v.optional(v.array(v.string())),
     coachIds: v.optional(v.array(v.id("coaches"))),
     earlyBirdDiscountPercent: v.optional(v.number()),

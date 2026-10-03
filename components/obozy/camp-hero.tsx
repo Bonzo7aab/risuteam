@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { campRegistrationCtaHref } from "@/lib/camp-registration-links";
@@ -6,25 +8,27 @@ export type CampHeroProps = {
   badge: string;
   /** Optional second badge (e.g. "OSTATNIE MIEJSCA") */
   badgeSecondary?: string;
-  /** Full camp name as single title (new layout) */
+  /** Full camp name as single title */
   title?: string;
-  /** Legacy: first part of title */
+  /** Split title: first part (accent) */
   titlePart1?: string;
-  /** Legacy: second part of title */
+  /** Split title: second part */
   titlePart2?: string;
   image: string;
   imageAlt: string;
   meta: { icon: string; text: string }[];
   /** Optional secondary link (e.g. "Wszystkie obozy") */
   secondaryLink?: { label: string; href: string };
-  /** Back control over the hero image (frosted pill, top-left; mobile + desktop) */
+  /** Back control over the hero image (frosted pill, top-left) */
   backLink?: { href: string; label: string };
-  /** Rejestracja — primary CTA on the hero image (card layout / obóz slug) */
+  /** Rejestracja — primary CTA */
   registrationHref?: string;
   isRegistrationClosed?: boolean;
-  /** Legacy: primary CTA (used when title is not provided) */
+  /** Explicit layout; defaults to fullBleed when no `title`, or when layout="fullBleed" */
+  layout?: "fullBleed" | "card";
+  /** Primary CTA (full-bleed; used when registrationHref is not set) */
   ctaPrimary?: { label: string; href: string };
-  /** Legacy: secondary CTA */
+  /** Secondary CTA */
   ctaSecondary?: { label: string; href: string };
 };
 
@@ -32,7 +36,7 @@ function HeroBackLink({ href, label }: { href: string; label: string }) {
   return (
     <Link
       href={href}
-      className="inline-flex max-w-[min(100%,calc(100vw-2rem))] items-center gap-1.5 rounded-full bg-black/40 px-3 py-2 text-sm font-semibold text-white shadow-[0_8px_24px_-8px_rgba(0,0,0,0.45)] ring-1 ring-white/15 backdrop-blur-sm transition-colors hover:bg-black/55"
+      className="inline-flex max-w-[min(100%,calc(100vw-2rem))] items-center gap-1.5 rounded-full bg-black/40 px-3 py-2 text-sm font-semibold text-white shadow-[0_8px_24px_-8px_rgba(0,0,0,0.45)] ring-1 ring-white/15 backdrop-blur-xs transition-colors hover:bg-black/55"
     >
       <span className="material-symbols-outlined shrink-0 text-xl leading-none" aria-hidden>
         arrow_back
@@ -78,34 +82,64 @@ export function CampHero({
   backLink,
   registrationHref,
   isRegistrationClosed = false,
+  layout,
   ctaPrimary,
   ctaSecondary,
 }: CampHeroProps) {
-  const useCardLayout = title != null;
-  const displayTitle = title ?? ([titlePart1, titlePart2].filter(Boolean).join(" ").trim() || "Obóz");
+  const useCardLayout = layout === "card" || (layout == null && title != null);
+  const displayTitle =
+    title ?? ([titlePart1, titlePart2].filter(Boolean).join(" ").trim() || "Obóz");
 
   if (!useCardLayout) {
+    const primaryCta =
+      registrationHref != null
+        ? {
+            label: isRegistrationClosed ? "Rejestracja zakończona" : "Zapisz się teraz",
+            href: campRegistrationCtaHref(registrationHref, isRegistrationClosed),
+            disabled: isRegistrationClosed,
+          }
+        : ctaPrimary
+          ? { ...ctaPrimary, disabled: false }
+          : null;
+
     return (
       <section className="relative flex min-h-[70vh] items-center justify-start">
         <div className="absolute inset-0">
-          <Image src={image} alt={imageAlt} fill className="object-cover" sizes="100vw" priority />
-          <div className="absolute inset-0 bg-black/50" aria-hidden />
+          <Image
+            src={image}
+            alt={imageAlt}
+            fill
+            className="object-cover"
+            sizes="100vw"
+            priority
+            unoptimized={image.startsWith("data:")}
+          />
+          <div className="absolute inset-0 bg-linear-to-r from-black/70 via-black/50 to-black/30" aria-hidden />
         </div>
-        <div className="relative z-10 mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-          <div className="max-w-xl">
-            <span className="mb-6 inline-block rounded bg-primary px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-primary-foreground">
-              {badge}
-            </span>
+        {backLink ? (
+          <div className="absolute left-4 top-[max(env(safe-area-inset-top),1rem)] z-20 sm:left-6 lg:left-8">
+            <HeroBackLink href={backLink.href} label={backLink.label} />
+          </div>
+        ) : null}
+        <div className="relative z-10 mx-auto w-full max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+          <div className="max-w-2xl">
+            <BadgeRow badge={badge} badgeSecondary={badgeSecondary} />
             <h1 className="mb-6 text-4xl font-bold leading-tight text-white md:text-5xl lg:text-6xl">
-              <span className="text-primary">{titlePart1 ?? displayTitle}</span>
-              {titlePart2 ? (
+              {titlePart1 || titlePart2 ? (
                 <>
-                  <br />
-                  <span>{titlePart2}</span>
+                  <span className="text-primary">{titlePart1 ?? displayTitle}</span>
+                  {titlePart2 ? (
+                    <>
+                      <br />
+                      <span>{titlePart2}</span>
+                    </>
+                  ) : null}
                 </>
-              ) : null}
+              ) : (
+                <span>{displayTitle}</span>
+              )}
             </h1>
-            <ul className="mb-8 space-y-2 text-sm text-white/90 md:text-base">
+            <ul className="mb-8 space-y-2.5 text-sm text-white/90 md:text-base">
               {meta.map((item) => (
                 <li key={item.text} className="flex items-center gap-2">
                   <span className="material-symbols-outlined text-lg text-primary" aria-hidden>
@@ -116,20 +150,36 @@ export function CampHero({
               ))}
             </ul>
             <div className="flex flex-wrap gap-3">
-              {ctaPrimary ? (
+              {primaryCta ? (
                 <Link
-                  href={ctaPrimary.href}
-                  className="inline-flex items-center justify-center rounded-xl bg-primary px-6 py-3 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary/90"
+                  href={primaryCta.href}
+                  onClick={(e) => {
+                    if (primaryCta.disabled) e.preventDefault();
+                  }}
+                  className={`inline-flex items-center justify-center rounded-xl px-6 py-3 text-sm font-bold transition-colors ${
+                    primaryCta.disabled
+                      ? "cursor-not-allowed bg-white/25 text-white/80"
+                      : "bg-primary text-primary-foreground hover:bg-primary/90"
+                  }`}
+                  aria-disabled={primaryCta.disabled}
                 >
-                  {ctaPrimary.label}
+                  {primaryCta.label}
                 </Link>
               ) : null}
               {ctaSecondary ? (
                 <Link
                   href={ctaSecondary.href}
-                  className="inline-flex items-center justify-center rounded-xl border border-stone-500/50 bg-stone-700/90 px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-stone-600/90"
+                  className="inline-flex items-center justify-center rounded-xl border border-white/40 bg-white/10 px-6 py-3 text-sm font-bold text-white backdrop-blur-xs transition-colors hover:bg-white/20"
                 >
                   {ctaSecondary.label}
+                </Link>
+              ) : null}
+              {secondaryLink ? (
+                <Link
+                  href={secondaryLink.href}
+                  className="inline-flex items-center justify-center px-2 py-3 text-sm font-medium text-white/90 risu-underline hover:text-white"
+                >
+                  {secondaryLink.label}
                 </Link>
               ) : null}
             </div>
@@ -141,10 +191,9 @@ export function CampHero({
 
   return (
     <section className="md:mx-auto md:max-w-7xl md:px-4 md:pb-12 md:pt-4 lg:px-8">
-      {/* Mobile: full-width image flush top, no rounding; title + meta below */}
       <div className="md:hidden">
         <div className="relative min-h-[220px] w-full bg-stone-200 dark:bg-stone-800">
-          <div className="relative aspect-[5/4] min-h-[220px] w-full">
+          <div className="relative aspect-5/4 min-h-[220px] w-full">
             <Image
               src={image}
               alt={imageAlt}
@@ -152,6 +201,7 @@ export function CampHero({
               className="object-cover object-top"
               sizes="100vw"
               priority
+              unoptimized={image.startsWith("data:")}
             />
             {backLink ? (
               <div className="absolute left-4 top-[max(env(safe-area-inset-top),0.75rem)] z-20">
@@ -159,7 +209,7 @@ export function CampHero({
               </div>
             ) : null}
             {registrationHref ? (
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 bg-gradient-to-t from-black/65 via-black/25 to-transparent pt-16 pb-4 px-4">
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 bg-linear-to-t from-black/65 via-black/25 to-transparent pt-16 pb-4 px-4">
                 <div className="pointer-events-auto mx-auto w-full max-w-md">
                   <Link
                     href={campRegistrationCtaHref(registrationHref, isRegistrationClosed)}
@@ -206,9 +256,8 @@ export function CampHero({
         </div>
       </div>
 
-      {/* Desktop: rounded card, overlay on image */}
       <div className="relative hidden overflow-hidden rounded-2xl border border-stone-200 bg-stone-100 shadow-lg dark:border-stone-700 dark:bg-stone-800/50 md:block md:rounded-3xl">
-        <div className="relative aspect-[21/9] min-h-[360px]">
+        <div className="relative aspect-21/9 min-h-[360px]">
           <Image
             src={image}
             alt={imageAlt}
@@ -216,9 +265,10 @@ export function CampHero({
             className="object-cover"
             sizes="(max-width: 768px) 100vw, 1280px"
             priority
+            unoptimized={image.startsWith("data:")}
           />
           <div
-            className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"
+            className="absolute inset-0 bg-linear-to-t from-black/70 via-black/30 to-transparent"
             aria-hidden
           />
           {backLink ? (

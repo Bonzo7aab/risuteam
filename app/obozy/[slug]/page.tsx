@@ -12,6 +12,8 @@ import {
   CampBringAndBaseSection,
   CampCoachesList,
   CampCtaBlock,
+  CampPromoBanner,
+  CampGallery,
 } from "@/components/obozy";
 import { CampRegistrationClosedBanner } from "@/components/obozy/camp-registration-closed-banner";
 import { BlurFade } from "@/components/ui/blur-fade";
@@ -93,7 +95,9 @@ export default function CampBySlugPage() {
   const locationStr = camp.location?.name ?? camp.location?.city ?? "—";
   const priceNum = camp.price ?? 0;
   const priceStr = priceNum > 0 ? `${priceNum} PLN` : "—";
-  const heroImage = camp.heroImageUrl ?? "https://images.pexels.com/photos/3764011/pexels-photo-3764011.jpeg?auto=compress&cs=tinysrgb&w=1200";
+  const heroImage =
+    camp.heroImageUrl ??
+    "https://images.pexels.com/photos/3764011/pexels-photo-3764011.jpeg?auto=compress&cs=tinysrgb&w=1200";
   const isRegistrationClosed = camp.isRegistrationOpen === false;
   const detailHref = `/obozy/${camp.slug}`;
   const registrationHref = `${detailHref}/rejestracja`;
@@ -138,10 +142,7 @@ export default function CampBySlugPage() {
   const priceDescription =
     "Wszystko wliczone w cenę: transport, noclegi, wyżywienie, opieka i program.";
   const priceIncluded = camp.includedItems?.length
-    ? [
-        ...camp.includedItems,
-        "Ubezpieczenie NNW w cenie",
-      ].slice(0, 4)
+    ? [...camp.includedItems, "Ubezpieczenie NNW w cenie"].slice(0, 4)
     : ["Rabat rodzinny: -100 PLN na drugie dziecko", "Ubezpieczenie NNW w cenie"];
   const installments =
     priceNum >= 500
@@ -152,13 +153,16 @@ export default function CampBySlugPage() {
           { label: "III Rata", deadline: "Do 15 czerwca", amount: "—" },
         ];
 
-  const galleryImages = (camp.galleryImageUrls ?? []).slice(0, 2);
+  const galleryImages = (camp.galleryImageUrls ?? []).filter(Boolean);
+  const promoBannerUrl = camp.promoBannerUrl?.trim() || "";
+  const useRichGallery = galleryImages.length >= 3;
 
   return (
     <div className="min-h-screen bg-stone-50 dark:bg-stone-900/30">
       <CampRegistrationClosedBanner slug={camp.slug} />
 
       <CampHero
+        layout="fullBleed"
         badge={badge}
         badgeSecondary={badgeSecondary}
         title={camp.name}
@@ -175,12 +179,12 @@ export default function CampBySlugPage() {
       />
 
       {camp.description?.trim() ? (
-        <section className="py-8 md:py-12 bg-white dark:bg-stone-900/50 border-t border-stone-200 dark:border-stone-700">
+        <section className="py-12 md:py-16 bg-white dark:bg-stone-900/50">
           <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="text-xl font-bold text-stone-900 dark:text-white mb-4">
-              Opis
+            <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-stone-900 dark:text-white mb-5">
+              O obozie
             </h2>
-            <p className="text-stone-600 dark:text-stone-400 whitespace-pre-wrap leading-relaxed">
+            <p className="text-stone-600 dark:text-stone-400 whitespace-pre-wrap leading-relaxed text-base md:text-lg">
               {camp.description.trim()}
             </p>
           </div>
@@ -188,27 +192,27 @@ export default function CampBySlugPage() {
       ) : null}
 
       {camp.generalAttractions && camp.generalAttractions.length > 0 ? (
-        <section className="py-8 md:py-12 bg-white dark:bg-stone-900/50 border-t border-stone-200 dark:border-stone-700">
+        <section className="py-12 md:py-16 bg-stone-50 dark:bg-stone-900/30 border-t border-stone-200/80 dark:border-stone-800">
           <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="text-xl font-bold text-stone-900 dark:text-white mb-4">
-              Atrakcje ogólne
+            <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-stone-900 dark:text-white mb-3">
+              Atrakcje
             </h2>
-            <p className="text-sm text-stone-600 dark:text-stone-400 mb-6">
+            <p className="text-sm md:text-base text-stone-600 dark:text-stone-400 mb-8">
               Wspólne atrakcje i aktywności dla całej grupy — oprócz programu dnia.
             </p>
-            <ul className="grid gap-3 sm:grid-cols-2">
+            <ul className="grid gap-4 sm:grid-cols-2">
               {camp.generalAttractions.map((item, i) => (
                 <li
                   key={`${item}-${i}`}
-                  className="flex items-start gap-3 rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-stone-800 shadow-sm dark:border-stone-600 dark:bg-stone-800/50 dark:text-stone-200"
+                  className="flex items-start gap-3 text-stone-800 dark:text-stone-200"
                 >
                   <span
-                    className="material-symbols-outlined shrink-0 text-xl text-primary"
+                    className="material-symbols-outlined shrink-0 text-xl text-primary mt-0.5"
                     aria-hidden
                   >
-                    verified
+                    check_circle
                   </span>
-                  <span className="text-sm font-medium leading-snug">{item}</span>
+                  <span className="text-sm md:text-base font-medium leading-snug">{item}</span>
                 </li>
               ))}
             </ul>
@@ -216,17 +220,29 @@ export default function CampBySlugPage() {
         </section>
       ) : null}
 
-      {galleryImages.length > 0 ? (
-        <section className="py-8 md:py-12 bg-stone-50 dark:bg-stone-900/30 border-t border-stone-200 dark:border-stone-700">
+      {useRichGallery ? (
+        <CampGallery
+          title="Galeria"
+          mainImage={{
+            src: galleryImages[0]!,
+            alt: `${camp.name} – zdjęcie 1`,
+          }}
+          gridImages={galleryImages.slice(1).map((src, i) => ({
+            src,
+            alt: `${camp.name} – zdjęcie ${i + 2}`,
+          }))}
+        />
+      ) : galleryImages.length > 0 ? (
+        <section className="py-12 md:py-16 bg-white dark:bg-stone-900/50 border-t border-stone-200/80 dark:border-stone-800">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="text-xl font-bold text-stone-900 dark:text-white mb-4 text-center">
+            <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-stone-900 dark:text-white mb-8 text-center">
               Galeria
             </h2>
             <div
               className={
                 galleryImages.length === 1
                   ? "mx-auto max-w-2xl"
-                  : "grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5"
+                  : "grid grid-cols-1 gap-5 sm:grid-cols-2"
               }
             >
               {galleryImages.map((src, i) => {
@@ -244,18 +260,18 @@ export default function CampBySlugPage() {
                       <button
                         type="button"
                         aria-label={`Powiększ: ${alt}`}
-                        className="group relative aspect-[4/3] w-full overflow-hidden rounded-xl border border-stone-200 bg-stone-200 text-left shadow-sm outline-none ring-offset-2 transition-shadow focus-visible:ring-2 focus-visible:ring-primary dark:border-stone-700 dark:bg-stone-800"
+                        className="group relative aspect-4/3 w-full overflow-hidden rounded-2xl bg-stone-200 text-left outline-hidden ring-offset-2 transition-shadow focus-visible:ring-2 focus-visible:ring-primary dark:bg-stone-800"
                       >
                         <Image
                           src={src}
                           alt={alt}
                           fill
-                          className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                          className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                           sizes="(max-width: 640px) 100vw, 672px"
                           unoptimized={src.startsWith("data:")}
                         />
                         <span
-                          className="pointer-events-none absolute inset-0 flex items-end justify-end bg-gradient-to-t from-black/55 via-transparent to-transparent p-3 opacity-0 transition-opacity group-hover:opacity-100"
+                          className="pointer-events-none absolute inset-0 flex items-end justify-end bg-linear-to-t from-black/50 via-transparent to-transparent p-3 opacity-0 transition-opacity group-hover:opacity-100"
                           aria-hidden
                         >
                           <span className="material-symbols-outlined text-2xl text-white drop-shadow-md">
@@ -275,6 +291,13 @@ export default function CampBySlugPage() {
       {programDays.some((d) => d.slots.length > 0) && (
         <CampProgramSection days={programDays} pdfHref="#" />
       )}
+
+      {promoBannerUrl ? (
+        <CampPromoBanner
+          imageUrl={promoBannerUrl}
+          alt={`${camp.name} – baner promocyjny`}
+        />
+      ) : null}
 
       <CampPricePaymentSection
         priceDescription={priceDescription}

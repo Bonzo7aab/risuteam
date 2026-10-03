@@ -10,6 +10,8 @@ export { CampBringAndBaseSection } from "./camp-bring-and-base-section";
 export type { CampBringAndBaseSectionProps } from "./camp-bring-and-base-section";
 export { CampCtaBlock } from "./camp-cta-block";
 export type { CampCtaBlockProps } from "./camp-cta-block";
+export { CampPromoBanner } from "./camp-promo-banner";
+export type { CampPromoBannerProps } from "./camp-promo-banner";
 export { FeatureCards } from "./feature-cards";
 export type { FeatureCardsProps, FeatureCard } from "./feature-cards";
 export { DailyProgram } from "./daily-program";

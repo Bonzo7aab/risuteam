@@ -118,6 +118,7 @@ type CampFormState = {
   category: "letni" | "zimowy" | "polkolonie";
   ageGroup: string;
   heroImageUrl: string;
+  promoBannerUrl: string;
   galleryImageUrls: string[];
   scheduleByDay: ScheduleDay[];
   includedItems: string[];
@@ -156,6 +157,7 @@ function campToFormState(camp: {
   category?: string | null;
   ageGroup?: string | null;
   heroImageUrl?: string | null;
+  promoBannerUrl?: string | null;
   galleryImageUrls?: string[] | null;
   scheduleByDay?: Array<{ dayLabel: string; slots: Array<{ time: string; activity: string }> }> | null;
   includedItems?: string[] | null;
@@ -182,6 +184,7 @@ function campToFormState(camp: {
     category,
     ageGroup: camp.ageGroup ?? "",
     heroImageUrl: camp.heroImageUrl ?? "",
+    promoBannerUrl: camp.promoBannerUrl ?? "",
     galleryImageUrls: [
       (camp.galleryImageUrls ?? [])[0] ?? "",
       (camp.galleryImageUrls ?? [])[1] ?? "",
@@ -212,8 +215,10 @@ export default function AdminEditCampPage() {
   const createLocation = useMutation(api.locations.create);
   const generateUploadUrl = useMutation(api.camps.generateUploadUrl);
   const setCampHeroImage = useMutation(api.camps.setCampHeroImage);
+  const setCampPromoBanner = useMutation(api.camps.setCampPromoBanner);
   const setCampGalleryImage = useMutation(api.camps.setCampGalleryImage);
   const heroImageFileInputRef = useRef<HTMLInputElement>(null);
+  const promoBannerFileInputRef = useRef<HTMLInputElement>(null);
   const galleryFileInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const [form, setForm] = useState<CampFormState | null>(null);
@@ -227,6 +232,8 @@ export default function AdminEditCampPage() {
   const [attractionInput, setAttractionInput] = useState("");
   const [heroUploading, setHeroUploading] = useState(false);
   const [heroUploadError, setHeroUploadError] = useState<string | null>(null);
+  const [promoUploading, setPromoUploading] = useState(false);
+  const [promoUploadError, setPromoUploadError] = useState<string | null>(null);
   const [galleryUploadingIndex, setGalleryUploadingIndex] = useState<number | null>(null);
   const [galleryUploadError, setGalleryUploadError] = useState<string | null>(null);
 
@@ -378,6 +385,38 @@ export default function AdminEditCampPage() {
     [camp, generateUploadUrl, setCampHeroImage]
   );
 
+  const handlePromoBannerFile = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      e.target.value = "";
+      if (!file || !file.type.startsWith("image/") || !camp) return;
+      setPromoUploadError(null);
+      setPromoUploading(true);
+      try {
+        const blob = await optimizeImageForHero(file);
+        const uploadUrl = await generateUploadUrl();
+        const res = await fetch(uploadUrl, {
+          method: "POST",
+          headers: { "Content-Type": "image/jpeg" },
+          body: blob,
+        });
+        if (!res.ok) throw new Error("Upload nie powiódł się.");
+        const { storageId } = (await res.json()) as { storageId: string };
+        if (!storageId) throw new Error("Brak storageId w odpowiedzi.");
+        const url = await setCampPromoBanner({
+          campId: camp._id,
+          storageId: storageId as Id<"_storage">,
+        });
+        setForm((f) => (f ? { ...f, promoBannerUrl: url } : f));
+      } catch (err) {
+        setPromoUploadError(err instanceof Error ? err.message : "Wystąpił błąd.");
+      } finally {
+        setPromoUploading(false);
+      }
+    },
+    [camp, generateUploadUrl, setCampPromoBanner]
+  );
+
   const handleGalleryImageFile = useCallback(
     async (index: 0 | 1, e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
@@ -488,6 +527,8 @@ export default function AdminEditCampPage() {
           category: form.category,
           ageGroup: form.ageGroup.trim() || undefined,
           heroImageUrl: form.heroImageUrl.trim() || undefined,
+          /** Always send so clearing the banner persists (empty → undefined in mutation). */
+          promoBannerUrl: form.promoBannerUrl.trim(),
           galleryImageUrls:
             form.galleryImageUrls.filter(Boolean).length > 0
               ? form.galleryImageUrls.filter(Boolean)
@@ -565,7 +606,7 @@ export default function AdminEditCampPage() {
       </div>
 
       {error && (
-        <div className="mb-6 rounded-xl border border-destructive/30 bg-destructive/10 p-4 shadow-sm">
+        <div className="mb-6 rounded-xl border border-destructive/30 bg-destructive/10 p-4 shadow-xs">
           <div className="flex gap-3">
             <span className="material-symbols-outlined mt-0.5 text-lg" aria-hidden>
               error
@@ -575,7 +616,7 @@ export default function AdminEditCampPage() {
         </div>
       )}
       {success && (
-        <div className="mb-6 rounded-xl border border-primary/30 bg-primary/10 p-4 shadow-sm text-primary font-medium">
+        <div className="mb-6 rounded-xl border border-primary/30 bg-primary/10 p-4 shadow-xs text-primary font-medium">
           {success}
         </div>
       )}
@@ -621,7 +662,7 @@ export default function AdminEditCampPage() {
               />
             </div>
             {form.heroImageUrl ? (
-              <div className="relative mx-auto mt-4 w-full max-w-md overflow-hidden rounded-lg border border-stone-200 shadow-sm dark:border-stone-700 sm:mx-0">
+              <div className="relative mx-auto mt-4 w-full max-w-md overflow-hidden rounded-lg border border-stone-200 shadow-xs dark:border-stone-700 sm:mx-0">
                 <img
                   src={form.heroImageUrl}
                   alt="Podgląd hero"
@@ -630,7 +671,7 @@ export default function AdminEditCampPage() {
                 <button
                   type="button"
                   onClick={() => setForm((f) => (f ? { ...f, heroImageUrl: "" } : f))}
-                  className="absolute right-2 top-2 z-10 inline-flex items-center gap-1.5 rounded-lg border border-white/20 bg-red-600 px-2.5 py-1.5 text-xs font-bold text-white shadow-md backdrop-blur-sm transition-colors hover:bg-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900"
+                  className="absolute right-2 top-2 z-10 inline-flex items-center gap-1.5 rounded-lg border border-white/20 bg-red-600 px-2.5 py-1.5 text-xs font-bold text-white shadow-md backdrop-blur-xs transition-colors hover:bg-red-700 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900"
                 >
                   <span className="material-symbols-outlined text-[18px] leading-none" aria-hidden>
                     delete
@@ -641,6 +682,70 @@ export default function AdminEditCampPage() {
             ) : null}
             {heroUploadError ? (
               <p className="mt-3 text-sm text-destructive">{heroUploadError}</p>
+            ) : null}
+          </div>
+        </section>
+
+        <section className="p-5 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/50">
+          <h2 className="text-lg font-semibold text-text-main dark:text-white mb-4">
+            Baner promocyjny (opcjonalny)
+          </h2>
+          <p className="text-sm text-muted-foreground mb-4">
+            Pełnoszerokościowe zdjęcie na środku strony obozu (między programem a ceną). Prześlij plik lub wklej URL.
+          </p>
+          <div className="min-h-[140px] rounded-xl border-2 border-dashed border-stone-200 bg-stone-50 p-5 dark:border-stone-600 dark:bg-stone-900/30">
+            <input
+              ref={promoBannerFileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handlePromoBannerFile}
+            />
+            <h3 className="mb-3 text-sm font-semibold text-text-main dark:text-white">
+              Prześlij plik
+            </h3>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                className="w-full shrink-0 sm:w-auto"
+                disabled={promoUploading}
+                onClick={() => promoBannerFileInputRef.current?.click()}
+              >
+                {promoUploading ? "Wysyłanie…" : "Dodaj plik"}
+              </Button>
+              <Input
+                type="url"
+                value={form.promoBannerUrl}
+                onChange={(e) =>
+                  setForm((f) => (f ? { ...f, promoBannerUrl: e.target.value } : f))
+                }
+                placeholder="URL banera"
+                className="min-w-0 flex-1"
+              />
+            </div>
+            {form.promoBannerUrl ? (
+              <div className="relative mx-auto mt-4 w-full max-w-md overflow-hidden rounded-lg border border-stone-200 shadow-xs dark:border-stone-700 sm:mx-0">
+                <img
+                  src={form.promoBannerUrl}
+                  alt="Podgląd banera promocyjnego"
+                  className="h-40 w-full object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={() => setForm((f) => (f ? { ...f, promoBannerUrl: "" } : f))}
+                  className="absolute right-2 top-2 z-10 inline-flex items-center gap-1.5 rounded-lg border border-white/20 bg-red-600 px-2.5 py-1.5 text-xs font-bold text-white shadow-md backdrop-blur-xs transition-colors hover:bg-red-700 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900"
+                >
+                  <span className="material-symbols-outlined text-[18px] leading-none" aria-hidden>
+                    delete
+                  </span>
+                  Usuń obraz
+                </button>
+              </div>
+            ) : null}
+            {promoUploadError ? (
+              <p className="mt-3 text-sm text-destructive">{promoUploadError}</p>
             ) : null}
           </div>
         </section>
@@ -874,7 +979,7 @@ export default function AdminEditCampPage() {
                         />
                       </div>
                       {url ? (
-                        <div className="relative mt-3 w-full overflow-hidden rounded-lg border border-stone-200 shadow-sm dark:border-stone-700">
+                        <div className="relative mt-3 w-full overflow-hidden rounded-lg border border-stone-200 shadow-xs dark:border-stone-700">
                           <img
                             src={url}
                             alt={`Galeria ${index + 1}`}
@@ -890,7 +995,7 @@ export default function AdminEditCampPage() {
                                 return { ...f, galleryImageUrls: next.slice(0, 2) };
                               })
                             }
-                            className="absolute right-2 top-2 z-10 inline-flex items-center gap-1.5 rounded-lg border border-white/20 bg-red-600 px-2.5 py-1.5 text-xs font-bold text-white shadow-md backdrop-blur-sm transition-colors hover:bg-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900"
+                            className="absolute right-2 top-2 z-10 inline-flex items-center gap-1.5 rounded-lg border border-white/20 bg-red-600 px-2.5 py-1.5 text-xs font-bold text-white shadow-md backdrop-blur-xs transition-colors hover:bg-red-700 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900"
                           >
                             <span className="material-symbols-outlined text-[18px] leading-none" aria-hidden>
                               delete
@@ -1022,7 +1127,7 @@ export default function AdminEditCampPage() {
                             onChange={(e) =>
                               updateScheduleSlot(dayIndex, slotIndex, "time", e.target.value)
                             }
-                            className="h-10 w-full min-w-[9.5rem] shrink-0 font-mono sm:w-[10.5rem] md:min-w-[11rem] md:w-44"
+                            className="h-10 w-full min-w-38 shrink-0 font-mono sm:w-42 md:min-w-44 md:w-44"
                           />
                           <Input
                             placeholder="Aktywność"

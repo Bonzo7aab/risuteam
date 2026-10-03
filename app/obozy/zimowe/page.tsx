@@ -6,6 +6,8 @@ import {
   WhatToBringPricing,
   InstructorCards,
   CampGallery,
+  CampPromoBanner,
+  CampCtaBlock,
 } from "@/components/obozy";
 import { CampRegistrationClosedBanner } from "@/components/obozy/camp-registration-closed-banner";
 
@@ -16,7 +18,10 @@ export const metadata: Metadata = {
 };
 
 const HERO_IMAGE =
-  "https://images.pexels.com/photos/3771074/pexels-photo-3771074.jpeg?auto=compress&cs=tinysrgb&w=600";
+  "https://images.pexels.com/photos/3771074/pexels-photo-3771074.jpeg?auto=compress&cs=tinysrgb&w=1200";
+const PROMO_BANNER =
+  "https://images.pexels.com/photos/3763188/pexels-photo-3763188.jpeg?auto=compress&cs=tinysrgb&w=1200";
+const REGISTRATION_HREF = "/obozy/zimowe/rejestracja";
 
 const FEATURE_CARDS = [
   {
@@ -114,7 +119,7 @@ const GALLERY_IMAGES = [
     alt: "Wycieczka rowerowa",
   },
   {
-    src: "https://images.pexels.com/photos/3763188/pexels-photo-3763188.jpeg?auto=compress&cs=tinysrgb&w=600",
+    src: PROMO_BANNER,
     alt: "Uczestnicy obozu",
   },
 ];
@@ -124,11 +129,13 @@ export default function ZimoweObozPage() {
     <div className="min-h-screen bg-stone-50 dark:bg-stone-900/30">
       <CampRegistrationClosedBanner slug="zimowe" />
       <CampHero
+        layout="fullBleed"
         badge="LATO 2025"
         titlePart1="Rowerowe Szaleństwo"
         titlePart2="Obóz rowerowy – Mazury"
         image={HERO_IMAGE}
         imageAlt="Obóz rowerowy Risu Team na Mazurach"
+        backLink={{ href: "/obozy", label: "Wszystkie obozy i nocowanki" }}
         meta={[
           { icon: "calendar_today", text: "5–12.08.2025" },
           { icon: "location_on", text: "Mazury, Polska" },
@@ -136,7 +143,7 @@ export default function ZimoweObozPage() {
         ]}
         ctaPrimary={{
           label: "Zapisz się teraz",
-          href: "/obozy/zimowe/rejestracja",
+          href: REGISTRATION_HREF,
         }}
         ctaSecondary={{
           label: "Pobierz ofertę PDF",
@@ -156,6 +163,11 @@ export default function ZimoweObozPage() {
         items={DAILY_SCHEDULE}
       />
 
+      <CampPromoBanner
+        imageUrl={PROMO_BANNER}
+        alt="Obóz rowerowy Risu Team — zdjęcie promocyjne"
+      />
+
       <WhatToBringPricing
         whatToBringTitle="Co zabrać?"
         whatToBringItems={WHAT_TO_BRING}
@@ -163,12 +175,12 @@ export default function ZimoweObozPage() {
         price="1 650 PLN"
         priceIncluded={PRICE_INCLUDED}
         bookButtonLabel="Zarezerwuj teraz"
-        bookButtonHref="/obozy/zimowe/rejestracja"
+        bookButtonHref={REGISTRATION_HREF}
         showDropdowns={true}
       />
 
-      <section className="py-8 bg-stone-50 dark:bg-stone-900/30 border-t border-stone-200 dark:border-stone-700">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm text-stone-600 dark:text-stone-400">
+      <section className="py-10 bg-white dark:bg-stone-900/50 border-t border-stone-200/80 dark:border-stone-800">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm text-stone-600 dark:text-stone-400 leading-relaxed">
           <p className="font-semibold text-stone-800 dark:text-stone-300 mb-2">
             Transport własny. Liczba miejsc ograniczona. Płatności wyłącznie przelewem na konto.
           </p>
@@ -196,6 +208,8 @@ export default function ZimoweObozPage() {
         }}
         gridImages={GALLERY_IMAGES}
       />
+
+      <CampCtaBlock signUpHref={REGISTRATION_HREF} />
     </div>
   );
 }

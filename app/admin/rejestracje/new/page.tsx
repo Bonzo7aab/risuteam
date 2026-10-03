@@ -81,6 +81,7 @@ type CampFormState = {
   category: "letni" | "zimowy" | "polkolonie";
   ageGroup: string;
   heroImageUrl: string;
+  promoBannerUrl: string;
   scheduleByDay: ScheduleDay[];
   includedItems: string[];
   customIncludedItems: string[];
@@ -101,6 +102,7 @@ const emptyForm: CampFormState = {
   category: "letni",
   ageGroup: "",
   heroImageUrl: "",
+  promoBannerUrl: "",
   scheduleByDay: [],
   includedItems: [],
   customIncludedItems: [],
@@ -129,6 +131,7 @@ export default function AdminNewCampPage() {
   const createCamp = useMutation(api.camps.create);
   const createLocation = useMutation(api.locations.create);
   const heroImageFileInputRef = useRef<HTMLInputElement>(null);
+  const promoBannerFileInputRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState<CampFormState>(emptyForm);
   const [error, setError] = useState<string | null>(null);
@@ -251,6 +254,21 @@ export default function AdminNewCampPage() {
     []
   );
 
+  const handlePromoBannerFile = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file || !file.type.startsWith("image/")) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = reader.result;
+        if (typeof dataUrl === "string") setForm((f) => ({ ...f, promoBannerUrl: dataUrl }));
+      };
+      reader.readAsDataURL(file);
+      e.target.value = "";
+    },
+    []
+  );
+
   const addCustomIncluded = useCallback(() => {
     const trimmed = customItemInput.trim();
     if (!trimmed) return;
@@ -312,6 +330,7 @@ export default function AdminNewCampPage() {
           category: form.category,
           ageGroup: form.ageGroup.trim() || undefined,
           heroImageUrl: form.heroImageUrl.trim() || undefined,
+          promoBannerUrl: form.promoBannerUrl.trim() || undefined,
           scheduleByDay: scheduleByDay.length > 0 ? scheduleByDay : undefined,
           includedItems:
             form.includedItems.length > 0 ? form.includedItems : undefined,
@@ -375,7 +394,7 @@ export default function AdminNewCampPage() {
       </div>
 
       {error && (
-        <div className="mb-6 rounded-xl border border-destructive/30 bg-destructive/10 p-4 shadow-sm">
+        <div className="mb-6 rounded-xl border border-destructive/30 bg-destructive/10 p-4 shadow-xs">
           <div className="flex gap-3">
             <span className="material-symbols-outlined mt-0.5 text-lg" aria-hidden>
               error
@@ -447,7 +466,7 @@ export default function AdminNewCampPage() {
                 id="camp-ageGroup"
                 value={form.ageGroup}
                 onChange={(e) => setForm((f) => ({ ...f, ageGroup: e.target.value }))}
-                className="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <option value="">— wybierz —</option>
                 {AGE_GROUPS.map((opt) => (
@@ -476,7 +495,7 @@ export default function AdminNewCampPage() {
                 id="camp-locationId"
                 value={form.locationId}
                 onChange={(e) => setForm((f) => ({ ...f, locationId: e.target.value }))}
-                className="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <option value="">— wybierz lokalizację —</option>
                 {locations?.map((loc) => (
@@ -526,7 +545,9 @@ export default function AdminNewCampPage() {
           </div>
           <div className="space-y-4">
             <div>
-              <Label className="text-text-main dark:text-stone-200 mb-2 block">Obraz</Label>
+              <Label className="text-text-main dark:text-stone-200 mb-2 block">
+                Obraz główny (hero)
+              </Label>
               <div className="border-2 border-dashed border-stone-200 dark:border-stone-600 rounded-xl p-6 flex flex-col items-center justify-center gap-2 min-h-[140px] bg-stone-50 dark:bg-stone-900/30">
                 <span className="material-symbols-outlined text-4xl text-primary">cloud_upload</span>
                 <p className="text-sm text-text-light dark:text-stone-400 text-center">
@@ -558,6 +579,68 @@ export default function AdminNewCampPage() {
                     />
                   </div>
                 </div>
+                {form.heroImageUrl ? (
+                  <img
+                    src={form.heroImageUrl}
+                    alt="Podgląd hero"
+                    className="mt-3 h-32 w-full max-w-md rounded-lg object-cover"
+                  />
+                ) : null}
+              </div>
+            </div>
+            <div>
+              <Label className="text-text-main dark:text-stone-200 mb-2 block">
+                Baner promocyjny (opcjonalny)
+              </Label>
+              <p className="mb-2 text-sm text-muted-foreground">
+                Pełnoszerokościowe zdjęcie na środku strony obozu (między programem a ceną).
+              </p>
+              <div className="border-2 border-dashed border-stone-200 dark:border-stone-600 rounded-xl p-6 flex flex-col items-center justify-center gap-2 min-h-[140px] bg-stone-50 dark:bg-stone-900/30">
+                <span className="material-symbols-outlined text-4xl text-primary">image</span>
+                <div className="flex flex-wrap items-center gap-2 mt-2">
+                  <input
+                    ref={promoBannerFileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handlePromoBannerFile}
+                  />
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => promoBannerFileInputRef.current?.click()}
+                    >
+                      Prześlij plik
+                    </Button>
+                    <Input
+                      type="url"
+                      value={form.promoBannerUrl}
+                      onChange={(e) =>
+                        setForm((f) => ({ ...f, promoBannerUrl: e.target.value }))
+                      }
+                      placeholder="Lub wklej URL banera"
+                      className="max-w-xs"
+                    />
+                  </div>
+                </div>
+                {form.promoBannerUrl ? (
+                  <div className="relative mt-3 w-full max-w-md">
+                    <img
+                      src={form.promoBannerUrl}
+                      alt="Podgląd banera"
+                      className="h-32 w-full rounded-lg object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setForm((f) => ({ ...f, promoBannerUrl: "" }))}
+                      className="absolute right-2 top-2 rounded-lg bg-red-600 px-2 py-1 text-xs font-bold text-white hover:bg-red-700"
+                    >
+                      Usuń
+                    </button>
+                  </div>
+                ) : null}
               </div>
             </div>
             <div>

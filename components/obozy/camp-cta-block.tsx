@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { campRegistrationCtaHref } from "@/lib/camp-registration-links";
 
@@ -21,17 +23,17 @@ export function CampCtaBlock({
   isRegistrationClosed = false,
 }: CampCtaBlockProps) {
   return (
-    <section className="py-12 md:py-16">
+    <section className="py-14 md:py-20">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="relative overflow-hidden rounded-2xl md:rounded-3xl bg-primary px-6 py-10 md:px-12 md:py-14 text-primary-foreground">
-          <div className="absolute top-4 right-4 md:top-6 md:right-8 opacity-20" aria-hidden>
+        <div className="relative overflow-hidden rounded-2xl md:rounded-3xl bg-primary px-6 py-12 md:px-14 md:py-16 text-primary-foreground">
+          <div className="absolute top-4 right-4 md:top-6 md:right-8 opacity-15" aria-hidden>
             <span className="material-symbols-outlined text-6xl md:text-8xl">terrain</span>
           </div>
           <div className="relative z-10 text-center max-w-2xl mx-auto">
-            <h2 className="text-2xl md:text-3xl font-bold mb-3">
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight mb-4">
               {headline}
             </h2>
-            <p className="text-primary-foreground/90 text-sm md:text-base mb-6">
+            <p className="text-primary-foreground/90 text-sm md:text-base leading-relaxed mb-8">
               {description}
             </p>
             <div className="flex flex-wrap justify-center gap-3">

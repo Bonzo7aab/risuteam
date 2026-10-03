@@ -158,6 +158,7 @@ export const create = mutation({
     category: v.optional(v.string()),
     ageGroup: v.optional(v.string()),
     heroImageUrl: v.optional(v.string()),
+    promoBannerUrl: v.optional(v.string()),
     galleryImageUrls: v.optional(v.array(v.string())),
     dailySchedule: v.optional(
       v.array(v.object({ time: v.string(), activity: v.string() }))
@@ -198,6 +199,7 @@ export const create = mutation({
       category: args.category,
       ageGroup: args.ageGroup,
       heroImageUrl: args.heroImageUrl,
+      promoBannerUrl: args.promoBannerUrl?.trim() || undefined,
       galleryImageUrls: args.galleryImageUrls,
       dailySchedule: args.dailySchedule,
       scheduleByDay: args.scheduleByDay,
@@ -230,6 +232,7 @@ export const update = mutation({
     category: v.optional(v.string()),
     ageGroup: v.optional(v.string()),
     heroImageUrl: v.optional(v.string()),
+    promoBannerUrl: v.optional(v.string()),
     galleryImageUrls: v.optional(v.array(v.string())),
     dailySchedule: v.optional(
       v.array(v.object({ time: v.string(), activity: v.string() }))
@@ -273,6 +276,9 @@ export const update = mutation({
     if (rest.category !== undefined) updates.category = rest.category;
     if (rest.ageGroup !== undefined) updates.ageGroup = rest.ageGroup?.trim() || undefined;
     if (rest.heroImageUrl !== undefined) updates.heroImageUrl = rest.heroImageUrl?.trim() || undefined;
+    if (rest.promoBannerUrl !== undefined) {
+      updates.promoBannerUrl = rest.promoBannerUrl?.trim() || undefined;
+    }
     if (rest.galleryImageUrls !== undefined) updates.galleryImageUrls = rest.galleryImageUrls;
     /** Early-bird discount removed from product; strip on any admin save. */
     updates.earlyBirdDiscountPercent = undefined;
@@ -375,6 +381,29 @@ export const setCampHeroImage = mutation({
     const url = await ctx.storage.getUrl(args.storageId);
     if (!url) throw new Error("Nie można pobrać URL pliku.");
     await ctx.db.patch(args.campId, { heroImageUrl: url, updatedAt: Date.now() });
+    return url;
+  },
+});
+
+/**
+ * Set camp promo banner image from an uploaded file storage ID (admin only).
+ * Returns the public URL so the client can update UI.
+ */
+export const setCampPromoBanner = mutation({
+  args: {
+    campId: v.id("camps"),
+    storageId: v.id("_storage"),
+  },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    const camp = await ctx.db.get("camps", args.campId);
+    if (!camp) throw new Error("Nie znaleziono obozu.");
+    const url = await ctx.storage.getUrl(args.storageId);
+    if (!url) throw new Error("Nie można pobrać URL pliku.");
+    await ctx.db.patch(args.campId, {
+      promoBannerUrl: url,
+      updatedAt: Date.now(),
+    });
     return url;
   },
 });

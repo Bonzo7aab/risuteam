@@ -6,6 +6,8 @@ import {
   WhatToBringPricing,
   InstructorCards,
   CampGallery,
+  CampPromoBanner,
+  CampCtaBlock,
 } from "@/components/obozy";
 import { CampRegistrationClosedBanner } from "@/components/obozy/camp-registration-closed-banner";
 
@@ -16,7 +18,10 @@ export const metadata: Metadata = {
 };
 
 const HERO_IMAGE =
-  "https://images.pexels.com/photos/3764011/pexels-photo-3764011.jpeg?auto=compress&cs=tinysrgb&w=600";
+  "https://images.pexels.com/photos/3764011/pexels-photo-3764011.jpeg?auto=compress&cs=tinysrgb&w=1200";
+const PROMO_BANNER =
+  "https://images.pexels.com/photos/3771074/pexels-photo-3771074.jpeg?auto=compress&cs=tinysrgb&w=1200";
+const REGISTRATION_HREF = "/obozy/polkolonie/rejestracja";
 
 const FEATURE_CARDS = [
   {
@@ -113,7 +118,7 @@ const INSTRUCTORS = [
 const GALLERY_IMAGES = [
   { src: HERO_IMAGE, alt: "Półkolonie letnie Warszawa" },
   {
-    src: "https://images.pexels.com/photos/3771074/pexels-photo-3771074.jpeg?auto=compress&cs=tinysrgb&w=600",
+    src: PROMO_BANNER,
     alt: "Zajęcia sportowe",
   },
   {
@@ -127,11 +132,13 @@ export default function PolkoloniePage() {
     <div className="min-h-screen bg-stone-50 dark:bg-stone-900/30">
       <CampRegistrationClosedBanner slug="polkolonie" />
       <CampHero
+        layout="fullBleed"
         badge="LATO 2025"
         titlePart1="Półkolonie letnie"
         titlePart2="Warszawa"
         image={HERO_IMAGE}
         imageAlt="Półkolonie letnie Risu Team w Warszawie"
+        backLink={{ href: "/obozy", label: "Wszystkie obozy i nocowanki" }}
         meta={[
           { icon: "calendar_today", text: "Lipiec–sierpień 2025" },
           { icon: "location_on", text: "Warszawa" },
@@ -139,7 +146,7 @@ export default function PolkoloniePage() {
         ]}
         ctaPrimary={{
           label: "Zapisz się teraz",
-          href: "/obozy/polkolonie/rejestracja",
+          href: REGISTRATION_HREF,
         }}
         ctaSecondary={{
           label: "Pobierz ofertę PDF",
@@ -159,6 +166,11 @@ export default function PolkoloniePage() {
         items={DAILY_SCHEDULE}
       />
 
+      <CampPromoBanner
+        imageUrl={PROMO_BANNER}
+        alt="Półkolonie Risu Team — zdjęcie promocyjne"
+      />
+
       <WhatToBringPricing
         whatToBringTitle="Co zabrać?"
         whatToBringItems={WHAT_TO_BRING}
@@ -166,12 +178,12 @@ export default function PolkoloniePage() {
         price="600 PLN / tydz."
         priceIncluded={PRICE_INCLUDED}
         bookButtonLabel="Zarezerwuj miejsce"
-        bookButtonHref="/obozy/polkolonie/rejestracja"
+        bookButtonHref={REGISTRATION_HREF}
         showDropdowns={true}
       />
 
-      <section className="py-8 bg-stone-50 dark:bg-stone-900/30 border-t border-stone-200 dark:border-stone-700">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm text-stone-600 dark:text-stone-400">
+      <section className="py-10 bg-white dark:bg-stone-900/50 border-t border-stone-200/80 dark:border-stone-800">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm text-stone-600 dark:text-stone-400 leading-relaxed">
           <p className="font-semibold text-stone-800 dark:text-stone-300 mb-2">
             Liczba miejsc ograniczona. Płatności wyłącznie przelewem na konto.
           </p>
@@ -199,6 +211,8 @@ export default function PolkoloniePage() {
         }}
         gridImages={GALLERY_IMAGES}
       />
+
+      <CampCtaBlock signUpHref={REGISTRATION_HREF} />
     </div>
   );
 }

@@ -6,6 +6,8 @@ import {
   WhatToBringPricing,
   InstructorCards,
   CampGallery,
+  CampPromoBanner,
+  CampCtaBlock,
 } from "@/components/obozy";
 import { CampRegistrationClosedBanner } from "@/components/obozy/camp-registration-closed-banner";
 
@@ -16,6 +18,8 @@ export const metadata: Metadata = {
 };
 
 const HERO_IMAGE = "/zakopane_2025_ver2_1.jpg";
+const PROMO_BANNER = "/zakopane_2025_ver2_2.jpg";
+const REGISTRATION_HREF = "/obozy/letnie/rejestracja";
 
 const FEATURE_CARDS = [
   {
@@ -121,7 +125,7 @@ const GALLERY_IMAGES = [
   { src: "/zakopane_2025_ver2_2.jpg", alt: "Obóz Zakopane" },
   { src: "/willabasienka.jpg", alt: "Willa Basieńka" },
   { src: "/zakopane_2025_ver2_1.jpg", alt: "Trening w górach" },
-  { src: "/zakopane_2025_ver2_2.jpg", alt: "Uczestnicy obozu" },
+  { src: "/zakopane_lato_2025_1.jpeg", alt: "Uczestnicy obozu" },
 ];
 
 export default function LetniObozPage() {
@@ -129,11 +133,13 @@ export default function LetniObozPage() {
     <div className="min-h-screen bg-stone-50 dark:bg-stone-900/30">
       <CampRegistrationClosedBanner slug="letnie" />
       <CampHero
+        layout="fullBleed"
         badge="LATO 2025"
         titlePart1="Letni Obóz Judo i Przygoda"
         titlePart2="Zakopane 2025"
         image={HERO_IMAGE}
         imageAlt="Letni obóz Risu Team w Zakopanem"
+        backLink={{ href: "/obozy", label: "Wszystkie obozy i nocowanki" }}
         meta={[
           { icon: "calendar_today", text: "5–12.07.2025" },
           { icon: "location_on", text: "Zakopane, Polska" },
@@ -141,7 +147,7 @@ export default function LetniObozPage() {
         ]}
         ctaPrimary={{
           label: "Zapisz się teraz",
-          href: "/obozy/letnie/rejestracja",
+          href: REGISTRATION_HREF,
         }}
         ctaSecondary={{
           label: "Pobierz ofertę PDF",
@@ -161,6 +167,11 @@ export default function LetniObozPage() {
         items={DAILY_SCHEDULE}
       />
 
+      <CampPromoBanner
+        imageUrl={PROMO_BANNER}
+        alt="Letni obóz Risu Team — zdjęcie promocyjne"
+      />
+
       <WhatToBringPricing
         whatToBringTitle="Co zabrać?"
         whatToBringItems={WHAT_TO_BRING}
@@ -168,13 +179,12 @@ export default function LetniObozPage() {
         price="2 190 PLN"
         priceIncluded={PRICE_INCLUDED}
         bookButtonLabel="Zarezerwuj teraz"
-        bookButtonHref="/obozy/letnie/rejestracja"
+        bookButtonHref={REGISTRATION_HREF}
         showDropdowns={true}
       />
 
-      {/* Payment details – compact */}
-      <section className="py-8 bg-stone-50 dark:bg-stone-900/30 border-t border-stone-200 dark:border-stone-700">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm text-stone-600 dark:text-stone-400">
+      <section className="py-10 bg-white dark:bg-stone-900/50 border-t border-stone-200/80 dark:border-stone-800">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm text-stone-600 dark:text-stone-400 leading-relaxed">
           <p className="font-semibold text-stone-800 dark:text-stone-300 mb-2">
             Transport własny. Liczba miejsc ograniczona. Płatności wyłącznie przelewem na konto.
           </p>
@@ -203,6 +213,8 @@ export default function LetniObozPage() {
         }}
         gridImages={GALLERY_IMAGES}
       />
+
+      <CampCtaBlock signUpHref={REGISTRATION_HREF} />
     </div>
   );
 }
