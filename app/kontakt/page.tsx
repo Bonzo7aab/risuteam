@@ -1,16 +1,49 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useState, type FormEvent, type ReactNode } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { contactSchema } from "@/lib/schemas";
 import { firstZodMessage } from "@/lib/validation";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 import { locationCenter, locationPlaces } from "@/lib/location-data";
 import type { Place } from "@/components/map/location-map";
+
+const fieldControlClass =
+  "h-12 rounded-lg border-stone-200 bg-stone-50 px-3.5 text-[15px] text-text-main shadow-none placeholder:text-stone-400 hover:border-stone-300 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-0 dark:border-white/12 dark:bg-stone-950/45 dark:text-white dark:placeholder:text-stone-500 dark:hover:border-white/20";
+
+function FieldLabel({
+  htmlFor,
+  children,
+}: {
+  htmlFor: string;
+  children: ReactNode;
+}) {
+  return (
+    <Label
+      htmlFor={htmlFor}
+      className="block text-[13px] font-semibold leading-5 text-stone-700 dark:text-stone-200"
+    >
+      {children}
+    </Label>
+  );
+}
+
+function FieldIcon({ name }: { name: string }) {
+  return (
+    <span
+      className="material-symbols-outlined pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[20px] text-stone-400 dark:text-stone-500"
+      aria-hidden
+    >
+      {name}
+    </span>
+  );
+}
 
 const DynamicLocationMap = dynamic(
   () =>
@@ -98,75 +131,94 @@ export default function KontaktPage() {
                   </div>
                 )}
 
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="firstname" className="text-text-main dark:text-stone-300 text-sm font-medium">
-                        Imię
-                      </Label>
+                <form onSubmit={handleSubmit} className="space-y-5">
+                  <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                    <div className="space-y-1.5">
+                      <FieldLabel htmlFor="firstname">Imię</FieldLabel>
+                      <div className="relative">
+                        <FieldIcon name="person" />
+                        <Input
+                          id="firstname"
+                          name="firstname"
+                          autoComplete="given-name"
+                          placeholder="np. Anna"
+                          required
+                          className={cn(fieldControlClass, "pl-11")}
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-1.5">
+                      <FieldLabel htmlFor="lastname">Nazwisko</FieldLabel>
+                      <div className="relative">
+                        <FieldIcon name="id_card" />
+                        <Input
+                          id="lastname"
+                          name="lastname"
+                          autoComplete="family-name"
+                          placeholder="np. Kowalska"
+                          required
+                          className={cn(fieldControlClass, "pl-11")}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <FieldLabel htmlFor="email">Adres e-mail</FieldLabel>
+                    <div className="relative">
+                      <FieldIcon name="mail" />
                       <Input
-                        id="firstname"
-                        name="firstname"
-                        placeholder="Wpisz imię..."
+                        id="email"
+                        name="email"
+                        type="email"
+                        autoComplete="email"
+                        inputMode="email"
+                        placeholder="np. rodzic@example.com"
                         required
-                        className="rounded-xl border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-text-main dark:text-white placeholder:text-text-light dark:placeholder:text-stone-500 focus-visible:ring-primary"
+                        className={cn(fieldControlClass, "pl-11")}
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="lastname" className="text-text-main dark:text-stone-300 text-sm font-medium">
-                        Nazwisko
-                      </Label>
+                  </div>
+                  <div className="space-y-1.5">
+                    <FieldLabel htmlFor="phone_number">Telefon</FieldLabel>
+                    <div className="relative">
+                      <FieldIcon name="call" />
                       <Input
-                        id="lastname"
-                        name="lastname"
-                        placeholder="Wpisz nazwisko..."
-                        required
-                        className="rounded-xl border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-text-main dark:text-white placeholder:text-text-light dark:placeholder:text-stone-500 focus-visible:ring-primary"
+                        id="phone_number"
+                        name="phone_number"
+                        type="tel"
+                        autoComplete="tel"
+                        inputMode="tel"
+                        placeholder="np. 533 020 048"
+                        className={cn(fieldControlClass, "pl-11")}
                       />
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email" className="text-text-main dark:text-stone-300 text-sm font-medium">
-                      Email
-                    </Label>
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      placeholder="Wpisz adres e-mail..."
-                      required
-                      className="rounded-xl border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-text-main dark:text-white placeholder:text-text-light dark:placeholder:text-stone-500 focus-visible:ring-primary"
-                    />
+                  <div className="space-y-1.5">
+                    <FieldLabel htmlFor="message">Wiadomość</FieldLabel>
+                    <div className="relative">
+                      <span
+                        className="material-symbols-outlined pointer-events-none absolute left-3.5 top-3.5 text-[20px] text-stone-400 dark:text-stone-500"
+                        aria-hidden
+                      >
+                        chat
+                      </span>
+                      <Textarea
+                        id="message"
+                        name="message"
+                        rows={5}
+                        placeholder="Napisz, w czym możemy pomóc…"
+                        required
+                        className={cn(
+                          fieldControlClass,
+                          "min-h-36 h-auto resize-none py-3 pl-11 leading-relaxed",
+                        )}
+                      />
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="phone_number" className="text-text-main dark:text-stone-300 text-sm font-medium">
-                      Telefon
-                    </Label>
-                    <Input
-                      id="phone_number"
-                      name="phone_number"
-                      type="tel"
-                      placeholder="Numer telefonu (opcjonalnie)"
-                      className="rounded-xl border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-text-main dark:text-white placeholder:text-text-light dark:placeholder:text-stone-500 focus-visible:ring-primary"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="message" className="text-text-main dark:text-stone-300 text-sm font-medium">
-                      Wiadomość
-                    </Label>
-                    <Textarea
-                      id="message"
-                      name="message"
-                      rows={4}
-                      placeholder="Wpisz wiadomość..."
-                      required
-                      className="rounded-xl border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-text-main dark:text-white placeholder:text-text-light dark:placeholder:text-stone-500 focus-visible:ring-primary resize-none"
-                    />
-                  </div>
-                  <button
+                  <Button
                     type="submit"
                     disabled={sending}
-                    className="w-full rounded-xl h-12 bg-primary text-primary-foreground font-bold hover:bg-primary-hover disabled:opacity-70 transition-colors flex items-center justify-center gap-2"
+                    className="h-12 w-full gap-2 rounded-lg bg-primary text-[15px] font-bold text-primary-foreground hover:bg-primary-hover"
                   >
                     {sending ? (
                       "Wysyłanie…"
@@ -178,7 +230,7 @@ export default function KontaktPage() {
                         </span>
                       </>
                     )}
-                  </button>
+                  </Button>
                 </form>
               </div>
 
