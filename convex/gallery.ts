@@ -2,8 +2,35 @@ import { mutation, query } from "./_generated/server";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { v } from "convex/values";
 import { requireAdmin } from "./authHelpers";
-import type { Id } from "./_generated/dataModel";
+import type { Doc, Id } from "./_generated/dataModel";
 import { PUBLIC_GALLERY_IMAGE_MANIFEST } from "./galleryPublicManifest";
+
+export const UNCATEGORIZED_FOLDER_SLUG = "pozostale";
+export const UNCATEGORIZED_FOLDER_NAME = "Pozostałe";
+
+const albumSummaryValidator = v.object({
+  _id: v.union(v.id("galleryCategories"), v.null()),
+  name: v.string(),
+  slug: v.string(),
+  order: v.number(),
+  isActive: v.boolean(),
+  imageCount: v.number(),
+  videoCount: v.number(),
+  publishedCount: v.number(),
+  coverUrls: v.array(v.string()),
+  isUncategorized: v.boolean(),
+});
+
+const galleryItemPublicValidator = v.object({
+  _id: v.id("galleryItems"),
+  type: v.union(v.literal("image"), v.literal("video")),
+  title: v.optional(v.string()),
+  categoryId: v.optional(v.id("galleryCategories")),
+  imageUrl: v.optional(v.string()),
+  thumbnailUrl: v.optional(v.string()),
+  videoUrl: v.optional(v.string()),
+  order: v.number(),
+});
 
 function slugify(text: string): string {
   return text
@@ -26,6 +53,55 @@ function assertUrlLike(url: string, fieldName: string): void {
   }
 }
 
+function itemCoverUrl(item: Doc<"galleryItems">): string | null {
+  if (item.type === "image") return item.imageUrl?.trim() || null;
+  return item.thumbnailUrl?.trim() || item.imageUrl?.trim() || null;
+}
+
+function coverUrlsFromItems(items: Doc<"galleryItems">[], limit = 4): string[] {
+  const urls: string[] = [];
+  const sorted = [...items].sort((a, b) => a.order - b.order);
+  for (const item of sorted) {
+    const url = itemCoverUrl(item);
+    if (!url) continue;
+    urls.push(url);
+    if (urls.length >= limit) break;
+  }
+  return urls;
+}
+
+function summarizeAlbum(
+  items: Doc<"galleryItems">[],
+  folder: {
+    _id: Id<"galleryCategories"> | null;
+    name: string;
+    slug: string;
+    order: number;
+    isActive: boolean;
+    isUncategorized: boolean;
+  },
+  publishedOnly: boolean,
+) {
+  const visible = publishedOnly ? items.filter((item) => item.isPublished) : items;
+  return {
+    _id: folder._id,
+    name: folder.name,
+    slug: folder.slug,
+    order: folder.order,
+    isActive: folder.isActive,
+    imageCount: visible.filter((item) => item.type === "image").length,
+    videoCount: visible.filter((item) => item.type === "video").length,
+    publishedCount: items.filter((item) => item.isPublished).length,
+    coverUrls: coverUrlsFromItems(
+      publishedOnly ? visible : [...visible].sort((a, b) => {
+        if (a.isPublished !== b.isPublished) return a.isPublished ? -1 : 1;
+        return a.order - b.order;
+      }),
+    ),
+    isUncategorized: folder.isUncategorized,
+  };
+}
+
 async function nextOrderForCategory(
   ctx: QueryCtx | MutationCtx,
   categoryId: Id<"galleryCategories"> | undefined
@@ -44,24 +120,222 @@ async function nextOrderForCategory(
   return (last?.order ?? 0) + 1;
 }
 
-export const listCategoriesPublic = query({
+function toPublicItem(item: Doc<"galleryItems">) {
+  return {
+    _id: item._id,
+    type: item.type,
+    title: item.title,
+    categoryId: item.categoryId,
+    imageUrl: item.imageUrl,
+    thumbnailUrl: item.thumbnailUrl,
+    videoUrl: item.videoUrl,
+    order: item.order,
+  };
+}
+
+export const listPublicAlbums = query({
   args: {},
+  returns: v.array(albumSummaryValidator),
   handler: async (ctx) => {
-    return await ctx.db
+    const cats = await ctx.db
       .query("galleryCategories")
       .withIndex("by_active", (q) => q.eq("isActive", true))
-      .collect()
-      .then((cats) => cats.sort((a, b) => a.order - b.order));
+      .collect();
+    cats.sort((a, b) => a.order - b.order);
+    const items = await ctx.db
+      .query("galleryItems")
+      .withIndex("by_published_order", (q) => q.eq("isPublished", true))
+      .collect();
+
+    const byCategory = new Map<string, Doc<"galleryItems">[]>();
+    const uncategorized: Doc<"galleryItems">[] = [];
+    for (const item of items) {
+      if (!item.categoryId) {
+        uncategorized.push(item);
+        continue;
+      }
+      const key = item.categoryId;
+      const list = byCategory.get(key) ?? [];
+      list.push(item);
+      byCategory.set(key, list);
+    }
+
+    const albums = cats
+      .map((cat) =>
+        summarizeAlbum(byCategory.get(cat._id) ?? [], {
+          _id: cat._id,
+          name: cat.name,
+          slug: cat.slug,
+          order: cat.order,
+          isActive: cat.isActive,
+          isUncategorized: false,
+        }, true),
+      )
+      .filter((album) => album.publishedCount > 0);
+
+    if (uncategorized.length > 0) {
+      albums.push(
+        summarizeAlbum(uncategorized, {
+          _id: null,
+          name: UNCATEGORIZED_FOLDER_NAME,
+          slug: UNCATEGORIZED_FOLDER_SLUG,
+          order: Number.MAX_SAFE_INTEGER,
+          isActive: true,
+          isUncategorized: true,
+        }, true),
+      );
+    }
+    return albums;
+  },
+});
+
+export const listAdminAlbums = query({
+  args: {},
+  returns: v.array(albumSummaryValidator),
+  handler: async (ctx) => {
+    await requireAdmin(ctx);
+    const cats = await ctx.db.query("galleryCategories").collect();
+    cats.sort((a, b) => a.order - b.order);
+    const items = await ctx.db.query("galleryItems").collect();
+
+    const byCategory = new Map<string, Doc<"galleryItems">[]>();
+    const uncategorized: Doc<"galleryItems">[] = [];
+    for (const item of items) {
+      if (!item.categoryId) {
+        uncategorized.push(item);
+        continue;
+      }
+      const key = item.categoryId;
+      const list = byCategory.get(key) ?? [];
+      list.push(item);
+      byCategory.set(key, list);
+    }
+
+    const albums = cats.map((cat) =>
+      summarizeAlbum(byCategory.get(cat._id) ?? [], {
+        _id: cat._id,
+        name: cat.name,
+        slug: cat.slug,
+        order: cat.order,
+        isActive: cat.isActive,
+        isUncategorized: false,
+      }, false),
+    );
+    albums.push(
+      summarizeAlbum(uncategorized, {
+        _id: null,
+        name: UNCATEGORIZED_FOLDER_NAME,
+        slug: UNCATEGORIZED_FOLDER_SLUG,
+        order: Number.MAX_SAFE_INTEGER,
+        isActive: true,
+        isUncategorized: true,
+      }, false),
+    );
+    return albums;
+  },
+});
+
+export const getPublicAlbum = query({
+  args: { slug: v.string() },
+  returns: v.union(albumSummaryValidator, v.null()),
+  handler: async (ctx, args) => {
+    const slug = args.slug.trim();
+    if (!slug) return null;
+    const items = await ctx.db
+      .query("galleryItems")
+      .withIndex("by_published_order", (q) => q.eq("isPublished", true))
+      .collect();
+
+    if (slug === UNCATEGORIZED_FOLDER_SLUG) {
+      const uncategorized = items.filter((item) => !item.categoryId);
+      if (uncategorized.length === 0) return null;
+      return summarizeAlbum(uncategorized, {
+        _id: null,
+        name: UNCATEGORIZED_FOLDER_NAME,
+        slug: UNCATEGORIZED_FOLDER_SLUG,
+        order: Number.MAX_SAFE_INTEGER,
+        isActive: true,
+        isUncategorized: true,
+      }, true);
+    }
+
+    const cat = await ctx.db
+      .query("galleryCategories")
+      .withIndex("by_slug", (q) => q.eq("slug", slug))
+      .first();
+    if (!cat || !cat.isActive) return null;
+    const inFolder = items.filter((item) => item.categoryId === cat._id);
+    if (inFolder.length === 0) return null;
+    return summarizeAlbum(inFolder, {
+      _id: cat._id,
+      name: cat.name,
+      slug: cat.slug,
+      order: cat.order,
+      isActive: cat.isActive,
+      isUncategorized: false,
+    }, true);
+  },
+});
+
+export const getAdminAlbum = query({
+  args: { slug: v.string() },
+  returns: v.union(albumSummaryValidator, v.null()),
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    const slug = args.slug.trim();
+    if (!slug) return null;
+    const items = await ctx.db.query("galleryItems").collect();
+
+    if (slug === UNCATEGORIZED_FOLDER_SLUG) {
+      const uncategorized = items.filter((item) => !item.categoryId);
+      return summarizeAlbum(uncategorized, {
+        _id: null,
+        name: UNCATEGORIZED_FOLDER_NAME,
+        slug: UNCATEGORIZED_FOLDER_SLUG,
+        order: Number.MAX_SAFE_INTEGER,
+        isActive: true,
+        isUncategorized: true,
+      }, false);
+    }
+
+    const cat = await ctx.db
+      .query("galleryCategories")
+      .withIndex("by_slug", (q) => q.eq("slug", slug))
+      .first();
+    if (!cat) return null;
+    const inFolder = items.filter((item) => item.categoryId === cat._id);
+    return summarizeAlbum(inFolder, {
+      _id: cat._id,
+      name: cat.name,
+      slug: cat.slug,
+      order: cat.order,
+      isActive: cat.isActive,
+      isUncategorized: false,
+    }, false);
   },
 });
 
 export const listGalleryPublic = query({
   args: {
     categorySlug: v.optional(v.string()),
+    uncategorizedOnly: v.optional(v.boolean()),
     limit: v.optional(v.number()),
   },
+  returns: v.array(galleryItemPublicValidator),
   handler: async (ctx, args) => {
     const limit = Math.max(1, Math.min(args.limit ?? 200, 500));
+
+    if (args.uncategorizedOnly) {
+      const items = await ctx.db
+        .query("galleryItems")
+        .withIndex("by_published_order", (q) => q.eq("isPublished", true))
+        .collect();
+      return items
+        .filter((item) => !item.categoryId)
+        .sort((a, b) => a.order - b.order)
+        .slice(0, limit)
+        .map(toPublicItem);
+    }
 
     let categoryId: Id<"galleryCategories"> | undefined;
     if (args.categorySlug) {
@@ -76,29 +350,41 @@ export const listGalleryPublic = query({
       }
     }
 
-    let items;
     if (categoryId) {
-      // Use index for category + order, then filter published (no composite index available).
-      items = await ctx.db
+      const items = await ctx.db
         .query("galleryItems")
         .withIndex("by_category_order", (q) => q.eq("categoryId", categoryId))
         .collect();
-      items = items.filter((i) => i.isPublished);
-      items.sort((a, b) => a.order - b.order);
-      return items.slice(0, limit);
+      return items
+        .filter((item) => item.isPublished)
+        .sort((a, b) => a.order - b.order)
+        .slice(0, limit)
+        .map(toPublicItem);
     }
 
-    items = await ctx.db
+    const items = await ctx.db
       .query("galleryItems")
       .withIndex("by_published_order", (q) => q.eq("isPublished", true))
       .collect();
-    items.sort((a, b) => a.order - b.order);
-    return items.slice(0, limit);
+    return items
+      .sort((a, b) => a.order - b.order)
+      .slice(0, limit)
+      .map(toPublicItem);
   },
 });
 
 export const listCategoriesForAdmin = query({
   args: {},
+  returns: v.array(
+    v.object({
+      _id: v.id("galleryCategories"),
+      _creationTime: v.number(),
+      name: v.string(),
+      slug: v.string(),
+      order: v.number(),
+      isActive: v.boolean(),
+    }),
+  ),
   handler: async (ctx) => {
     await requireAdmin(ctx);
     const cats = await ctx.db.query("galleryCategories").collect();
@@ -113,17 +399,24 @@ export const createCategory = mutation({
     order: v.optional(v.number()),
     isActive: v.optional(v.boolean()),
   },
+  returns: v.object({
+    id: v.id("galleryCategories"),
+    slug: v.string(),
+  }),
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
     const name = args.name.trim();
-    if (!name) throw new Error("Nazwa kategorii jest wymagana.");
+    if (!name) throw new Error("Nazwa folderu jest wymagana.");
     const slug = (args.slug?.trim() || slugify(name)).trim();
     if (!slug) throw new Error("Slug jest wymagany.");
+    if (slug === UNCATEGORIZED_FOLDER_SLUG) {
+      throw new Error("Ta nazwa folderu jest zarezerwowana.");
+    }
     const existing = await ctx.db
       .query("galleryCategories")
       .withIndex("by_slug", (q) => q.eq("slug", slug))
       .first();
-    if (existing) throw new Error("Kategoria z tym slug już istnieje.");
+    if (existing) throw new Error("Folder o tej nazwie już istnieje.");
 
     const last = await ctx.db
       .query("galleryCategories")
@@ -132,12 +425,13 @@ export const createCategory = mutation({
       .first();
     const nextOrder = args.order ?? (last?.order ?? 0) + 1;
 
-    return await ctx.db.insert("galleryCategories", {
+    const id = await ctx.db.insert("galleryCategories", {
       name,
       slug,
       order: nextOrder,
       isActive: args.isActive ?? true,
     });
+    return { id, slug };
   },
 });
 
@@ -152,21 +446,24 @@ export const updateCategory = mutation({
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
     const existing = await ctx.db.get("galleryCategories", args.id);
-    if (!existing) throw new Error("Nie znaleziono kategorii.");
+    if (!existing) throw new Error("Nie znaleziono folderu.");
     const updates: Record<string, unknown> = {};
     if (args.name !== undefined) {
       const name = args.name.trim();
-      if (!name) throw new Error("Nazwa kategorii jest wymagana.");
+      if (!name) throw new Error("Nazwa folderu jest wymagana.");
       updates.name = name;
     }
     if (args.slug !== undefined) {
       const slug = args.slug.trim();
       if (!slug) throw new Error("Slug jest wymagany.");
+      if (slug === UNCATEGORIZED_FOLDER_SLUG) {
+        throw new Error("Ta nazwa folderu jest zarezerwowana.");
+      }
       const other = await ctx.db
         .query("galleryCategories")
         .withIndex("by_slug", (q) => q.eq("slug", slug))
         .first();
-      if (other && other._id !== args.id) throw new Error("Kategoria z tym slug już istnieje.");
+      if (other && other._id !== args.id) throw new Error("Folder o tej nazwie już istnieje.");
       updates.slug = slug;
     }
     if (args.order !== undefined) updates.order = args.order;
@@ -176,22 +473,46 @@ export const updateCategory = mutation({
 });
 
 export const removeCategory = mutation({
-  args: { id: v.id("galleryCategories") },
+  args: {
+    id: v.id("galleryCategories"),
+    moveItemsToUncategorized: v.optional(v.boolean()),
+  },
+  returns: v.null(),
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
     const used = await ctx.db
       .query("galleryItems")
       .withIndex("by_category_order", (q) => q.eq("categoryId", args.id))
-      .first();
-    if (used) throw new Error("Nie można usunąć kategorii — jest używana przez elementy galerii.");
+      .collect();
+    if (used.length > 0 && !args.moveItemsToUncategorized) {
+      throw new Error("Folder zawiera zdjęcia. Przenieś je lub usuń przed skasowaniem folderu.");
+    }
+    for (const item of used) {
+      await ctx.db.patch(item._id, { categoryId: undefined });
+    }
     await ctx.db.delete(args.id);
+    return null;
   },
 });
 
 export const listItemsForAdmin = query({
-  args: {},
-  handler: async (ctx) => {
+  args: {
+    categoryId: v.optional(v.id("galleryCategories")),
+    uncategorizedOnly: v.optional(v.boolean()),
+  },
+  handler: async (ctx, args) => {
     await requireAdmin(ctx);
+    if (args.uncategorizedOnly) {
+      const items = await ctx.db.query("galleryItems").collect();
+      return items.filter((item) => !item.categoryId).sort((a, b) => a.order - b.order);
+    }
+    if (args.categoryId) {
+      const items = await ctx.db
+        .query("galleryItems")
+        .withIndex("by_category_order", (q) => q.eq("categoryId", args.categoryId!))
+        .collect();
+      return items.sort((a, b) => a.order - b.order);
+    }
     const items = await ctx.db.query("galleryItems").collect();
     return items.sort((a, b) => a.order - b.order);
   },
@@ -268,18 +589,25 @@ export const updateItemMeta = mutation({
   args: {
     id: v.id("galleryItems"),
     title: v.optional(v.string()),
-    categoryId: v.optional(v.id("galleryCategories")),
+    categoryId: v.optional(v.union(v.id("galleryCategories"), v.null())),
     isPublished: v.optional(v.boolean()),
     order: v.optional(v.number()),
     videoUrl: v.optional(v.string()),
   },
+  returns: v.null(),
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
     const existing = await ctx.db.get("galleryItems", args.id);
     if (!existing) throw new Error("Nie znaleziono elementu.");
     const updates: Record<string, unknown> = {};
     if (args.title !== undefined) updates.title = args.title.trim() || undefined;
-    if (args.categoryId !== undefined) updates.categoryId = args.categoryId;
+    if (args.categoryId !== undefined) {
+      const nextCategoryId = args.categoryId === null ? undefined : args.categoryId;
+      updates.categoryId = nextCategoryId;
+      if (nextCategoryId !== existing.categoryId) {
+        updates.order = await nextOrderForCategory(ctx, nextCategoryId);
+      }
+    }
     if (args.isPublished !== undefined) updates.isPublished = args.isPublished;
     if (args.order !== undefined) updates.order = args.order;
     if (args.videoUrl !== undefined) {
@@ -288,6 +616,7 @@ export const updateItemMeta = mutation({
       updates.videoUrl = args.videoUrl.trim();
     }
     if (Object.keys(updates).length > 0) await ctx.db.patch(args.id, updates);
+    return null;
   },
 });
 
