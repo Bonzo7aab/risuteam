@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { campRegistrationCtaHref } from "@/lib/camp-registration-links";
+import { Button } from "@/components/ui/button";
 
 export type CampHeroProps = {
   badge: string;
@@ -16,7 +17,7 @@ export type CampHeroProps = {
   titlePart2?: string;
   image: string;
   imageAlt: string;
-  meta: { icon: string; text: string }[];
+  meta: { icon: string; text: string; label?: string }[];
   /** Optional secondary link (e.g. "Wszystkie obozy") */
   secondaryLink?: { label: string; href: string };
   /** Back control over the hero image (frosted pill, top-left) */
@@ -24,8 +25,10 @@ export type CampHeroProps = {
   /** Rejestracja — primary CTA */
   registrationHref?: string;
   isRegistrationClosed?: boolean;
+  /** Optional price shown in the split info panel */
+  price?: string;
   /** Explicit layout; defaults to fullBleed when no `title`, or when layout="fullBleed" */
-  layout?: "fullBleed" | "card";
+  layout?: "fullBleed" | "card" | "split";
   /** Primary CTA (full-bleed; used when registrationHref is not set) */
   ctaPrimary?: { label: string; href: string };
   /** Secondary CTA */
@@ -44,6 +47,20 @@ function HeroBackLink({ href, label }: { href: string; label: string }) {
       <span className="min-w-0 truncate sm:max-w-none sm:whitespace-normal sm:overflow-visible">
         {label}
       </span>
+    </Link>
+  );
+}
+
+function SplitBackLink({ href, label }: { href: string; label: string }) {
+  return (
+    <Link
+      href={href}
+      className="mb-4 inline-flex max-w-full items-center gap-1.5 text-sm font-semibold text-stone-600 transition-colors hover:text-primary dark:text-stone-400 dark:hover:text-primary"
+    >
+      <span className="material-symbols-outlined shrink-0 text-lg leading-none" aria-hidden>
+        arrow_back
+      </span>
+      <span className="min-w-0 truncate">{label}</span>
     </Link>
   );
 }
@@ -82,6 +99,7 @@ export function CampHero({
   backLink,
   registrationHref,
   isRegistrationClosed = false,
+  price,
   layout,
   ctaPrimary,
   ctaSecondary,
@@ -89,6 +107,114 @@ export function CampHero({
   const useCardLayout = layout === "card" || (layout == null && title != null);
   const displayTitle =
     title ?? ([titlePart1, titlePart2].filter(Boolean).join(" ").trim() || "Obóz");
+
+  if (layout === "split") {
+    const registerHref = registrationHref
+      ? campRegistrationCtaHref(registrationHref, isRegistrationClosed)
+      : null;
+
+    return (
+      <section className="px-4 pb-8 pt-4 sm:px-6 md:pb-12 md:pt-6 lg:px-8">
+        <div className="mx-auto max-w-6xl">
+          {backLink ? <SplitBackLink href={backLink.href} label={backLink.label} /> : null}
+
+          <div className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-soft dark:border-stone-700 dark:bg-stone-900/80 lg:rounded-3xl">
+            <div className="grid lg:grid-cols-[minmax(16rem,22rem)_minmax(0,1fr)]">
+              <div className="relative aspect-[3/4] w-full bg-[#ece7df] dark:bg-[#1c1610] lg:aspect-auto lg:min-h-[26rem]">
+                <Image
+                  src={image}
+                  alt={imageAlt}
+                  fill
+                  className="object-contain"
+                  sizes="(max-width: 1024px) 100vw, 352px"
+                  priority
+                  unoptimized={image.startsWith("data:")}
+                />
+              </div>
+
+              <div className="flex flex-col justify-center px-5 py-6 sm:px-7 sm:py-8 lg:px-10 lg:py-10">
+                <BadgeRow badge={badge} badgeSecondary={badgeSecondary} />
+                <h1 className="text-2xl font-bold tracking-tight text-stone-900 dark:text-white sm:text-3xl lg:text-[2.15rem] lg:leading-tight">
+                  {displayTitle}
+                </h1>
+
+                <dl className="mt-5 divide-y divide-stone-200/80 border-y border-stone-200/80 dark:divide-stone-700/80 dark:border-stone-700/80">
+                  {meta.map((item) => (
+                    <div key={item.text} className="flex items-start gap-3 py-3">
+                      <span
+                        className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary"
+                        aria-hidden
+                      >
+                        <span className="material-symbols-outlined text-[20px] leading-none">
+                          {item.icon}
+                        </span>
+                      </span>
+                      <div className="min-w-0">
+                        {item.label ? (
+                          <dt className="text-[11px] font-semibold uppercase tracking-[0.14em] text-stone-500 dark:text-stone-400">
+                            {item.label}
+                          </dt>
+                        ) : null}
+                        <dd className="text-sm font-semibold leading-snug text-stone-800 dark:text-stone-100 sm:text-[15px]">
+                          {item.text}
+                        </dd>
+                      </div>
+                    </div>
+                  ))}
+                </dl>
+
+                {price ? (
+                  <p className="mt-5 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-stone-500 dark:text-stone-400">
+                      Cena
+                    </span>
+                    <span className="text-xl font-bold tracking-tight text-stone-900 dark:text-white">
+                      {price}
+                    </span>
+                  </p>
+                ) : null}
+
+                {registerHref || secondaryLink ? (
+                  <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+                    {registerHref ? (
+                      <Button
+                        asChild
+                        className="h-11 min-w-[11.5rem] rounded-xl px-6 text-sm font-bold"
+                        disabled={isRegistrationClosed}
+                      >
+                        <Link
+                          href={registerHref}
+                          onClick={(e) => {
+                            if (isRegistrationClosed) e.preventDefault();
+                          }}
+                          aria-disabled={isRegistrationClosed}
+                          className={
+                            isRegistrationClosed
+                              ? "pointer-events-none cursor-not-allowed opacity-70"
+                              : ""
+                          }
+                        >
+                          {isRegistrationClosed ? "Rejestracja zakończona" : "Zapisz się"}
+                        </Link>
+                      </Button>
+                    ) : null}
+                    {secondaryLink ? (
+                      <Link
+                        href={secondaryLink.href}
+                        className="text-sm font-medium text-primary risu-underline dark:text-amber-200"
+                      >
+                        {secondaryLink.label}
+                      </Link>
+                    ) : null}
+                  </div>
+                ) : null}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   if (!useCardLayout) {
     const primaryCta =

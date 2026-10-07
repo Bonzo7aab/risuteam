@@ -22,65 +22,99 @@ export function CampBringAndBaseSection({
   const hasLocation = location?.name || location?.address || location?.city;
   const fullAddress = location ? buildFullAddress(location) : "";
   const embedUrl = location ? buildEmbedUrl(location) : "";
+  const mapsUrl = location?.mapsUrl?.trim();
 
   return (
-    <section className="py-12 md:py-16 bg-stone-50 dark:bg-stone-900/30 border-t border-stone-200 dark:border-stone-700">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid md:grid-cols-2 gap-6 md:gap-8">
-          {/* Co zabrać? */}
-          <div className="rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 p-6 shadow-xs">
-            <h2 className="text-lg font-bold text-stone-900 dark:text-white mb-4 flex items-center gap-2">
-              <span className="material-symbols-outlined text-primary text-xl">luggage</span>
+    <section className="border-t border-stone-200 bg-stone-50 py-12 dark:border-stone-700 dark:bg-stone-900/30 md:py-16">
+      <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+        <div className="grid items-stretch gap-6 md:grid-cols-2 md:gap-8">
+          <div className="flex h-full flex-col rounded-2xl border border-stone-200 bg-white p-6 shadow-soft dark:border-stone-700 dark:bg-stone-900/80 md:p-7">
+            <h2 className="mb-1 flex items-center gap-2 text-lg font-bold text-stone-900 dark:text-white">
+              <span className="material-symbols-outlined text-xl text-primary">
+                luggage
+              </span>
               Co zabrać?
             </h2>
-            <ul className="space-y-2">
-              {whatToBringItems.map((item) => (
-                <li key={item}>
-                  <div className="flex items-center gap-2 rounded-lg bg-stone-100 dark:bg-stone-800/80 px-3 py-2.5 text-sm text-stone-700 dark:text-stone-300">
-                    <span className="material-symbols-outlined text-primary text-lg shrink-0" aria-hidden>
-                      check_circle
-                    </span>
+            <p className="mb-4 text-sm text-stone-500 dark:text-stone-400">
+              Lista rzeczy na wyjazd
+            </p>
+            <ol className="divide-y divide-stone-200/80 dark:divide-stone-700/80">
+              {whatToBringItems.map((item, i) => (
+                <li key={item} className="flex items-start gap-3 py-2.5 first:pt-0 last:pb-0">
+                  <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-md bg-primary/10 text-[11px] font-bold tabular-nums text-primary">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <span className="text-sm font-medium leading-snug text-stone-800 dark:text-stone-200">
                     {item}
-                  </div>
+                  </span>
                 </li>
               ))}
-            </ul>
+            </ol>
           </div>
 
-          {/* Nasza baza */}
           {hasLocation ? (
-            <div className="rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 overflow-hidden shadow-xs">
-              <h2 className="text-lg font-bold text-stone-900 dark:text-white p-6 pb-2 flex items-center gap-2">
-                <span className="material-symbols-outlined text-primary text-xl">home</span>
+            <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-soft dark:border-stone-700 dark:bg-stone-900/80">
+              <h2 className="flex items-center gap-2 px-6 pb-3 pt-5 text-lg font-bold text-stone-900 dark:text-white">
+                <span className="material-symbols-outlined text-xl text-primary">
+                  home
+                </span>
                 Nasza baza
               </h2>
-              <div className="p-4 pt-0">
-                <div className="rounded-xl overflow-hidden border border-stone-200 dark:border-stone-700 h-48">
-                  <iframe
-                    title="Mapa lokalizacji"
-                    src={embedUrl}
-                    width="100%"
-                    height="100%"
-                    className="w-full h-full border-0"
-                    allowFullScreen
-                    loading="lazy"
-                    referrerPolicy="no-referrer-when-downgrade"
-                  />
-                </div>
-                <div className="mt-3 flex items-start gap-2 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 p-3 shadow-xs">
-                  <span className="material-symbols-outlined text-primary text-lg shrink-0 mt-0.5">location_on</span>
-                  <div>
-                    <p className="font-medium text-stone-900 dark:text-white">{location!.name}</p>
-                    {fullAddress && (
-                      <p className="text-sm text-stone-600 dark:text-stone-400">{fullAddress}</p>
-                    )}
-                  </div>
-                </div>
+              <div className="min-h-48 w-full flex-1 border-y border-stone-200 dark:border-stone-700 sm:min-h-56">
+                <iframe
+                  title="Mapa lokalizacji"
+                  src={embedUrl}
+                  width="100%"
+                  height="100%"
+                  className="h-full w-full border-0"
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                />
+              </div>
+              <div className="px-5 py-4 sm:px-6">
+                <p className="font-semibold text-stone-900 dark:text-white">
+                  {location!.name}
+                </p>
+                {fullAddress ? (
+                  <p className="mt-0.5 text-sm text-stone-600 dark:text-stone-400">
+                    {fullAddress}
+                  </p>
+                ) : null}
+                {mapsUrl ? (
+                  <a
+                    href={mapsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-primary risu-underline"
+                  >
+                    Otwórz w mapach
+                    <span className="material-symbols-outlined text-base" aria-hidden>
+                      open_in_new
+                    </span>
+                  </a>
+                ) : (
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                      fullAddress || location!.name,
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-primary risu-underline"
+                  >
+                    Otwórz w mapach
+                    <span className="material-symbols-outlined text-base" aria-hidden>
+                      open_in_new
+                    </span>
+                  </a>
+                )}
               </div>
             </div>
           ) : (
-            <div className="rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 p-6 shadow-xs flex items-center justify-center min-h-[200px]">
-              <p className="text-sm text-stone-500 dark:text-stone-400">Brak lokalizacji</p>
+            <div className="flex min-h-[200px] items-center justify-center rounded-2xl border border-stone-200 bg-white p-6 shadow-soft dark:border-stone-700 dark:bg-stone-900/80">
+              <p className="text-sm text-stone-500 dark:text-stone-400">
+                Brak lokalizacji
+              </p>
             </div>
           )}
         </div>

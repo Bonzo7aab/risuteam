@@ -1,18 +1,12 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import Link from "next/link";
-import Image from "next/image";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import type { Id } from "@/convex/_generated/dataModel";
-import { EventRegistrationsView } from "@/app/admin/rejestracje/event-registrations-view";
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+  EventFactsSheet,
+  EventRegistrationsView,
+} from "@/app/admin/rejestracje/event-registrations-view";
 
 function getSlug(params: unknown): string {
   const p = params as { slug?: string | string[] } | null;
@@ -100,164 +94,36 @@ export default function AdminRejestracjeObozPage() {
           ? "Półkolonie"
           : camp.category ?? "—";
 
-  const szczegolyObozuCollapsible = (
-    <Accordion type="single" collapsible className="border border-stone-200 dark:border-stone-700 rounded-lg bg-card overflow-hidden">
-      <AccordionItem value="szczegoly-obozu" className="border-b-0">
-        <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-muted/30 data-[state=open]:bg-muted/20">
-          <div className="flex items-center gap-3">
-            <span className="font-semibold text-text-main dark:text-white">
-              Szczegóły obozu
-            </span>
-            <div
-              className="flex items-center gap-3"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <Link
-                href={`/obozy/${encodeURIComponent(camp.slug)}`}
-                className="text-sm text-primary risu-underline"
-              >
-                Zobacz stronę obozu →
-              </Link>
-            </div>
-          </div>
-        </AccordionTrigger>
-        <AccordionContent className="px-4 pb-4 pt-0">
-          <div className="space-y-4">
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <div>
-              <p className="text-xs font-medium text-text-light dark:text-stone-400 uppercase tracking-wide">
-                Nazwa
-              </p>
-              <p className="text-text-main dark:text-white">{camp.name}</p>
-            </div>
-            <div>
-              <p className="text-xs font-medium text-text-light dark:text-stone-400 uppercase tracking-wide">
-                Identyfikator URL
-              </p>
-              <p className="font-mono text-sm text-text-main dark:text-white">{camp.slug}</p>
-            </div>
-            <div>
-              <p className="text-xs font-medium text-text-light dark:text-stone-400 uppercase tracking-wide">
-                Kategoria
-              </p>
-              <p className="text-text-main dark:text-white">{categoryLabel}</p>
-            </div>
-            <div>
-              <p className="text-xs font-medium text-text-light dark:text-stone-400 uppercase tracking-wide">
-                Grupa wiekowa
-              </p>
-              <p className="text-text-main dark:text-white">{camp.ageGroup ?? "—"}</p>
-            </div>
-            <div>
-              <p className="text-xs font-medium text-text-light dark:text-stone-400 uppercase tracking-wide">
-                Termin
-              </p>
-              <p className="text-text-main dark:text-white">
-                {formatCampDates(camp.startDate, camp.endDate)}
-              </p>
-            </div>
-            <div>
-              <p className="text-xs font-medium text-text-light dark:text-stone-400 uppercase tracking-wide">
-                Lokalizacja
-              </p>
-              <p className="text-text-main dark:text-white">
-                {camp.location
-                  ? `${camp.location.name}${camp.location.address ? `, ${camp.location.address}` : ""}`
-                  : "—"}
-              </p>
-            </div>
-            <div>
-              <p className="text-xs font-medium text-text-light dark:text-stone-400 uppercase tracking-wide">
-                Cena (PLN)
-              </p>
-              <p className="text-text-main dark:text-white">
-                {camp.price != null ? camp.price : "—"}
-              </p>
-            </div>
-            <div>
-              <p className="text-xs font-medium text-text-light dark:text-stone-400 uppercase tracking-wide">
-                Maks. uczestników
-              </p>
-              <p className="text-text-main dark:text-white">
-                {camp.maxParticipants ?? "—"}
-              </p>
-            </div>
-            <div>
-              <p className="text-xs font-medium text-text-light dark:text-stone-400 uppercase tracking-wide">
-                Aktywny / Rejestracja
-              </p>
-              <p className="text-text-main dark:text-white">
-                {camp.isActive ? "Tak" : "Nie"} /{" "}
-                {camp.isRegistrationOpen !== false ? "Otwarta" : "Zamknięta"}
-              </p>
-            </div>
-          </div>
-          {camp.description?.trim() ? (
-            <div>
-              <p className="text-xs font-medium text-text-light dark:text-stone-400 uppercase tracking-wide mb-1">
-                Opis (fragment)
-              </p>
-              <p className="text-sm text-text-main dark:text-stone-300 line-clamp-3">
-                {camp.description.trim()}
-              </p>
-            </div>
-          ) : null}
-          {(camp.heroImageUrl ?? "").trim() ? (
-            <div>
-              <p className="text-xs font-medium text-text-light dark:text-stone-400 uppercase tracking-wide mb-2">
-                Obraz
-              </p>
-              <div className="relative w-24 h-24 rounded-lg border border-stone-200 dark:border-stone-700 overflow-hidden bg-stone-100 dark:bg-stone-800">
-                <Image
-                  src={camp.heroImageUrl!}
-                  alt=""
-                  fill
-                  className="object-cover"
-                  unoptimized={camp.heroImageUrl!.startsWith("data:")}
-                />
-              </div>
-            </div>
-          ) : null}
-          {camp.scheduleByDay && camp.scheduleByDay.length > 0 ? (
-            <div>
-              <p className="text-xs font-medium text-text-light dark:text-stone-400 uppercase tracking-wide mb-1">
-                Program (dni)
-              </p>
-              <p className="text-sm text-text-main dark:text-stone-300">
-                {camp.scheduleByDay.length} dni,{" "}
-                {camp.scheduleByDay.reduce((acc, d) => acc + (d.slots?.length ?? 0), 0)} slotów
-              </p>
-            </div>
-          ) : null}
-          {camp.includedItems && camp.includedItems.length > 0 ? (
-            <div>
-              <p className="text-xs font-medium text-text-light dark:text-stone-400 uppercase tracking-wide mb-1">
-                Co w cenie
-              </p>
-              <p className="text-sm text-text-main dark:text-stone-300">
-                {camp.includedItems.join(", ")}
-              </p>
-            </div>
-          ) : null}
-          {camp.generalAttractions && camp.generalAttractions.length > 0 ? (
-            <div>
-              <p className="text-xs font-medium text-text-light dark:text-stone-400 uppercase tracking-wide mb-1">
-                Atrakcje ogólne
-              </p>
-              <p className="text-sm text-text-main dark:text-stone-300">
-                {camp.generalAttractions.join(", ")}
-              </p>
-            </div>
-          ) : null}
-          </div>
-        </AccordionContent>
-      </AccordionItem>
-    </Accordion>
-  );
+  const facts = [
+    {
+      icon:
+        camp.category === "zimowy"
+          ? "ac_unit"
+          : camp.category === "polkolonie"
+            ? "diversity_3"
+            : "sunny",
+      label: "Kategoria",
+      value: categoryLabel,
+    },
+    { icon: "cake", label: "Wiek", value: camp.ageGroup ?? "—" },
+    { icon: "calendar_month", label: "Termin", value: formatCampDates(camp.startDate, camp.endDate) },
+    {
+      icon: "location_on",
+      label: "Miejsce",
+      value: camp.location
+        ? `${camp.location.name}${camp.location.address ? `, ${camp.location.address}` : ""}`
+        : "—",
+    },
+    { icon: "payments", label: "Cena", value: camp.price != null ? `${camp.price} PLN` : "—" },
+    {
+      icon: "groups",
+      label: "Miejsca",
+      value: camp.maxParticipants != null ? String(camp.maxParticipants) : "—",
+    },
+  ];
 
   return (
-    <div className="w-full min-w-0 space-y-5 sm:space-y-6">
-      <EventRegistrationsView
+    <EventRegistrationsView
         eventTitle={camp.name}
         eventDescription={camp.description ?? undefined}
         hideEventDescriptionOnMobile
@@ -279,8 +145,14 @@ export default function AdminRejestracjeObozPage() {
         }
         pendingPaymentsCount={pendingPaymentsCount}
         missingMedicalFormsCount={missingMedicalFormsCount}
-        slotAboveStats={szczegolyObozuCollapsible}
+        slotAboveStats={
+          <EventFactsSheet
+            title="Szczegóły obozu"
+            href={`/obozy/${encodeURIComponent(camp.slug)}`}
+            hrefLabel="Strona obozu"
+            facts={facts}
+          />
+        }
       />
-    </div>
   );
 }

@@ -295,7 +295,15 @@ export function SiteMobileBottomNav() {
                         );
                       })}
                     </div>
-                    <SignOutButton className="mt-1 w-full justify-center rounded-none border-0 bg-transparent py-3.5 text-sm font-semibold text-text-main shadow-none hover:bg-black/4 dark:text-stone-200 dark:hover:bg-white/6" />
+                    <SignOutButton
+                      variant="ghost"
+                      className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-xl border-0 bg-red-500/10 py-3 text-sm font-semibold text-red-600 shadow-none hover:bg-red-500/15 dark:text-red-400 dark:hover:bg-red-500/20"
+                    >
+                      <span className="material-symbols-outlined text-[20px]" aria-hidden>
+                        logout
+                      </span>
+                      Wyloguj się
+                    </SignOutButton>
                   </MoreSection>
                 )}
 
@@ -321,7 +329,15 @@ export function SiteMobileBottomNav() {
                         );
                       })}
                     </div>
-                    <SignOutButton className="mt-1 w-full justify-center rounded-none border-0 bg-transparent py-3.5 text-sm font-semibold text-text-main shadow-none hover:bg-black/4 dark:text-stone-200 dark:hover:bg-white/6" />
+                    <SignOutButton
+                      variant="ghost"
+                      className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-xl border-0 bg-red-500/10 py-3 text-sm font-semibold text-red-600 shadow-none hover:bg-red-500/15 dark:text-red-400 dark:hover:bg-red-500/20"
+                    >
+                      <span className="material-symbols-outlined text-[20px]" aria-hidden>
+                        logout
+                      </span>
+                      Wyloguj się
+                    </SignOutButton>
                   </MoreSection>
                 )}
 

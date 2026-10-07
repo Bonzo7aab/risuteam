@@ -356,61 +356,64 @@ export default function AdminNewCampPage() {
   };
 
   return (
-    <div className="max-w-3xl">
-      {/* Breadcrumbs */}
-      <nav className="flex items-center gap-2 text-sm text-text-light dark:text-stone-400 mb-6">
-        <Link href="/admin/wydarzenia" className="hover:text-primary transition-colors">
+    <div className="w-full min-w-0 max-w-5xl space-y-6 text-left">
+      <nav className="text-sm text-stone-500 dark:text-stone-400">
+        <Link
+          href="/admin/wydarzenia"
+          className="font-medium transition-colors hover:text-primary"
+        >
           Wydarzenia
         </Link>
-        <span aria-hidden>›</span>
-        <span className="text-text-main dark:text-stone-200">Nowy obóz</span>
+        <span className="mx-2 text-stone-300 dark:text-stone-600">/</span>
+        <span className="font-medium text-stone-900 dark:text-white">Nowy obóz</span>
       </nav>
 
-      <p className="mb-6 max-w-2xl text-sm text-text-light dark:text-stone-400">
-        Po opublikowaniu obozu ustawisz dodatkowe pytania rejestracji na stronie{" "}
-        <strong className="font-medium text-text-main dark:text-stone-200">edycji obozu</strong>{" "}
-        (przycisk „Pytania formularza”) lub na liście{" "}
-        <strong className="font-medium text-text-main dark:text-stone-200">Wydarzenia</strong>.
-      </p>
-
-      {/* Header + top actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-text-main dark:text-white mb-2">
-            Utwórz nowy obóz
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div className="min-w-0">
+          <h1 className="text-2xl font-bold text-stone-900 dark:text-white md:text-3xl">
+            Nowy obóz
           </h1>
+          <p className="mt-2 max-w-2xl text-sm text-stone-500 dark:text-stone-400">
+            Po publikacji ustawisz pytania rejestracji na stronie edycji obozu.
+          </p>
         </div>
-        <div className="flex items-center gap-2 flex-wrap shrink-0">
-          <Button type="button" variant="ghost" asChild>
-            <Link href="/admin/wydarzenia">Odrzuć szkic</Link>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" size="sm" className="h-9 min-h-9 rounded-lg px-3 text-sm font-semibold" asChild>
+            <Link href="/admin/wydarzenia">Anuluj</Link>
           </Button>
-          <Button type="button" variant="outline" onClick={handleSaveDraft}>
-            Zapisz jako szkic
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="h-9 min-h-9 rounded-lg px-3 text-sm font-semibold"
+            onClick={handleSaveDraft}
+          >
+            Szkic
           </Button>
-          <Button type="submit" form="camp-form">
-            Opublikuj obóz
+          <Button type="submit" form="camp-form" size="sm" className="h-9 min-h-9 rounded-lg px-3 text-sm font-semibold">
+            Opublikuj
           </Button>
         </div>
       </div>
 
       {error && (
-        <div className="mb-6 rounded-xl border border-destructive/30 bg-destructive/10 p-4 shadow-xs">
+        <div className="rounded-2xl border border-destructive/30 bg-destructive/10 p-4">
           <div className="flex gap-3">
             <span className="material-symbols-outlined mt-0.5 text-lg" aria-hidden>
               error
             </span>
-            <div className="text-sm md:text-base font-medium leading-relaxed">
+            <div className="text-sm font-medium leading-relaxed">
               {error}
             </div>
           </div>
         </div>
       )}
 
-      <form id="camp-form" onSubmit={handleSubmit} className="space-y-8">
+      <form id="camp-form" onSubmit={handleSubmit} className="space-y-6">
         {/* Section 1 – Basic Info */}
-        <section className="p-5 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/50">
+        <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-soft dark:border-stone-700 dark:bg-stone-900/80 sm:p-6">
           <div className="flex items-center gap-2 mb-4">
-            <h2 className="text-lg font-semibold text-text-main dark:text-white">
+            <h2 className="text-base font-bold text-stone-900 dark:text-white">
               Podstawowe dane
             </h2>
           </div>
@@ -537,9 +540,9 @@ export default function AdminNewCampPage() {
         </section>
 
         {/* Section 2 – Media & Description */}
-        <section className="p-5 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/50">
+        <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-soft dark:border-stone-700 dark:bg-stone-900/80 sm:p-6">
           <div className="flex items-center gap-2 mb-4">
-            <h2 className="text-lg font-semibold text-text-main dark:text-white">
+            <h2 className="text-base font-bold text-stone-900 dark:text-white">
               Media i opis
             </h2>
           </div>
@@ -659,9 +662,9 @@ export default function AdminNewCampPage() {
         </section>
 
         {/* Section 3 – Pricing & Capacity */}
-        <section className="p-5 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/50">
+        <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-soft dark:border-stone-700 dark:bg-stone-900/80 sm:p-6">
           <div className="flex items-center gap-2 mb-4">
-            <h2 className="text-lg font-semibold text-text-main dark:text-white">
+            <h2 className="text-base font-bold text-stone-900 dark:text-white">
               Cena i liczba miejsc
             </h2>
           </div>
@@ -729,10 +732,10 @@ export default function AdminNewCampPage() {
         </section>
 
         {/* Section 4 – Daily Schedule (by day) */}
-        <section className="p-5 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/50">
+        <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-soft dark:border-stone-700 dark:bg-stone-900/80 sm:p-6">
           <div className="flex items-center justify-between gap-4 flex-wrap mb-4">
             <div className="flex items-center gap-2">
-              <h2 className="text-lg font-semibold text-text-main dark:text-white">
+              <h2 className="text-base font-bold text-stone-900 dark:text-white">
                 Program dnia
               </h2>
             </div>
@@ -830,9 +833,9 @@ export default function AdminNewCampPage() {
         </section>
 
         {/* Section 4b – General attractions */}
-        <section className="p-5 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/50">
+        <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-soft dark:border-stone-700 dark:bg-stone-900/80 sm:p-6">
           <div className="mb-4">
-            <h2 className="text-lg font-semibold text-text-main dark:text-white">
+            <h2 className="text-base font-bold text-stone-900 dark:text-white">
               Atrakcje ogólne dla całego obozu
             </h2>
           </div>
@@ -907,9 +910,9 @@ export default function AdminNewCampPage() {
         </section>
 
         {/* Section 5 – Included Items */}
-        <section className="p-5 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/50">
+        <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-soft dark:border-stone-700 dark:bg-stone-900/80 sm:p-6">
           <div className="mb-4">
-            <h2 className="text-lg font-semibold text-text-main dark:text-white">
+            <h2 className="text-base font-bold text-stone-900 dark:text-white">
               Co w cenie
             </h2>
           </div>
@@ -968,15 +971,24 @@ export default function AdminNewCampPage() {
           </div>
         </section>
 
-        {/* Bottom actions */}
-        <div className="flex gap-2 pt-4 flex-wrap">
-          <Button type="button" variant="ghost" asChild>
-            <Link href="/admin/wydarzenia">Odrzuć szkic</Link>
-          </Button>
-          <Button type="button" variant="outline" onClick={handleSaveDraft}>
-            Zapisz jako szkic
-          </Button>
-          <Button type="submit">Opublikuj obóz</Button>
+        <div className="sticky bottom-[calc(var(--risu-mobile-bottom-nav-h)+0.75rem)] z-20 flex justify-end md:bottom-4">
+          <div className="flex gap-2 rounded-2xl border border-stone-200 bg-white/95 p-2 shadow-soft backdrop-blur-md dark:border-stone-700 dark:bg-stone-900/95">
+            <Button variant="outline" size="sm" className="h-9 min-h-9 rounded-lg px-3 text-sm font-semibold" asChild>
+              <Link href="/admin/wydarzenia">Anuluj</Link>
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-9 min-h-9 rounded-lg px-3 text-sm font-semibold"
+              onClick={handleSaveDraft}
+            >
+              Szkic
+            </Button>
+            <Button type="submit" size="sm" className="h-9 min-h-9 rounded-lg px-3 text-sm font-semibold">
+              Opublikuj
+            </Button>
+          </div>
         </div>
       </form>
 

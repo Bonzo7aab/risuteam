@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useMutation, useQuery } from "convex/react";
-import { Switch } from "@/components/ui/switch";
 import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,10 +21,8 @@ export default function UstawieniaPage() {
   const router = useRouter();
   const { signOut } = useAuthActions();
   const user = useQuery(api.authHelpers.getCurrentUser);
-  const newsletterStatus = useQuery(api.newsletter.getNewsletterStatusForSelf);
   const updateSelf = useMutation(api.users.updateSelf);
   const removeSelf = useMutation(api.users.removeSelf);
-  const setNewsletterForSelf = useMutation(api.newsletter.setNewsletterForSelf);
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -36,8 +33,6 @@ export default function UstawieniaPage() {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deletePending, setDeletePending] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState("");
-  const [newsletterPending, setNewsletterPending] = useState(false);
-  const [newsletterError, setNewsletterError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -131,66 +126,6 @@ export default function UstawieniaPage() {
               {pending ? "Zapisywanie..." : "Zapisz zmiany"}
             </Button>
           </form>
-        )}
-      </div>
-
-      <div className="rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 p-6">
-        <h2 className="text-lg font-bold text-text-main dark:text-white mb-2">
-          Newsletter
-        </h2>
-        <p className="text-sm text-text-light dark:text-stone-400 mb-4">
-          Informacje o obozach i nocowankach wysyłamy na adres e-mail przypisany
-          do konta. Możesz w każdej chwili zrezygnować z otrzymywania
-          newslettera.
-        </p>
-        {newsletterStatus === undefined ? (
-          <p className="text-sm text-text-light dark:text-stone-400">Ładowanie…</p>
-        ) : newsletterStatus === null ? (
-          <p className="text-sm text-text-light dark:text-stone-400">
-            Zaloguj się, aby zarządzać zgodą na newsletter.
-          </p>
-        ) : !newsletterStatus.hasEmail ? (
-          <p className="text-sm text-text-light dark:text-stone-400">
-            Twoje konto nie ma przypisanego adresu e-mail — skontaktuj się z
-            administratorem lub uzupełnij e-mail przy logowaniu.
-          </p>
-        ) : (
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 max-w-md">
-            <div>
-              <p className="text-sm font-medium text-text-main dark:text-white">
-                Powiadomienia e-mail
-              </p>
-              <p className="text-xs text-text-light dark:text-stone-400 mt-1">
-                {newsletterStatus.subscribed
-                  ? "Jesteś zapisany na newsletter."
-                  : "Nie otrzymujesz newslettera."}
-              </p>
-            </div>
-            <Switch
-              checked={newsletterStatus.subscribed}
-              disabled={newsletterPending}
-              onCheckedChange={async (checked) => {
-                setNewsletterError(null);
-                setNewsletterPending(true);
-                try {
-                  await setNewsletterForSelf({ subscribed: checked });
-                } catch (err) {
-                  setNewsletterError(
-                    err instanceof Error
-                      ? err.message
-                      : "Nie udało się zapisać preferencji."
-                  );
-                } finally {
-                  setNewsletterPending(false);
-                }
-              }}
-            />
-          </div>
-        )}
-        {newsletterError && (
-          <p className="mt-3 text-sm text-red-600 dark:text-red-400">
-            {newsletterError}
-          </p>
         )}
       </div>
 

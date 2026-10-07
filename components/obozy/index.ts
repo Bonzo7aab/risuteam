@@ -20,6 +20,8 @@ export { WhatToBringPricing } from "./what-to-bring-pricing";
 export type { WhatToBringPricingProps } from "./what-to-bring-pricing";
 export { InstructorCards } from "./instructor-cards";
 export type { InstructorCardsProps, Instructor } from "./instructor-cards";
+export { CampAboutAndAttractionsSection } from "./camp-about-section";
+export type { CampAboutAndAttractionsSectionProps } from "./camp-about-section";
 export { CampCoachesList } from "./camp-coaches-list";
 export type { CampCoachListItem } from "./camp-coaches-list";
 export { CampGallery } from "./camp-gallery";

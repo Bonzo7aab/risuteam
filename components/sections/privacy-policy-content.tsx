@@ -147,14 +147,6 @@ export function PrivacyPolicyContent() {
           </li>
           <li>
             <span className="font-semibold text-text-main dark:text-white">
-              Newsletter i komunikacja e-mail
-            </span>
-            : adres e-mail do wysylki informacji (np. o obozach, nocowankach lub
-            zmianach organizacyjnych) oraz ewentualny identyfikator/odnosnik do
-            wypisu (jesli stosowany).
-          </li>
-          <li>
-            <span className="font-semibold text-text-main dark:text-white">
               Reset hasla i wiadomosci transakcyjne
             </span>
             : adres e-mail, na ktory wysylany jest kod lub link do resetu hasla.
@@ -187,12 +179,6 @@ export function PrivacyPolicyContent() {
           </li>
           <li>
             <span className="font-semibold text-text-main dark:text-white">
-              Newsletter / komunikacja marketingowa
-            </span>{" "}
-            — art. 6 ust. 1 lit. a RODO (zgoda), jesli wymagane.
-          </li>
-          <li>
-            <span className="font-semibold text-text-main dark:text-white">
               Ustalenie, dochodzenie lub obrona roszczen
             </span>{" "}
             — art. 6 ust. 1 lit. f RODO.
@@ -212,7 +198,7 @@ export function PrivacyPolicyContent() {
         <ul className="list-disc pl-5 space-y-2 text-text-light dark:text-stone-400 text-sm md:text-base">
           <li>
             dostawcy uslug e-mail (np. Brevo) — w celu wysylki wiadomosci
-            transakcyjnych, resetu hasla oraz newslettera,
+            transakcyjnych oraz resetu hasla,
           </li>
           <li>
             dostawcy infrastruktury/hostingu i bazy danych (np. Convex) — w celu
@@ -249,9 +235,6 @@ export function PrivacyPolicyContent() {
           <li>
             korespondencja — przez okres niezbedny do obslugi sprawy i
             archiwizacji,
-          </li>
-          <li>
-            newsletter — do czasu wypisania sie lub cofniecia zgody.
           </li>
         </ul>
 

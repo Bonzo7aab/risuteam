@@ -23,7 +23,6 @@ import type * as gallery from "../gallery.js";
 import type * as galleryPublicManifest from "../galleryPublicManifest.js";
 import type * as http from "../http.js";
 import type * as locations from "../locations.js";
-import type * as newsletter from "../newsletter.js";
 import type * as nocowanki from "../nocowanki.js";
 import type * as parentDashboard from "../parentDashboard.js";
 import type * as payments from "../payments.js";
@@ -57,7 +56,6 @@ declare const fullApi: ApiFromModules<{
   galleryPublicManifest: typeof galleryPublicManifest;
   http: typeof http;
   locations: typeof locations;
-  newsletter: typeof newsletter;
   nocowanki: typeof nocowanki;
   parentDashboard: typeof parentDashboard;
   payments: typeof payments;

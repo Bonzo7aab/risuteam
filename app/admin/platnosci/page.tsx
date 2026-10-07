@@ -678,7 +678,7 @@ export default function AdminPlatnosciPage() {
           <div className="flex flex-wrap items-center gap-2">
             <Button
               type="button"
-              variant={openEventType === "camp" && closedEventKey === "all" ? "default" : "outline-solid"}
+              variant={openEventType === "camp" && closedEventKey === "all" ? "default" : "outline"}
               size="sm"
               onClick={() => {
                 setOpenEventType("camp");
@@ -690,7 +690,7 @@ export default function AdminPlatnosciPage() {
             </Button>
             <Button
               type="button"
-              variant={openEventType === "nocowanka" && closedEventKey === "all" ? "default" : "outline-solid"}
+              variant={openEventType === "nocowanka" && closedEventKey === "all" ? "default" : "outline"}
               size="sm"
               onClick={() => {
                 setOpenEventType("nocowanka");

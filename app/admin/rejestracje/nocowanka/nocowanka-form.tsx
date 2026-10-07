@@ -561,46 +561,42 @@ export function NocowankaEditor({ variant, doc, editSlug }: NocowankaEditorProps
 
   return (
     <form
+      id="nocowanka-form"
       onSubmit={handleSubmit}
-      className="space-y-8 max-w-3xl text-left"
+      className="space-y-6 text-left"
     >
       {error && (
-        <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
+        <div className="rounded-2xl border border-destructive/30 bg-destructive/10 p-4 text-sm font-medium text-destructive">
           {error}
         </div>
       )}
 
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <Button asChild variant="ghost" size="sm">
-          <Link href="/admin/wydarzenia">← Wydarzenia</Link>
-        </Button>
-        {variant === "create" && (
-          <div className="flex items-center gap-2">
-            <Label htmlFor="n-fill-like" className="text-sm">
-              Wypełnij jak
-            </Label>
-            <select
-              id="n-fill-like"
-              value={templateSourceId}
-              onChange={(e) => applyRecentTemplate(e.target.value)}
-              className="h-9 rounded-md border border-input bg-background px-3 text-sm"
-            >
-              <option value="">Wybierz nocowankę...</option>
-              <option value="__klubowa__">Klubowa (szablon)</option>
-              {recentNocowanki.map((item) => (
-                <option key={item._id} value={item._id}>
-                  {item.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
-      </div>
+      {variant === "create" ? (
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <Label htmlFor="n-fill-like" className="text-sm text-stone-500 dark:text-stone-400">
+            Wypełnij jak
+          </Label>
+          <select
+            id="n-fill-like"
+            value={templateSourceId}
+            onChange={(e) => applyRecentTemplate(e.target.value)}
+            className="h-9 rounded-lg border border-stone-200 bg-white px-3 text-sm dark:border-stone-600 dark:bg-stone-900"
+          >
+            <option value="">Wybierz nocowankę...</option>
+            <option value="__klubowa__">Klubowa (szablon)</option>
+            {recentNocowanki.map((item) => (
+              <option key={item._id} value={item._id}>
+                {item.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      ) : null}
 
       {/* Podstawowe + Hero */}
-      <section className="p-5 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/50 space-y-4">
+      <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-soft dark:border-stone-700 dark:bg-stone-900/80 sm:p-6 space-y-4">
         <div className="flex items-start justify-between gap-3">
-          <h2 className="text-lg font-semibold text-text-main dark:text-white">
+          <h2 className="text-base font-bold text-stone-900 dark:text-white">
             Podstawowe
           </h2>
           <div className="flex items-center gap-3">
@@ -765,9 +761,9 @@ export function NocowankaEditor({ variant, doc, editSlug }: NocowankaEditorProps
       </section>
 
       {/* Zdjęcia */}
-      <section className="p-5 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/50 space-y-4">
+      <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-soft dark:border-stone-700 dark:bg-stone-900/80 sm:p-6 space-y-4">
         <div className="flex items-center justify-between gap-2">
-          <h2 className="text-lg font-semibold text-text-main dark:text-white">
+          <h2 className="text-base font-bold text-stone-900 dark:text-white">
             Zdjęcia
           </h2>
           <Button
@@ -848,9 +844,9 @@ export function NocowankaEditor({ variant, doc, editSlug }: NocowankaEditorProps
       </section>
 
       {/* Atrakcje */}
-      <section className="p-5 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/50 space-y-4">
+      <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-soft dark:border-stone-700 dark:bg-stone-900/80 sm:p-6 space-y-4">
         <div className="flex items-center justify-between gap-2">
-          <h2 className="text-lg font-semibold text-text-main dark:text-white">
+          <h2 className="text-base font-bold text-stone-900 dark:text-white">
             Główne atrakcje
           </h2>
           <Button type="button" variant="outline" size="sm" onClick={addAttraction}>
@@ -892,8 +888,8 @@ export function NocowankaEditor({ variant, doc, editSlug }: NocowankaEditorProps
       </section>
 
       {/* Cena i co zabrać */}
-      <section className="p-5 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/50 space-y-4">
-        <h2 className="text-lg font-semibold text-text-main dark:text-white">
+      <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-soft dark:border-stone-700 dark:bg-stone-900/80 sm:p-6 space-y-4">
+        <h2 className="text-base font-bold text-stone-900 dark:text-white">
           Cena i wyposażenie
         </h2>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -1018,9 +1014,9 @@ export function NocowankaEditor({ variant, doc, editSlug }: NocowankaEditorProps
       </section>
 
       {/* Harmonogram */}
-      <section className="p-5 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/50 space-y-4">
+      <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-soft dark:border-stone-700 dark:bg-stone-900/80 sm:p-6 space-y-4">
         <div className="flex items-center justify-between gap-2">
-          <h2 className="text-lg font-semibold text-text-main dark:text-white">
+          <h2 className="text-base font-bold text-stone-900 dark:text-white">
             Harmonogram nocy
           </h2>
           <Button type="button" variant="outline" size="sm" onClick={addScheduleRow}>
@@ -1075,31 +1071,25 @@ export function NocowankaEditor({ variant, doc, editSlug }: NocowankaEditorProps
         </div>
       </section>
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-wrap gap-2">
+      <div className="sticky bottom-[calc(var(--risu-mobile-bottom-nav-h)+0.75rem)] z-20 flex justify-end md:bottom-4">
+        <div className="flex gap-2 rounded-2xl border border-stone-200 bg-white/95 p-2 shadow-soft backdrop-blur-md dark:border-stone-700 dark:bg-stone-900/95">
           {form.slug.trim() ? (
-            <Button asChild variant="outline" type="button" className="font-semibold">
+            <Button asChild variant="outline" type="button" size="sm" className="h-9 min-h-9 rounded-lg px-3 text-sm font-semibold">
               <Link
                 href={`/admin/wydarzenia/nocowanka/${encodeURIComponent(form.slug.trim())}/pytania`}
               >
-                Pytania formularza
+                Pytania
               </Link>
             </Button>
-          ) : (
-            <p className="self-center text-xs text-text-light dark:text-stone-400">
-              Ustaw slug nocowanki, aby przejść do pytań formularza.
-            </p>
-          )}
-        </div>
-        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <Button asChild variant="outline" type="button">
+          ) : null}
+          <Button asChild variant="outline" type="button" size="sm" className="h-9 min-h-9 rounded-lg px-3 text-sm font-semibold">
             <Link href="/admin/wydarzenia">Anuluj</Link>
           </Button>
-          <Button type="submit" disabled={saving} className="min-w-[160px]">
+          <Button type="submit" size="sm" disabled={saving} className="h-9 min-h-9 rounded-lg px-3 text-sm font-semibold">
             {saving
               ? "Zapisywanie…"
               : variant === "create"
-                ? "Utwórz nocowankę"
+                ? "Utwórz"
                 : "Zapisz zmiany"}
           </Button>
         </div>

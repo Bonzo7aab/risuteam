@@ -554,12 +554,12 @@ export default function AdminEditCampPage() {
 
   if (camp === undefined || (slug && !camp)) {
     return (
-      <div className="max-w-3xl">
-        <p className="text-text-light dark:text-stone-400">
+      <div className="w-full min-w-0 max-w-5xl">
+        <p className="text-sm text-stone-500 dark:text-stone-400">
           {camp === undefined ? "Ładowanie…" : "Nie znaleziono obozu."}
         </p>
-        <Link href="/admin/wydarzenia" className="text-primary font-medium risu-underline mt-2 inline-block">
-          ← Wydarzenia
+        <Link href="/admin/wydarzenia" className="mt-2 inline-block text-sm font-semibold text-primary risu-underline">
+          Wydarzenia
         </Link>
       </div>
     );
@@ -567,63 +567,84 @@ export default function AdminEditCampPage() {
 
   if (!form || !camp) return null;
 
+  const actionBtnClass = "h-9 min-h-9 rounded-lg px-3 text-sm font-semibold";
+
   return (
-    <div className="max-w-3xl">
-      <nav className="flex items-center gap-2 text-sm text-text-light dark:text-stone-400 mb-6">
-        <Link href="/admin/wydarzenia" className="hover:text-primary transition-colors">
+    <div className="w-full min-w-0 max-w-5xl space-y-6 text-left">
+      <nav className="text-sm text-stone-500 dark:text-stone-400">
+        <Link
+          href="/admin/wydarzenia"
+          className="font-medium transition-colors hover:text-primary"
+        >
           Wydarzenia
         </Link>
-        <span aria-hidden>›</span>
-        <Link
-          href={`/admin/rejestracje/oboz/${encodeURIComponent(camp.slug)}`}
-          className="hover:text-primary transition-colors"
-        >
-          {camp.name}
-        </Link>
-        <span aria-hidden>›</span>
-        <span className="text-text-main dark:text-stone-200">Edycja</span>
+        <span className="mx-2 text-stone-300 dark:text-stone-600">/</span>
+        <span className="font-medium text-stone-900 dark:text-white">{camp.name}</span>
       </nav>
 
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-        <h1 className="text-2xl md:text-3xl font-bold text-text-main dark:text-white">
-          Edytuj obóz
-        </h1>
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <h1 className="text-2xl font-bold text-stone-900 dark:text-white md:text-3xl">
+              {camp.name}
+            </h1>
+            <span
+              className={cn(
+                "inline-flex rounded-md px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide",
+                form.isRegistrationOpen
+                  ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400"
+                  : "bg-stone-200 text-stone-600 dark:bg-stone-700 dark:text-stone-400",
+              )}
+            >
+              {form.isRegistrationOpen ? "Otwarta" : "Zamknięta"}
+            </span>
+          </div>
+          <p className="mt-2 max-w-2xl text-sm text-stone-500 dark:text-stone-400">
+            Edycja treści, terminu i ustawień obozu.
+          </p>
+        </div>
         <div className="flex flex-wrap gap-2">
-          <Button type="submit" form="camp-edit-form" disabled={saving}>
-            {saving ? "Zapisywanie…" : "Zapisz zmiany"}
-          </Button>
-          <Button variant="outline" asChild>
+          <Button variant="outline" size="sm" className={actionBtnClass} asChild>
             <Link href={`/admin/wydarzenia/oboz/${encodeURIComponent(camp.slug)}/pytania`}>
-              Pytania formularza
+              Pytania
             </Link>
           </Button>
-          <Button variant="outline" asChild>
+          <Button variant="outline" size="sm" className={actionBtnClass} asChild>
             <Link href={`/admin/rejestracje/oboz/${encodeURIComponent(camp.slug)}`}>
-              Anuluj
+              Rejestracje
             </Link>
+          </Button>
+          <Button
+            type="submit"
+            form="camp-edit-form"
+            size="sm"
+            className={actionBtnClass}
+            disabled={saving}
+          >
+            {saving ? "Zapisywanie…" : "Zapisz"}
           </Button>
         </div>
       </div>
 
       {error && (
-        <div className="mb-6 rounded-xl border border-destructive/30 bg-destructive/10 p-4 shadow-xs">
+        <div className="rounded-2xl border border-destructive/30 bg-destructive/10 p-4">
           <div className="flex gap-3">
             <span className="material-symbols-outlined mt-0.5 text-lg" aria-hidden>
               error
             </span>
-            <div className="text-sm md:text-base font-medium leading-relaxed">{error}</div>
+            <div className="text-sm font-medium leading-relaxed">{error}</div>
           </div>
         </div>
       )}
       {success && (
-        <div className="mb-6 rounded-xl border border-primary/30 bg-primary/10 p-4 shadow-xs text-primary font-medium">
+        <div className="rounded-2xl border border-emerald-200/80 bg-emerald-50/70 p-4 text-sm font-medium text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/20 dark:text-emerald-200">
           {success}
         </div>
       )}
 
-      <form id="camp-edit-form" onSubmit={handleSubmit} className="space-y-8">
-        <section className="p-5 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/50">
-          <h2 className="text-lg font-semibold text-text-main dark:text-white mb-4">
+      <form id="camp-edit-form" onSubmit={handleSubmit} className="space-y-6">
+        <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-soft dark:border-stone-700 dark:bg-stone-900/80 sm:p-6">
+          <h2 className="text-base font-bold text-stone-900 dark:text-white mb-4">
             Obraz główny (hero)
           </h2>
           <p className="text-sm text-muted-foreground mb-4">
@@ -686,8 +707,8 @@ export default function AdminEditCampPage() {
           </div>
         </section>
 
-        <section className="p-5 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/50">
-          <h2 className="text-lg font-semibold text-text-main dark:text-white mb-4">
+        <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-soft dark:border-stone-700 dark:bg-stone-900/80 sm:p-6">
+          <h2 className="text-base font-bold text-stone-900 dark:text-white mb-4">
             Baner promocyjny (opcjonalny)
           </h2>
           <p className="text-sm text-muted-foreground mb-4">
@@ -750,8 +771,8 @@ export default function AdminEditCampPage() {
           </div>
         </section>
 
-        <section className="p-5 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/50">
-          <h2 className="text-lg font-semibold text-text-main dark:text-white mb-4">
+        <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-soft dark:border-stone-700 dark:bg-stone-900/80 sm:p-6">
+          <h2 className="text-base font-bold text-stone-900 dark:text-white mb-4">
             Podstawowe dane
           </h2>
           <div className="space-y-4">
@@ -874,8 +895,8 @@ export default function AdminEditCampPage() {
           </div>
         </section>
 
-        <section className="p-5 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/50">
-          <h2 className="text-lg font-semibold text-text-main dark:text-white mb-4">
+        <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-soft dark:border-stone-700 dark:bg-stone-900/80 sm:p-6">
+          <h2 className="text-base font-bold text-stone-900 dark:text-white mb-4">
             Trenerzy
           </h2>
           <p className="text-sm text-muted-foreground mb-4">
@@ -923,8 +944,8 @@ export default function AdminEditCampPage() {
           </div>
         </section>
 
-        <section className="p-5 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/50">
-          <h2 className="text-lg font-semibold text-text-main dark:text-white mb-4">
+        <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-soft dark:border-stone-700 dark:bg-stone-900/80 sm:p-6">
+          <h2 className="text-base font-bold text-stone-900 dark:text-white mb-4">
             Media i opis
           </h2>
           <div className="space-y-6">
@@ -1026,8 +1047,8 @@ export default function AdminEditCampPage() {
           </div>
         </section>
 
-        <section className="p-5 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/50">
-          <h2 className="text-lg font-semibold text-text-main dark:text-white mb-4">
+        <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-soft dark:border-stone-700 dark:bg-stone-900/80 sm:p-6">
+          <h2 className="text-base font-bold text-stone-900 dark:text-white mb-4">
             Cena i liczba miejsc
           </h2>
           <div className="grid gap-4 sm:grid-cols-2">
@@ -1073,9 +1094,9 @@ export default function AdminEditCampPage() {
           </div>
         </section>
 
-        <section className="p-5 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/50">
+        <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-soft dark:border-stone-700 dark:bg-stone-900/80 sm:p-6">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold text-text-main dark:text-white">
+            <h2 className="text-base font-bold text-stone-900 dark:text-white">
               Program dnia
             </h2>
             <Button type="button" variant="outline" size="sm" onClick={addScheduleDay}>
@@ -1166,8 +1187,8 @@ export default function AdminEditCampPage() {
           </div>
         </section>
 
-        <section className="p-5 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/50">
-          <h2 className="text-lg font-semibold text-text-main dark:text-white mb-4">
+        <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-soft dark:border-stone-700 dark:bg-stone-900/80 sm:p-6">
+          <h2 className="text-base font-bold text-stone-900 dark:text-white mb-4">
             Atrakcje ogólne
           </h2>
           <div className="space-y-3">
@@ -1242,8 +1263,8 @@ export default function AdminEditCampPage() {
           </div>
         </section>
 
-        <section className="p-5 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/50">
-          <h2 className="text-lg font-semibold text-text-main dark:text-white mb-4">
+        <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-soft dark:border-stone-700 dark:bg-stone-900/80 sm:p-6">
+          <h2 className="text-base font-bold text-stone-900 dark:text-white mb-4">
             Co w cenie
           </h2>
           <div className="space-y-3">
@@ -1303,15 +1324,15 @@ export default function AdminEditCampPage() {
           </div>
         </section>
 
-        <div className="flex gap-2 flex-wrap">
-          <Button type="submit" disabled={saving}>
-            {saving ? "Zapisywanie…" : "Zapisz zmiany"}
-          </Button>
-          <Button variant="outline" asChild>
-            <Link href={`/admin/rejestracje/oboz/${encodeURIComponent(camp.slug)}`}>
-              Anuluj
-            </Link>
-          </Button>
+        <div className="sticky bottom-[calc(var(--risu-mobile-bottom-nav-h)+0.75rem)] z-20 flex justify-end md:bottom-4">
+          <div className="flex gap-2 rounded-2xl border border-stone-200 bg-white/95 p-2 shadow-soft backdrop-blur-md dark:border-stone-700 dark:bg-stone-900/95">
+            <Button variant="outline" size="sm" className={actionBtnClass} asChild>
+              <Link href="/admin/wydarzenia">Anuluj</Link>
+            </Button>
+            <Button type="submit" size="sm" className={actionBtnClass} disabled={saving}>
+              {saving ? "Zapisywanie…" : "Zapisz zmiany"}
+            </Button>
+          </div>
         </div>
       </form>
 

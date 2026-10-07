@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useMutation, useQuery } from "convex/react";
 import { useState } from "react";
@@ -9,6 +8,7 @@ import {
   getNocowankaDescription,
   getNocowankaDisplayName,
   getNocowankaMaxParticipants,
+  getNocowankaPrice,
 } from "@/lib/nocowanki";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,7 +20,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { EventRegistrationsView } from "@/app/admin/rejestracje/event-registrations-view";
+import {
+  EventFactsSheet,
+  EventRegistrationsView,
+} from "@/app/admin/rejestracje/event-registrations-view";
 
 export default function AdminRejestracjeNocowankaPage() {
   const params = useParams();
@@ -98,21 +101,13 @@ export default function AdminRejestracjeNocowankaPage() {
     customAnswers: r.customAnswers,
   }));
 
-  const editSlot =
-    nocowankaDoc !== null ? (
-      <div className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap">
-        <Button asChild variant="outline" size="sm" className="w-full font-semibold sm:w-auto sm:flex-1">
-          <Link href={`/admin/wydarzenia/nocowanka/${encodeURIComponent(slug)}/edit`}>
-            Edytuj nocowankę
-          </Link>
-        </Button>
-        <Button asChild variant="outline" size="sm" className="w-full border-2 border-primary/35 font-semibold text-primary hover:bg-primary/10 sm:w-auto sm:flex-1 dark:border-primary/45 dark:hover:bg-primary/15">
-          <Link href={`/admin/wydarzenia/nocowanka/${encodeURIComponent(slug)}/pytania`}>
-            Pytania formularza
-          </Link>
-        </Button>
-      </div>
-    ) : null;
+  const price = nocowankaDoc?.price ?? getNocowankaPrice(slug);
+  const facts = [
+    { icon: "calendar_month", label: "Termin", value: nocowankaDoc?.datesLabel?.trim() || "—" },
+    { icon: "location_on", label: "Miejsce", value: nocowankaDoc?.locationLabel?.trim() || "—" },
+    { icon: "payments", label: "Cena", value: `${price} PLN` },
+    { icon: "groups", label: "Miejsca", value: String(maxParticipants) },
+  ];
 
   const handleCreateRegistration = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -166,6 +161,12 @@ export default function AdminRejestracjeNocowankaPage() {
         eventDescription={description}
         newRegistrationOnClick={() => setCreateDialogOpen(true)}
         formQuestionsHref={`/admin/wydarzenia/nocowanka/${encodeURIComponent(slug)}/pytania`}
+        editCampHref={
+          nocowankaDoc
+            ? `/admin/wydarzenia/nocowanka/${encodeURIComponent(slug)}/edit`
+            : undefined
+        }
+        editEventLabel="Edytuj nocowankę"
         customQuestionLabels={customQuestionLabels}
         participants={participants}
         totalRegistered={registrations.length}
@@ -175,7 +176,14 @@ export default function AdminRejestracjeNocowankaPage() {
         isRegistrationOpen={registrationOpen}
         pendingPaymentsCount={pendingPaymentsCount}
         missingMedicalFormsCount={missingMedicalFormsCount}
-        slotAboveStats={editSlot}
+        slotAboveStats={
+          <EventFactsSheet
+            title="Szczegóły nocowanki"
+            href={`/obozy/nocowanki/${encodeURIComponent(slug)}`}
+            hrefLabel="Strona nocowanki"
+            facts={facts}
+          />
+        }
       />
       <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
         <DialogContent className="sm:max-w-xl">

@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { campRegistrationCtaHref } from "@/lib/camp-registration-links";
 
 export type InstallmentRow = {
   label: string;
@@ -24,62 +26,123 @@ export function CampPricePaymentSection({
   registrationHref,
   isRegistrationClosed,
 }: CampPricePaymentSectionProps) {
+  const registerHref = campRegistrationCtaHref(
+    registrationHref,
+    isRegistrationClosed,
+  );
+
   return (
-    <section id="cennik" className="py-12 md:py-16 bg-stone-50 dark:bg-stone-900/30 border-t border-stone-200 dark:border-stone-700">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-2xl md:text-3xl font-bold text-stone-900 dark:text-white mb-6">
+    <section
+      id="cennik"
+      className="border-t border-stone-200 bg-stone-50 py-12 dark:border-stone-700 dark:bg-stone-900/30 md:py-16"
+    >
+      <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+        <h2 className="mb-6 text-2xl font-bold text-stone-900 dark:text-white md:text-3xl">
           Cena i płatność
         </h2>
-        <div className="grid md:grid-cols-2 gap-6 md:gap-8">
-          {/* Wszystko w cenie */}
-          <div className="rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 p-6 shadow-xs">
-            <p className="text-sm text-stone-600 dark:text-stone-400 mb-4">
-              {priceDescription}
-            </p>
-            <div className="flex flex-wrap items-baseline gap-2 mb-2">
-              <span className="text-3xl font-bold text-primary">
-                {price}
-              </span>
-            </div>
-            <ul className="space-y-2 mt-4">
-              {priceIncluded.map((item) => (
-                <li key={item} className="flex items-center gap-2 text-sm text-stone-700 dark:text-stone-300">
-                  <span className="material-symbols-outlined text-emerald-600 text-lg shrink-0" aria-hidden>
-                    check_circle
-                  </span>
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </div>
 
-          {/* Płatność w ratach */}
-          <div className="rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 p-6 shadow-xs">
-            <h3 className="text-lg font-bold text-stone-900 dark:text-white mb-4">
-              Płatność w ratach 0%
-            </h3>
-            <ul className="space-y-3">
-              {installments.map((row) => (
-                <li
-                  key={row.label}
-                  className="flex flex-wrap items-center justify-between gap-2 text-stone-700 dark:text-stone-300"
-                >
-                  <div className="flex flex-col min-w-0">
-                    <span className="text-sm font-medium text-stone-900 dark:text-white">
-                      {row.label}
-                    </span>
-                    {row.deadline && (
-                      <span className="text-xs text-stone-500 dark:text-stone-400">
-                        {row.deadline}
+        <div className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-soft dark:border-stone-700 dark:bg-stone-900/80">
+          <div className="grid md:grid-cols-2">
+            <div className="flex flex-col border-b border-stone-200 p-6 dark:border-stone-700 md:border-b-0 md:border-r md:p-8">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-stone-500 dark:text-stone-400">
+                Cena za uczestnika
+              </p>
+              <p className="mt-2 text-4xl font-bold tracking-tight text-stone-900 dark:text-white">
+                {price}
+              </p>
+              <p className="mt-3 text-sm leading-relaxed text-stone-600 dark:text-stone-400">
+                {priceDescription}
+              </p>
+
+              {priceIncluded.length > 0 ? (
+                <ul className="mt-6 space-y-2.5">
+                  {priceIncluded.map((item) => (
+                    <li
+                      key={item}
+                      className="flex items-start gap-2.5 text-sm text-stone-700 dark:text-stone-300"
+                    >
+                      <span
+                        className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
+                        aria-hidden
+                      >
+                        <span className="material-symbols-outlined text-[16px] leading-none">
+                          check
+                        </span>
                       </span>
-                    )}
-                  </div>
-                  <span className="text-sm font-bold text-stone-900 dark:text-white shrink-0">
-                    {row.amount}
-                  </span>
-                </li>
-              ))}
-            </ul>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+
+              <div className="mt-auto pt-6">
+                <Button
+                  asChild
+                  className="h-11 rounded-xl px-6 text-sm font-bold"
+                  disabled={isRegistrationClosed}
+                >
+                  <Link
+                    href={registerHref}
+                    onClick={(e) => {
+                      if (isRegistrationClosed) e.preventDefault();
+                    }}
+                    aria-disabled={isRegistrationClosed}
+                    className={
+                      isRegistrationClosed
+                        ? "pointer-events-none cursor-not-allowed opacity-70"
+                        : ""
+                    }
+                  >
+                    {isRegistrationClosed ? "Rejestracja zakończona" : "Zapisz się"}
+                  </Link>
+                </Button>
+              </div>
+            </div>
+
+            <div className="bg-stone-50/90 p-6 dark:bg-stone-950/35 md:p-8">
+              <h3 className="text-base font-bold text-stone-900 dark:text-white">
+                Harmonogram wpłat
+              </h3>
+              <p className="mt-1 text-sm text-stone-500 dark:text-stone-400">
+                Raty 0% — bez dodatkowych kosztów
+              </p>
+
+              <ol className="mt-5 space-y-0">
+                {installments.map((row, i) => {
+                  const isLast = i === installments.length - 1;
+                  return (
+                    <li key={row.label} className="relative flex gap-3">
+                      {!isLast ? (
+                        <span
+                          className="absolute left-[13px] top-7 bottom-0 w-px bg-stone-200 dark:bg-stone-700"
+                          aria-hidden
+                        />
+                      ) : null}
+                      <span className="relative z-10 flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-[11px] font-bold text-primary-foreground">
+                        {i + 1}
+                      </span>
+                      <div
+                        className={`flex min-w-0 flex-1 items-start justify-between gap-3 ${isLast ? "pb-0" : "pb-5"}`}
+                      >
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold text-stone-900 dark:text-white">
+                            {row.label}
+                          </p>
+                          {row.deadline ? (
+                            <p className="mt-0.5 text-xs text-stone-500 dark:text-stone-400">
+                              {row.deadline}
+                            </p>
+                          ) : null}
+                        </div>
+                        <p className="shrink-0 text-sm font-bold tabular-nums text-stone-900 dark:text-white">
+                          {row.amount}
+                        </p>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ol>
+            </div>
           </div>
         </div>
       </div>

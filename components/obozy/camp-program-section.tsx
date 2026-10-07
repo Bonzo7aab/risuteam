@@ -19,48 +19,7 @@ export type CampProgramSectionProps = {
   pdfHref?: string;
 };
 
-const CARD_STYLES: { bg: string; icon: string }[] = [
-  { bg: "bg-primary text-primary-foreground", icon: "directions_bus" },
-  { bg: "bg-emerald-500 text-white", icon: "park" },
-  { bg: "bg-blue-500 text-white", icon: "local_fire_department" },
-  { bg: "bg-amber-500 text-white", icon: "dark_mode" },
-  { bg: "bg-violet-500 text-white", icon: "star" },
-];
-
-function ActivityCard({
-  slot,
-  style,
-}: {
-  slot: ProgramSlot;
-  style: { bg: string; icon: string };
-}) {
-  return (
-    <div className="rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 p-4 shadow-xs">
-      <div className="flex flex-col items-center text-center">
-        <div
-          className={cn(
-            "mb-3 flex h-12 w-12 shrink-0 items-center justify-center rounded-full",
-            style.bg
-          )}
-          aria-hidden
-        >
-          <span className="material-symbols-outlined text-2xl">{style.icon}</span>
-        </div>
-        <div className="mb-1 text-sm font-medium text-stone-500 dark:text-stone-400">
-          {slot.time}
-        </div>
-        <h3 className="mb-1 font-bold text-stone-900 dark:text-white">{slot.title}</h3>
-        {slot.description ? (
-          <p className="text-sm leading-relaxed text-stone-600 dark:text-stone-400">
-            {slot.description}
-          </p>
-        ) : null}
-      </div>
-    </div>
-  );
-}
-
-export function CampProgramSection({ days, pdfHref = "#" }: CampProgramSectionProps) {
+export function CampProgramSection({ days, pdfHref }: CampProgramSectionProps) {
   const [activeDayIndex, setActiveDayIndex] = useState(0);
   const daysWithSlots = days.filter((d) => d.slots.length > 0);
   const activeDay = daysWithSlots[activeDayIndex];
@@ -68,34 +27,41 @@ export function CampProgramSection({ days, pdfHref = "#" }: CampProgramSectionPr
 
   if (daysWithSlots.length === 0) return null;
 
+  const showPdf = Boolean(pdfHref && pdfHref !== "#");
+
   return (
-    <section id="program" className="py-12 md:py-16 bg-white dark:bg-stone-900/50 border-t border-stone-200 dark:border-stone-700">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-          <h2 className="text-2xl md:text-3xl font-bold text-stone-900 dark:text-white">
+    <section
+      id="program"
+      className="border-t border-stone-200 bg-white py-12 dark:border-stone-700 dark:bg-stone-900/50 md:py-16"
+    >
+      <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+          <h2 className="text-2xl font-bold text-stone-900 dark:text-white md:text-3xl">
             Program Obozu
           </h2>
-          <a
-            href={pdfHref}
-            className="text-sm font-medium text-primary risu-underline inline-flex items-center gap-1"
-          >
-            Pobierz PDF
-            <span className="material-symbols-outlined text-lg">download</span>
-          </a>
+          {showPdf ? (
+            <a
+              href={pdfHref}
+              className="inline-flex items-center gap-1 text-sm font-medium text-primary risu-underline"
+            >
+              Pobierz PDF
+              <span className="material-symbols-outlined text-lg">download</span>
+            </a>
+          ) : null}
         </div>
 
         {daysWithSlots.length > 1 && (
-          <div className="flex flex-wrap gap-2 mb-6">
+          <div className="mb-5 flex flex-wrap gap-2">
             {daysWithSlots.map((day, i) => (
               <button
                 key={day.dayLabel}
                 type="button"
                 onClick={() => setActiveDayIndex(i)}
                 className={cn(
-                  "rounded-xl px-4 py-2.5 text-sm font-bold transition-colors",
+                  "rounded-lg px-3.5 py-2 text-sm font-semibold transition-colors",
                   i === activeDayIndex
                     ? "bg-primary text-primary-foreground"
-                    : "bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-700"
+                    : "bg-stone-100 text-stone-700 hover:bg-stone-200 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-stone-700",
                 )}
               >
                 {day.dayLabel}
@@ -104,15 +70,28 @@ export function CampProgramSection({ days, pdfHref = "#" }: CampProgramSectionPr
           </div>
         )}
 
-        <div className="grid sm:grid-cols-2 gap-4">
+        <ol className="overflow-hidden rounded-2xl border border-stone-200 bg-white dark:border-stone-700 dark:bg-stone-900/80">
           {slots.map((slot, i) => (
-            <ActivityCard
+            <li
               key={`${slot.time}-${slot.title}-${i}`}
-              slot={slot}
-              style={CARD_STYLES[i % CARD_STYLES.length] ?? CARD_STYLES[0]}
-            />
+              className="flex gap-4 border-b border-stone-200 px-4 py-3.5 last:border-b-0 dark:border-stone-700 sm:gap-5 sm:px-5"
+            >
+              <time className="w-[4.25rem] shrink-0 pt-0.5 font-mono text-sm font-semibold tabular-nums text-primary">
+                {slot.time}
+              </time>
+              <div className="min-w-0">
+                <h3 className="font-semibold leading-snug text-stone-900 dark:text-white">
+                  {slot.title}
+                </h3>
+                {slot.description ? (
+                  <p className="mt-0.5 text-sm leading-relaxed text-stone-600 dark:text-stone-400">
+                    {slot.description}
+                  </p>
+                ) : null}
+              </div>
+            </li>
           ))}
-        </div>
+        </ol>
       </div>
     </section>
   );

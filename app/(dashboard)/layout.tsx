@@ -9,7 +9,15 @@ export const dynamic = "force-dynamic";
 function DashboardSidebarFooter() {
   return (
     <div className="space-y-3 border-t border-stone-100 dark:border-stone-800 pt-4">
-      <SignOutButton className="w-full justify-center h-10 text-sm font-medium text-stone-500 hover:text-text-main dark:text-stone-400 border border-stone-200 dark:border-stone-700 bg-transparent hover:bg-stone-50 dark:hover:bg-stone-800/80" />
+      <SignOutButton
+        variant="ghost"
+        className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl border-0 bg-red-500/10 text-sm font-semibold text-red-600 shadow-none hover:bg-red-500/15 dark:text-red-400 dark:hover:bg-red-500/20"
+      >
+        <span className="material-symbols-outlined text-[20px]" aria-hidden>
+          logout
+        </span>
+        Wyloguj się
+      </SignOutButton>
     </div>
   );
 }

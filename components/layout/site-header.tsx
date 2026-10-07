@@ -4,10 +4,10 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useQuery } from "convex/react";
-import { useAuthActions } from "@convex-dev/auth/react";
 import { api } from "@/convex/_generated/api";
 import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 import { SiteMobileBottomNav } from "@/components/navigation/site-mobile-bottom-nav";
+import { AccountMenu } from "@/components/layout/account-menu";
 import { oNasSubItems } from "@/lib/nav/public-site-more";
 import {
   Menu,
@@ -15,23 +15,7 @@ import {
   MenuPanel,
   MenuItem,
 } from "@/components/animate-ui/components/base/menu";
-import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-
-function getInitials(user: { name?: string; email?: string } | null): string {
-  if (!user) return "?";
-  if (user.name?.trim()) {
-    const parts = user.name.trim().split(/\s+/);
-    if (parts.length >= 2) {
-      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase().slice(0, 2);
-    }
-    return user.name.slice(0, 2).toUpperCase();
-  }
-  if (user.email?.trim()) {
-    return user.email.slice(0, 2).toUpperCase();
-  }
-  return "?";
-}
 
 const navItems: {
   label: string;
@@ -67,15 +51,8 @@ const oNasPanelClass =
 export function SiteHeader() {
   const pathname = usePathname();
   const router = useRouter();
-  const { signOut } = useAuthActions();
   const isAuthenticated = useQuery(api.auth.isAuthenticated);
   const currentUser = useQuery(api.authHelpers.getCurrentUser);
-  const isAdmin = currentUser?.role === "admin";
-
-  const handleSignOut = async () => {
-    await signOut();
-    router.push("/sign-in");
-  };
 
   return (
     <header className="md:sticky md:top-2 z-50 mx-auto w-full max-w-7xl px-3 sm:px-4 lg:px-6">
@@ -161,85 +138,12 @@ export function SiteHeader() {
           })}
         </nav>
 
-        <div className="flex items-center gap-2 pl-2 sm:gap-3">
+        <div className="flex items-center gap-1.5 pl-2 sm:gap-2">
           <AnimatedThemeToggler />
-          {isAuthenticated === true && isAdmin && (
-            <>
-              <Link
-                href="/admin"
-                className="hidden sm:inline-flex items-center justify-center rounded-sm border-2 border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800/50 px-4 py-2 text-sm font-bold text-text-main dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
-              >
-                Admin
-              </Link>
-              <div className="hidden sm:block w-px self-stretch min-h-6 bg-stone-200 dark:bg-stone-600" aria-hidden />
-            </>
-          )}
-          {isAuthenticated === true && !isAdmin && (
-            <>
-              <Link
-                href="/dashboard"
-                className="hidden sm:inline-flex items-center justify-center rounded-sm border-2 border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800/50 px-4 py-2 text-sm font-bold text-text-main dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
-              >
-                Panel
-              </Link>
-              <div className="hidden sm:block w-px self-stretch min-h-6 bg-stone-200 dark:bg-stone-600" aria-hidden />
-            </>
-          )}
-          <Menu>
-            <MenuTrigger
-              className={cn(
-                buttonVariants({ variant: "outline" }),
-                "h-auto min-h-9 py-1.5 pl-3 pr-2 rounded-sm bg-stone-50 dark:bg-stone-800/50 text-left gap-2 shrink-0"
-              )}
-              aria-label="Konto"
-            >
-              {isAuthenticated === true && currentUser ? (
-                <>
-                  <div className="hidden sm:block">
-                    <div className="font-bold text-sm text-text-main dark:text-stone-200 leading-tight text-right">
-                      {currentUser.name?.trim() || currentUser.email || "Konto"}
-                    </div>
-                    {isAdmin && (
-                      <div className="text-[10px] font-semibold uppercase tracking-wider text-text-light dark:text-stone-400 leading-tight mt-0.5">
-                        Administrator
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex h-8 w-8 shrink-0 rounded-full bg-primary/10 text-primary items-center justify-center text-sm font-bold">
-                    {getInitials(currentUser)}
-                  </div>
-                </>
-              ) : (
-                <span className="material-symbols-outlined text-xl text-text-main dark:text-stone-400">person</span>
-              )}
-            </MenuTrigger>
-            <MenuPanel align="end" className="min-w-40" sideOffset={4}>
-              {isAuthenticated === true ? (
-                <MenuItem
-                  variant="destructive"
-                  onClick={handleSignOut}
-                  className="cursor-pointer"
-                >
-                  Wyloguj się
-                </MenuItem>
-              ) : (
-                <>
-                  <MenuItem
-                    onClick={() => router.push("/sign-in")}
-                    className="cursor-pointer"
-                  >
-                    Zaloguj się
-                  </MenuItem>
-                  <MenuItem
-                    onClick={() => router.push("/sign-up")}
-                    className="cursor-pointer"
-                  >
-                    Zarejestruj się
-                  </MenuItem>
-                </>
-              )}
-            </MenuPanel>
-          </Menu>
+          <AccountMenu
+            isAuthenticated={isAuthenticated === true}
+            currentUser={currentUser ?? null}
+          />
         </div>
       </div>
       <SiteMobileBottomNav />

@@ -7,6 +7,7 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import {
   CampHero,
+  CampAboutAndAttractionsSection,
   CampProgramSection,
   CampPricePaymentSection,
   CampBringAndBaseSection,
@@ -162,7 +163,7 @@ export default function CampBySlugPage() {
       <CampRegistrationClosedBanner slug={camp.slug} />
 
       <CampHero
-        layout="fullBleed"
+        layout="split"
         badge={badge}
         badgeSecondary={badgeSecondary}
         title={camp.name}
@@ -171,54 +172,20 @@ export default function CampBySlugPage() {
         backLink={{ href: "/obozy", label: "Wszystkie obozy i nocowanki" }}
         registrationHref={registrationHref}
         isRegistrationClosed={isRegistrationClosed}
+        price={priceNum > 0 ? `${priceNum} PLN` : undefined}
         meta={[
-          { icon: "calendar_today", text: datesStr },
-          { icon: "location_on", text: locationStr },
-          ...(camp.ageGroup ? [{ icon: "group", text: camp.ageGroup }] : []),
+          { icon: "calendar_today", label: "Termin", text: datesStr },
+          { icon: "location_on", label: "Miejsce", text: locationStr },
+          ...(camp.ageGroup
+            ? [{ icon: "group", label: "Wiek", text: camp.ageGroup }]
+            : []),
         ]}
       />
 
-      {camp.description?.trim() ? (
-        <section className="py-12 md:py-16 bg-white dark:bg-stone-900/50">
-          <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-stone-900 dark:text-white mb-5">
-              O obozie
-            </h2>
-            <p className="text-stone-600 dark:text-stone-400 whitespace-pre-wrap leading-relaxed text-base md:text-lg">
-              {camp.description.trim()}
-            </p>
-          </div>
-        </section>
-      ) : null}
-
-      {camp.generalAttractions && camp.generalAttractions.length > 0 ? (
-        <section className="py-12 md:py-16 bg-stone-50 dark:bg-stone-900/30 border-t border-stone-200/80 dark:border-stone-800">
-          <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-stone-900 dark:text-white mb-3">
-              Atrakcje
-            </h2>
-            <p className="text-sm md:text-base text-stone-600 dark:text-stone-400 mb-8">
-              Wspólne atrakcje i aktywności dla całej grupy — oprócz programu dnia.
-            </p>
-            <ul className="grid gap-4 sm:grid-cols-2">
-              {camp.generalAttractions.map((item, i) => (
-                <li
-                  key={`${item}-${i}`}
-                  className="flex items-start gap-3 text-stone-800 dark:text-stone-200"
-                >
-                  <span
-                    className="material-symbols-outlined shrink-0 text-xl text-primary mt-0.5"
-                    aria-hidden
-                  >
-                    check_circle
-                  </span>
-                  <span className="text-sm md:text-base font-medium leading-snug">{item}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </section>
-      ) : null}
+      <CampAboutAndAttractionsSection
+        description={camp.description}
+        attractions={camp.generalAttractions}
+      />
 
       {useRichGallery ? (
         <CampGallery

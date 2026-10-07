@@ -156,7 +156,7 @@ export default function LokalizacjaPage() {
                         )}
                         <Button
                           size="sm"
-                          variant={isSelected ? "default" : "outline-solid"}
+                          variant={isSelected ? "default" : "outline"}
                           className={`mt-3 w-fit rounded-xl ${
                             isSelected
                               ? ""

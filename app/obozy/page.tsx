@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense, useMemo, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { useMutation, useQuery } from "convex/react";
+import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { cn } from "@/lib/utils";
 import { ArrowRightIcon } from "@/components/icons/arrow-right";
@@ -53,13 +53,6 @@ function ObozyContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [tab, setTab] = useState<Tab>("letnie");
-  const subscribeByEmail = useMutation(api.newsletter.subscribeByEmail);
-  const [newsletterEmail, setNewsletterEmail] = useState("");
-  const [newsletterPending, setNewsletterPending] = useState(false);
-  const [newsletterMessage, setNewsletterMessage] = useState<string | null>(
-    null
-  );
-  const [newsletterError, setNewsletterError] = useState<string | null>(null);
 
   const setTabWithUrl = useCallback(
     (newTab: Tab) => {
@@ -507,76 +500,6 @@ function ObozyContent() {
               )}
             </div>
           )}
-
-          {/* Newsletter CTA */}
-          <div className="mt-20 rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 shadow-xs p-8 md:p-12 text-center">
-            <h2 className="text-xl font-bold text-stone-900 dark:text-white mb-2">
-              Bądź na bieżąco
-            </h2>
-            <p className="text-stone-600 dark:text-stone-400 mb-6 max-w-md mx-auto">
-              Zapisz się do newslettera, aby otrzymywać informacje o nowych
-              obozach i nocowankach.
-            </p>
-            <form
-              className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto"
-              aria-label="Zapisz się do newslettera"
-              onSubmit={async (e) => {
-                e.preventDefault();
-                setNewsletterError(null);
-                setNewsletterMessage(null);
-                const trimmed = newsletterEmail.trim();
-                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
-                  setNewsletterError("Podaj prawidłowy adres e-mail.");
-                  return;
-                }
-                setNewsletterPending(true);
-                try {
-                  await subscribeByEmail({ email: trimmed });
-                  setNewsletterMessage(
-                    "Dziękujemy! Zapisaliśmy Twój adres — bądź na bieżąco z obozami i nocowankami."
-                  );
-                  setNewsletterEmail("");
-                } catch (err) {
-                  setNewsletterError(
-                    err instanceof Error
-                      ? err.message
-                      : "Nie udało się zapisać. Spróbuj ponownie."
-                  );
-                } finally {
-                  setNewsletterPending(false);
-                }
-              }}
-            >
-              <input
-                type="email"
-                name="newsletter-email"
-                value={newsletterEmail}
-                onChange={(e) => setNewsletterEmail(e.target.value)}
-                placeholder="Twój email"
-                aria-label="Adres e-mail"
-                autoComplete="email"
-                disabled={newsletterPending}
-                className="flex-1 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 px-4 py-3 text-stone-900 dark:text-white placeholder:text-stone-400 disabled:opacity-60"
-              />
-              <button
-                type="submit"
-                disabled={newsletterPending}
-                className="rounded-xl h-12 px-6 bg-primary text-primary-foreground font-bold hover:bg-primary-hover disabled:opacity-60"
-              >
-                {newsletterPending ? "Zapisywanie…" : "Zapisz się"}
-              </button>
-            </form>
-            {newsletterMessage && (
-              <p className="mt-4 text-sm text-emerald-700 dark:text-emerald-400 max-w-md mx-auto">
-                {newsletterMessage}
-              </p>
-            )}
-            {newsletterError && (
-              <p className="mt-4 text-sm text-red-600 dark:text-red-400 max-w-md mx-auto">
-                {newsletterError}
-              </p>
-            )}
-          </div>
         </div>
       </section>
     </div>

@@ -8,8 +8,6 @@ export {
 } from "./camp-registration";
 export { contactSchema, type ContactInput } from "./contact";
 export {
-  sendNewsletterSchema,
   sendCampReminderSchema,
-  type SendNewsletterInput,
   type SendCampReminderInput,
 } from "./email";
