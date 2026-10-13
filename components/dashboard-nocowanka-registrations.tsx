@@ -20,17 +20,22 @@ export function DashboardNocowankaRegistrations({
 
   if (list === undefined) {
     return (
-      <p className="text-text-light dark:text-stone-400 text-sm">Ładowanie…</p>
+      <ul className="space-y-3" aria-busy="true" aria-label="Ładowanie zapisów">
+        {Array.from({ length: 2 }).map((_, i) => (
+          <li
+            key={i}
+            className="h-[4.5rem] animate-pulse rounded-xl bg-stone-100 dark:bg-stone-800/80"
+          />
+        ))}
+      </ul>
     );
   }
 
   if (list.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-stone-300 dark:border-stone-600 bg-white/50 dark:bg-stone-900/40 p-8 text-center">
-        <p className="text-text-light dark:text-stone-400 text-sm">
-          {emptyRowsMessage ?? "Brak zapisów na nocowanki."}
-        </p>
-      </div>
+      <p className="py-4 text-center text-sm text-stone-500 dark:text-stone-400">
+        {emptyRowsMessage ?? "Brak zapisów na nocowanki."}
+      </p>
     );
   }
 

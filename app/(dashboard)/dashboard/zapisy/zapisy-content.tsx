@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -33,6 +33,42 @@ function subscriptionStatusLabel(status: string): string {
   }
 }
 
+function StepsList({ steps }: { steps: Step[] }) {
+  return (
+    <ol className="space-y-3">
+      {steps.map((s) => (
+        <li key={s.step}>
+          <Link
+            href={s.href}
+            className="group flex flex-col gap-4 rounded-2xl border border-stone-200/80 bg-white p-5 shadow-card transition-[box-shadow,transform,border-color] duration-300 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-card-hover motion-reduce:hover:translate-y-0 dark:border-stone-800 dark:bg-[#2a2015] dark:shadow-card-dark dark:hover:shadow-card-dark-hover sm:flex-row sm:items-center sm:p-6"
+          >
+            <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <span className="material-symbols-outlined text-2xl" aria-hidden>
+                {s.icon}
+              </span>
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-primary">
+                Krok {s.step}
+              </p>
+              <h2 className="mt-1 text-lg font-bold tracking-tight text-text-main dark:text-white">
+                {s.title}
+              </h2>
+              <p className="mt-1.5 text-sm leading-relaxed text-stone-500 dark:text-stone-400">
+                {s.description}
+              </p>
+            </div>
+            <span className="inline-flex h-10 shrink-0 items-center justify-center gap-1.5 rounded-xl border border-stone-200 bg-stone-50 px-4 text-sm font-bold text-text-main transition-colors group-hover:border-primary/30 group-hover:text-primary dark:border-stone-700 dark:bg-stone-900/50 dark:text-stone-100">
+              {s.cta}
+              <ArrowRightIcon className="text-[1em]" />
+            </span>
+          </Link>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
 export function ZapisyContent({ steps }: { steps: Step[] }) {
   const currentUser = useQuery(api.authHelpers.getCurrentUser);
   const classes = useQuery(api.classes.getClasses, { activeOnly: true });
@@ -55,7 +91,9 @@ export function ZapisyContent({ steps }: { steps: Step[] }) {
 
   const classMap = useMemo(() => {
     if (!allClasses) return new Map<Id<"classes">, { name: string; discipline: string }>();
-    return new Map(allClasses.map((c) => [c._id, { name: c.name, discipline: c.discipline }]));
+    return new Map(
+      allClasses.map((c) => [c._id, { name: c.name, discipline: c.discipline }])
+    );
   }, [allClasses]);
 
   const childMap = useMemo(() => {
@@ -74,47 +112,81 @@ export function ZapisyContent({ steps }: { steps: Step[] }) {
 
   if (currentUser === undefined) {
     return (
-      <p className="text-text-light dark:text-stone-400 text-center py-8">
-        Ładowanie…
-      </p>
+      <div className="grid gap-3">
+        {Array.from({ length: 2 }).map((_, i) => (
+          <div
+            key={i}
+            className="h-28 animate-pulse rounded-2xl bg-stone-200/70 dark:bg-stone-800"
+          />
+        ))}
+      </div>
     );
   }
 
   if (isLoggedIn && hasChildren && (classes?.length ?? 0) > 0) {
     return (
-      <div className="space-y-6">
-        <div className="rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 p-6 shadow-soft">
-          <h2 className="text-lg font-bold text-text-main dark:text-white mb-4">
-            Twoje zapisy na zajęcia
-          </h2>
+      <div className="space-y-5">
+        <section className="rounded-2xl border border-stone-200/80 bg-white p-5 shadow-card dark:border-stone-800 dark:bg-[#2a2015] dark:shadow-card-dark sm:p-6">
+          <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 className="text-lg font-black tracking-tight text-text-main dark:text-white">
+                Twoje zapisy na zajęcia
+              </h2>
+              <p className="mt-1 text-sm text-stone-500 dark:text-stone-400">
+                Aktywne i oczekujące na płatność.
+              </p>
+            </div>
+            <Link
+              href="/grafik"
+              className="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl bg-primary px-4 text-sm font-bold text-primary-foreground shadow-sm transition-colors hover:bg-primary-hover"
+            >
+              Zapisz na zajęcia
+              <ArrowRightIcon className="text-[1em]" />
+            </Link>
+          </div>
+
           {subscriptions === undefined ? (
-            <p className="text-text-light dark:text-stone-400 text-sm">Ładowanie…</p>
+            <p className="text-sm text-stone-500 dark:text-stone-400">Ładowanie…</p>
           ) : activeSubscriptions.length === 0 ? (
-            <p className="text-text-light dark:text-stone-400 text-sm">
-              Brak zapisów na zajęcia. Zapisz dziecko poniżej.
-            </p>
+            <div className="rounded-xl border border-dashed border-stone-300 px-4 py-10 text-center dark:border-stone-600">
+              <p className="text-sm text-stone-500 dark:text-stone-400">
+                Brak aktywnych zapisów. Wybierz grupę w grafiku.
+              </p>
+              <Link
+                href="/grafik"
+                className="mt-4 inline-flex items-center gap-1.5 text-sm font-bold text-primary hover:text-primary-hover"
+              >
+                Otwórz grafik
+                <ArrowRightIcon className="text-[1em]" />
+              </Link>
+            </div>
           ) : (
-            <ul className="space-y-3 mb-6">
+            <ul className="space-y-3">
               {activeSubscriptions.map((s) => {
                 const cls = classMap.get(s.classId);
                 const childName = s.childId
-                  ? childMap.get(s.childId) ?? "—"
+                  ? (childMap.get(s.childId) ?? "—")
                   : "—";
                 return (
                   <li
                     key={s._id}
-                    className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 py-2 border-b border-stone-100 dark:border-stone-800 last:border-0"
+                    className="flex flex-col gap-3 rounded-xl border border-stone-200/80 bg-stone-50/70 p-4 dark:border-stone-800 dark:bg-stone-950/30 sm:flex-row sm:items-center sm:justify-between"
                   >
-                    <div>
-                      <p className="font-medium text-text-main dark:text-white">
-                        {cls?.name ?? "Zajęcia"} · {childName}
+                    <div className="min-w-0">
+                      <p className="font-bold text-text-main dark:text-white">
+                        {cls?.name ?? "Zajęcia"}
+                      </p>
+                      <p className="mt-0.5 text-sm text-stone-500 dark:text-stone-400">
+                        {childName}
+                        {cls?.discipline ? ` · ${cls.discipline}` : ""}
                       </p>
                       <span
                         className={cn(
-                          "inline-block mt-0.5 text-xs font-medium px-2 py-0.5 rounded-full",
-                          s.status === "active" && "bg-primary/20 text-primary",
+                          "mt-2 inline-flex rounded-full px-2.5 py-1 text-[11px] font-bold",
+                          s.status === "active" &&
+                            "bg-primary/15 text-primary",
                           s.status === "pending_payment" &&
-                            "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300"
+                            "bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-200"
                         )}
                       >
                         {subscriptionStatusLabel(s.status)}
@@ -124,8 +196,10 @@ export function ZapisyContent({ steps }: { steps: Step[] }) {
                       type="button"
                       variant="outline"
                       size="sm"
-                      className="shrink-0 w-fit"
-                      onClick={() => cancelEnrollment({ subscriptionId: s._id })}
+                      className="h-9 w-fit shrink-0 rounded-xl font-semibold"
+                      onClick={() =>
+                        cancelEnrollment({ subscriptionId: s._id })
+                      }
                     >
                       Wypisz
                     </Button>
@@ -134,6 +208,27 @@ export function ZapisyContent({ steps }: { steps: Step[] }) {
               })}
             </ul>
           )}
+        </section>
+
+        <div className="flex flex-wrap gap-3">
+          <Link
+            href="/cennik"
+            className="inline-flex h-10 items-center gap-2 rounded-xl border border-stone-200 bg-white px-4 text-sm font-semibold text-stone-700 transition-colors hover:border-stone-300 hover:bg-stone-50 dark:border-stone-700 dark:bg-[#2a2015] dark:text-stone-200 dark:hover:bg-stone-900"
+          >
+            <span className="material-symbols-outlined text-[18px] text-primary" aria-hidden>
+              payments
+            </span>
+            Cennik
+          </Link>
+          <Link
+            href="/grafik"
+            className="inline-flex h-10 items-center gap-2 rounded-xl border border-stone-200 bg-white px-4 text-sm font-semibold text-stone-700 transition-colors hover:border-stone-300 hover:bg-stone-50 dark:border-stone-700 dark:bg-[#2a2015] dark:text-stone-200 dark:hover:bg-stone-900"
+          >
+            <span className="material-symbols-outlined text-[18px] text-primary" aria-hidden>
+              schedule
+            </span>
+            Grafik zajęć
+          </Link>
         </div>
       </div>
     );
@@ -141,97 +236,49 @@ export function ZapisyContent({ steps }: { steps: Step[] }) {
 
   if (isLoggedIn && !hasChildren) {
     return (
-      <div className="space-y-6">
-        <div className="rounded-2xl border border-primary/30 bg-orange-50/50 dark:bg-orange-900/20 border-stone-200 dark:border-stone-700 p-6">
-          <p className="text-text-main dark:text-stone-200 mb-4">
-            Dodaj dziecko w panelu, aby móc zapisać je na zajęcia.
-          </p>
-          <Link
-            href="/dashboard/dzieci"
-            className="inline-flex items-center gap-2 rounded-xl h-11 px-6 bg-primary text-primary-foreground font-bold hover:bg-primary-hover"
-          >
-            Moje dzieci
-          </Link>
-        </div>
-        <div className="space-y-6">
-          {steps.map((s) => (
+      <div className="space-y-5">
+        <div className="rounded-2xl border border-stone-200/80 bg-orange-50/70 p-6 shadow-card dark:border-stone-800 dark:bg-primary/10 dark:shadow-card-dark sm:p-8">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-lg font-black tracking-tight text-text-main dark:text-white">
+                Najpierw dodaj dziecko
+              </h2>
+              <p className="mt-1.5 text-sm leading-relaxed text-stone-600 dark:text-stone-300">
+                Profil dziecka jest potrzebny, aby zapisać je na zajęcia
+                abonamentowe.
+              </p>
+            </div>
             <Link
-              key={s.step}
-              href={s.href}
-              className="block rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 p-6 shadow-soft hover:shadow-glow hover:border-primary/50 transition-all group"
+              href="/dashboard/dzieci"
+              className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-sm transition-colors hover:bg-primary-hover"
             >
-              <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                  <span className="material-symbols-outlined text-2xl">
-                    {s.icon}
-                  </span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <span className="text-xs font-bold text-primary uppercase tracking-wider">
-                    Krok {s.step}
-                  </span>
-                  <h2 className="text-xl font-bold text-text-main dark:text-white mt-1">
-                    {s.title}
-                  </h2>
-                  <p className="text-text-light dark:text-stone-400 mt-2 text-sm">
-                    {s.description}
-                  </p>
-                </div>
-                <span className="inline-flex items-center gap-2 text-primary font-bold risu-underline shrink-0">
-                  {s.cta}
-                  <ArrowRightIcon className="text-[1.1em]" />
-                </span>
-              </div>
+              Moje dzieci
+              <ArrowRightIcon className="text-[1em]" />
             </Link>
-          ))}
+          </div>
         </div>
+        <StepsList steps={steps} />
       </div>
     );
   }
 
   return (
-    <>
-      <div className="mb-6 rounded-2xl border border-primary/30 bg-orange-50/50 dark:bg-orange-900/20 p-4 text-center">
+    <div className="space-y-5">
+      <div className="rounded-2xl border border-stone-200/80 bg-white p-5 text-center shadow-card dark:border-stone-800 dark:bg-[#2a2015] dark:shadow-card-dark sm:p-6">
+        <p className="text-sm text-stone-600 dark:text-stone-300">
+          Zaloguj się, aby zapisać dziecko i zarządzać aktywnością.
+        </p>
         <Link
           href={`/sign-in?redirect=${encodeURIComponent("/dashboard/zapisy")}`}
-          className="inline-flex items-center gap-2 font-bold text-primary risu-underline"
+          className="mt-4 inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-sm transition-colors hover:bg-primary-hover"
         >
-          <span className="material-symbols-outlined">login</span>
-          Zaloguj się, aby zapisać się od razu
+          <span className="material-symbols-outlined text-[20px]" aria-hidden>
+            login
+          </span>
+          Zaloguj się
         </Link>
       </div>
-      <div className="space-y-6">
-        {steps.map((s) => (
-          <Link
-            key={s.step}
-            href={s.href}
-            className="block rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 p-6 shadow-soft hover:shadow-glow hover:border-primary/50 transition-all group"
-          >
-            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-              <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                <span className="material-symbols-outlined text-2xl">
-                  {s.icon}
-                </span>
-              </div>
-              <div className="flex-1 min-w-0">
-                <span className="text-xs font-bold text-primary uppercase tracking-wider">
-                  Krok {s.step}
-                </span>
-                <h2 className="text-xl font-bold text-text-main dark:text-white mt-1">
-                  {s.title}
-                </h2>
-                <p className="text-text-light dark:text-stone-400 mt-2 text-sm">
-                  {s.description}
-                </p>
-              </div>
-              <span className="inline-flex items-center gap-2 text-primary font-bold risu-underline shrink-0">
-                {s.cta}
-                <ArrowRightIcon className="text-[1.1em]" />
-              </span>
-            </div>
-          </Link>
-        ))}
-      </div>
-    </>
+      <StepsList steps={steps} />
+    </div>
   );
 }

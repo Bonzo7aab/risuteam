@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 import { publicSiteMoreItems } from "@/lib/nav/public-site-more";
 import { parentDashboardNavItems } from "@/lib/nav/parent-dashboard-nav";
 import { adminNavItems } from "@/lib/nav/admin-nav";
+import { requestDashboardTour } from "@/components/dashboard-onboarding";
 
 type NavLeaf = {
   label: string;
@@ -286,6 +287,10 @@ export function SiteMobileBottomNav() {
                               menuLinkBase,
                               active ? menuLinkActive : menuLinkInactive
                             )}
+                            {...("driverStepId" in item &&
+                              item.driverStepId && {
+                                "data-onboarding": item.driverStepId,
+                              })}
                           >
                             <span className="material-symbols-outlined text-[20px] shrink-0" aria-hidden>
                               {item.icon}
@@ -295,6 +300,16 @@ export function SiteMobileBottomNav() {
                         );
                       })}
                     </div>
+                    <button
+                      type="button"
+                      onClick={() => requestDashboardTour()}
+                      className={cn(menuLinkBase, menuLinkInactive, "mt-1")}
+                    >
+                      <span className="material-symbols-outlined text-[20px] shrink-0" aria-hidden>
+                        menu_book
+                      </span>
+                      Przewodnik po panelu
+                    </button>
                     <SignOutButton
                       variant="ghost"
                       className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-xl border-0 bg-red-500/10 py-3 text-sm font-semibold text-red-600 shadow-none hover:bg-red-500/15 dark:text-red-400 dark:hover:bg-red-500/20"

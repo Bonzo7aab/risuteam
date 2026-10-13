@@ -3,81 +3,160 @@
 import { useEffect, useRef } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { driver } from "driver.js";
+import { driver, type DriveStep } from "driver.js";
 import "driver.js/dist/driver.css";
+
+export const DASHBOARD_TOUR_EVENT = "risu:start-dashboard-tour";
 
 const STEPS = [
   {
-    title: "Strona główna",
-    description:
-      "Podsumowanie: dzieci, nadchodzące zajęcia, płatności i szybkie akcje. Zapisy na zajęcia i obozy znajdziesz w sekcji Szybkie akcje lub bezpośrednio pod adresem Zapisy.",
-    driverStepId: "nav-home",
-  },
-  {
     title: "Moje dzieci",
     description:
-      "Dodawaj i edytuj profile dzieci (imię, nazwisko, data urodzenia, PESEL). Dane są wykorzystywane przy zapisach na zajęcia i obozy.",
+      "Dodawaj i edytuj profile dzieci — imię, data urodzenia i PESEL. Te dane są używane przy zapisach na zajęcia i obozy.",
     driverStepId: "nav-dzieci",
   },
   {
     title: "Zajęcia",
     description:
-      "Zapisy na zajęcia i obozy: wybierz aktywność, uzupełnij dane i potwierdź zgłoszenie. Tutaj znajdziesz także listę swoich zapisów.",
+      "Zapisuj dzieci na zajęcia i obozy oraz sprawdzaj listę aktywnych zgłoszeń.",
     driverStepId: "nav-zajecia",
   },
   {
     title: "Płatności",
     description:
-      "Status zapisów: nadchodzące, do zapłaty i przeszłe. Płatności realizujemy przelewem — szczegóły na stronie Cennik.",
+      "Podgląd statusów: nadchodzące, do zapłaty i zakończone. Płatności realizujemy przelewem — szczegóły znajdziesz w Cenniku.",
     driverStepId: "nav-platnosci",
   },
   {
     title: "Ustawienia",
     description:
-      "Ustawienia konta i hasła. Możesz się wylogować z panelu bocznego.",
+      "Zarządzaj danymi konta i hasłem. Przewodnik po panelu możesz uruchomić ponownie właśnie tutaj.",
     driverStepId: "nav-ustawienia",
   },
 ] as const;
 
+export function requestDashboardTour() {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new CustomEvent(DASHBOARD_TOUR_EVENT));
+}
+
+function findTourTarget(driverStepId: string): Element | null {
+  const nodes = Array.from(
+    document.querySelectorAll(`[data-onboarding="${driverStepId}"]`)
+  );
+  return (
+    nodes.find((node) => {
+      const rect = node.getBoundingClientRect();
+      return rect.width > 0 && rect.height > 0;
+    }) ?? null
+  );
+}
+
+function buildSteps(): DriveStep[] {
+  return STEPS.map((step) => {
+    const el = findTourTarget(step.driverStepId);
+    return {
+      ...(el ? { element: el } : {}),
+      popover: {
+        title: step.title,
+        description: step.description,
+        side: el ? "right" : "over",
+        align: "start",
+      },
+    };
+  });
+}
+
+type StartTourOptions = {
+  onComplete?: () => void;
+};
+
+let activeDriver: ReturnType<typeof driver> | null = null;
+
+export function startDashboardTour(options?: StartTourOptions) {
+  if (typeof window === "undefined") return;
+
+  if (activeDriver?.isActive()) {
+    activeDriver.destroy();
+  }
+
+  const driverObj = driver({
+    animate: true,
+    smoothScroll: true,
+    allowClose: true,
+    overlayColor: "#1c160d",
+    overlayOpacity: 0.55,
+    stagePadding: 8,
+    stageRadius: 14,
+    popoverOffset: 14,
+    disableActiveInteraction: true,
+    showProgress: true,
+    progressText: "{{current}} / {{total}}",
+    nextBtnText: "Dalej",
+    prevBtnText: "Wstecz",
+    doneBtnText: "Zakończ",
+    popoverClass: "risu-driver-popover",
+    steps: buildSteps(),
+    onHighlighted: (element) => {
+      element?.setAttribute("data-tour-focused", "true");
+    },
+    onDeselected: (element) => {
+      element?.removeAttribute("data-tour-focused");
+    },
+    onDestroyed: () => {
+      document
+        .querySelectorAll("[data-tour-focused]")
+        .forEach((node) => node.removeAttribute("data-tour-focused"));
+      activeDriver = null;
+      options?.onComplete?.();
+    },
+  });
+
+  activeDriver = driverObj;
+  driverObj.drive();
+}
+
 export function DashboardOnboarding() {
   const currentUser = useQuery(api.authHelpers.getCurrentUser);
   const setOnboardingCompleted = useMutation(api.users.setOnboardingCompleted);
-  const tourStartedRef = useRef(false);
+  const autoStartedRef = useRef(false);
+
+  useEffect(() => {
+    const markDone = () => {
+      void setOnboardingCompleted();
+    };
+
+    const onRequestTour = () => {
+      startDashboardTour({ onComplete: markDone });
+    };
+
+    window.addEventListener(DASHBOARD_TOUR_EVENT, onRequestTour);
+    return () => {
+      window.removeEventListener(DASHBOARD_TOUR_EVENT, onRequestTour);
+    };
+  }, [setOnboardingCompleted]);
 
   useEffect(() => {
     if (
       currentUser === undefined ||
       currentUser?.role === "admin" ||
-      currentUser?.onboardingCompletedAt != null
+      currentUser?.onboardingCompletedAt != null ||
+      autoStartedRef.current
     ) {
       return;
     }
-    if (tourStartedRef.current) {
-      return;
-    }
-    tourStartedRef.current = true;
 
-    const driverObj = driver({
-      showProgress: true,
-      progressText: "{{current}} z {{total}}",
-      nextBtnText: "Dalej",
-      prevBtnText: "Wstecz",
-      doneBtnText: "Zakończ",
-      popoverClass: "risu-driver-popover",
-      steps: STEPS.map((step) => ({
-        element: `[data-onboarding="${step.driverStepId}"]`,
-        popover: {
-          title: step.title,
-          description: step.description,
+    autoStartedRef.current = true;
+    const timer = window.setTimeout(() => {
+      startDashboardTour({
+        onComplete: () => {
+          void setOnboardingCompleted();
         },
-      })),
-      onDestroyed: () => {
-        setOnboardingCompleted();
-      },
-    });
+      });
+    }, 450);
 
-    driverObj.drive();
-  }, [currentUser?.onboardingCompletedAt, setOnboardingCompleted]);
+    return () => window.clearTimeout(timer);
+  }, [currentUser, setOnboardingCompleted]);
 
   return null;
 }

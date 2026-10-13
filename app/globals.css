@@ -78,8 +78,12 @@
     infinite;
   --animate-float: float 5.5s ease-in-out infinite;
   --animate-kenburns: kenburns 22s ease-out forwards;
+  --animate-auth-ring: auth-ring 10s ease-in-out infinite;
+  --animate-auth-glow: auth-glow 5s ease-in-out infinite;
+  --animate-auth-shimmer: auth-shimmer 7s ease-in-out infinite;
   --animate-shine: shine 0.85s ease-out;
   --animate-orb-drift: orb-drift 9s ease-in-out infinite;
+  --animate-class-focus: class-focus 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 
   @keyframes accordion-down {
     from {
@@ -145,6 +149,56 @@
     }
     50% {
       transform: translate(14px, -10px) scale(1.08);
+    }
+  }
+  @keyframes auth-ring {
+    0%,
+    100% {
+      transform: scale(1);
+      opacity: 0.55;
+    }
+    50% {
+      transform: scale(1.045);
+      opacity: 1;
+    }
+  }
+  @keyframes auth-glow {
+    0%,
+    100% {
+      opacity: 0.55;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.08);
+    }
+  }
+  @keyframes auth-shimmer {
+    0%,
+    100% {
+      opacity: 0.25;
+      transform: rotate(0deg);
+    }
+    50% {
+      opacity: 0.55;
+      transform: rotate(8deg);
+    }
+  }
+  @keyframes class-focus {
+    0% {
+      box-shadow:
+        0 1px 2px rgba(28, 22, 13, 0.04),
+        0 0 0 0 rgba(244, 157, 37, 0);
+    }
+    50% {
+      box-shadow:
+        0 6px 18px -8px rgba(28, 22, 13, 0.12),
+        0 0 0 2px rgba(244, 157, 37, 0.12);
+    }
+    100% {
+      box-shadow:
+        0 4px 14px -6px rgba(28, 22, 13, 0.1),
+        0 0 0 1px rgba(244, 157, 37, 0.1);
     }
   }
 }
@@ -339,6 +393,10 @@
   .animate-kenburns,
   .animate-shine,
   .animate-orb-drift,
+  .animate-auth-ring,
+  .animate-auth-glow,
+  .animate-auth-shimmer,
+  .animate-class-focus,
   .animate-ping {
     animation: none !important;
   }
@@ -350,55 +408,89 @@
 
 /* Driver.js onboarding (dashboard tour) */
 .driver-popover.risu-driver-popover {
-  border-radius: 1.5rem;
-  border: 1px solid hsl(var(--border));
-  background: hsl(var(--background));
-  color: hsl(var(--foreground));
-  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.12);
-  padding: 14px;
+  max-width: 20.5rem;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(28, 22, 13, 0.08);
+  background: #fffdf9;
+  color: #1c160d;
+  box-shadow:
+    0 1px 2px rgba(28, 22, 13, 0.04),
+    0 18px 40px -16px rgba(28, 22, 13, 0.28);
+  padding: 1rem 1rem 0.9rem;
 }
 
 .dark .driver-popover.risu-driver-popover {
-  background: rgba(34, 26, 16, 0.96);
-  border-color: rgba(120, 113, 108, 0.35);
+  background: #2a2015;
+  border-color: rgba(255, 255, 255, 0.08);
+  color: #f5f0e8;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.25),
+    0 20px 44px -14px rgba(0, 0, 0, 0.55);
 }
 
 .driver-popover.risu-driver-popover .driver-popover-title {
   font-family: var(--font-display), ui-sans-serif, system-ui, -apple-system,
     BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-weight: 800;
-  letter-spacing: -0.01em;
-  font-size: 16px;
-  line-height: 1.2;
-  margin-bottom: 6px;
+  letter-spacing: -0.02em;
+  font-size: 1.05rem;
+  line-height: 1.25;
+  margin-bottom: 0.4rem;
 }
 
 .driver-popover.risu-driver-popover .driver-popover-description {
-  font-size: 13px;
-  line-height: 1.4;
-  color: hsl(var(--muted-foreground));
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: #78716c;
+}
+
+.dark .driver-popover.risu-driver-popover .driver-popover-description {
+  color: #a8a29e;
 }
 
 .driver-popover.risu-driver-popover .driver-popover-footer {
-  border-top: 1px solid hsl(var(--border));
-  margin-top: 12px;
-  padding-top: 12px;
+  border-top: 1px solid rgba(28, 22, 13, 0.08);
+  margin-top: 0.9rem;
+  padding-top: 0.85rem;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dark .driver-popover.risu-driver-popover .driver-popover-footer {
+  border-top-color: rgba(255, 255, 255, 0.08);
 }
 
 .driver-popover.risu-driver-popover .driver-popover-progress-text {
-  font-size: 12px;
+  font-size: 0.7rem;
   font-weight: 700;
-  color: hsl(var(--muted-foreground));
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #a8a29e;
+}
+
+.driver-popover.risu-driver-popover .driver-popover-prev-btn,
+.driver-popover.risu-driver-popover .driver-popover-next-btn,
+.driver-popover.risu-driver-popover .driver-popover-close-btn {
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 .driver-popover.risu-driver-popover .driver-popover-prev-btn,
 .driver-popover.risu-driver-popover .driver-popover-next-btn {
-  border-radius: 0.9rem;
-  font-weight: 800;
-  padding: 10px 12px;
-  border: 1px solid hsl(var(--border));
-  background: hsl(var(--background));
-  color: hsl(var(--foreground));
+  border-radius: 0.75rem;
+  font-weight: 700;
+  font-size: 0.8125rem;
+  padding: 0.55rem 0.9rem;
+  border: 1px solid rgba(28, 22, 13, 0.1);
+  background: transparent;
+  color: #1c160d;
+  text-shadow: none;
+}
+
+.dark .driver-popover.risu-driver-popover .driver-popover-prev-btn,
+.dark .driver-popover.risu-driver-popover .driver-popover-next-btn {
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #f5f0e8;
 }
 
 .driver-popover.risu-driver-popover .driver-popover-next-btn {
@@ -408,25 +500,55 @@
 }
 
 .driver-popover.risu-driver-popover .driver-popover-prev-btn:hover {
-  background: hsl(var(--accent));
+  background: rgba(28, 22, 13, 0.04);
+}
+
+.dark .driver-popover.risu-driver-popover .driver-popover-prev-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .driver-popover.risu-driver-popover .driver-popover-next-btn:hover {
-  filter: brightness(0.95);
+  background: #e38b14;
+}
+
+.driver-popover.risu-driver-popover .driver-popover-prev-btn:focus-visible,
+.driver-popover.risu-driver-popover .driver-popover-next-btn:focus-visible {
+  border-color: hsl(var(--primary));
 }
 
 .driver-popover.risu-driver-popover .driver-popover-close-btn {
-  border-radius: 0.75rem;
-  width: 34px;
-  height: 34px;
-  color: hsl(var(--muted-foreground));
+  border-radius: 0.65rem;
+  width: 2rem;
+  height: 2rem;
+  color: #a8a29e;
 }
 
 .driver-popover.risu-driver-popover .driver-popover-close-btn:hover {
-  background: hsl(var(--accent));
-  color: hsl(var(--foreground));
+  background: rgba(28, 22, 13, 0.05);
+  color: #1c160d;
+}
+
+.dark .driver-popover.risu-driver-popover .driver-popover-close-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #f5f0e8;
 }
 
 .driver-popover.risu-driver-popover .driver-popover-arrow {
-  color: hsl(var(--background));
+  color: #fffdf9;
+}
+
+.dark .driver-popover.risu-driver-popover .driver-popover-arrow {
+  color: #2a2015;
+}
+
+/* Clean highlight — avoid stacking with nav active rings */
+.driver-active-element[data-onboarding],
+[data-onboarding][data-tour-focused="true"] {
+  outline: none !important;
+  box-shadow: none !important;
+  --tw-ring-shadow: 0 0 #0000 !important;
+  --tw-ring-offset-shadow: 0 0 #0000 !important;
+  background: rgba(244, 157, 37, 0.16) !important;
+  color: hsl(var(--primary)) !important;
+  border-radius: 0.75rem;
 }

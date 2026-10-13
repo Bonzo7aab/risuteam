@@ -4,7 +4,6 @@ export const parentDashboardNavItems = [
     label: "Strona główna",
     href: "/dashboard",
     icon: "home",
-    driverStepId: "nav-home",
   },
   {
     label: "Moje dzieci",

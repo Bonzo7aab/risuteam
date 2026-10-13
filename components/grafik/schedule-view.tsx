@@ -320,92 +320,109 @@ function ClassCard({
         : `${remaining}/${maxCap} miejsc`
       : "Miejsca: bez limitu";
 
+  const anyClassFocused = activeClassId != null;
+
   const card = (
     <div
       onMouseEnter={() => onHoverClassId?.(slot.classId)}
       onMouseLeave={() => onHoverClassId?.(null)}
       className={cn(
-        "flex w-full min-h-34 flex-col overflow-hidden rounded-xl border-2 text-left transition-all",
-        hasOtherClassFocused && "opacity-50",
-        isClassFocused && "ring-2 ring-primary/70 ring-offset-2 ring-offset-background",
+        "group/card relative flex w-full min-h-34 flex-col overflow-hidden rounded-xl border text-left will-change-transform",
+        "transition-[border-color,box-shadow,opacity,transform,background-color,filter] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+        isClassFocused &&
+          "animate-class-focus z-10 scale-[1.01] border-primary/80 bg-orange-50/40 dark:border-primary/50 dark:bg-primary/12",
+        isClassFocused && isEnrolled && !onAdminEdit && "bg-primary/12 dark:bg-primary/20",
+        !isClassFocused &&
+          hasOtherClassFocused &&
+          "scale-[0.99] opacity-55 saturate-75",
+        !isClassFocused &&
+          !anyClassFocused &&
+          "hover:-translate-y-px hover:shadow-card motion-reduce:hover:translate-y-0",
+        !isClassFocused &&
+          isEnrolled &&
+          !onAdminEdit &&
+          "border-primary/50 bg-primary/10 dark:border-primary/40 dark:bg-primary/15",
+        !isClassFocused &&
+          !(isEnrolled && !onAdminEdit) &&
+          "border-stone-200/90 bg-white dark:border-stone-700 dark:bg-[#2a2015]",
+        !isClassFocused &&
+          !hasOtherClassFocused &&
+          !(isEnrolled && !onAdminEdit) &&
+          "hover:border-stone-300 dark:hover:border-stone-600",
         isInactive && !isClassFocused && "opacity-55 saturate-65",
-        isInactive && isClassFocused && "opacity-100 saturate-100",
-        onAdminEdit
-          ? cn(
-              "bg-orange-50/50 dark:bg-orange-900/20 hover:border-primary hover:shadow-glow",
-              isInactive
-                ? "border-stone-400 dark:border-stone-500"
-                : "border-primary/35"
-            )
-          : isEnrolled
-            ? "border-primary bg-primary/15 dark:bg-primary/20"
-            : "border-primary/30 bg-orange-50/50 dark:bg-orange-900/20 hover:border-primary hover:shadow-glow"
+        isInactive && isClassFocused && "opacity-100 saturate-100"
       )}
     >
+      <span
+        className={cn(
+          "absolute inset-y-2 left-0 w-0.5 origin-center rounded-full bg-primary transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+          isClassFocused || (isEnrolled && !onAdminEdit)
+            ? "scale-y-100"
+            : "scale-y-0"
+        )}
+        aria-hidden
+      />
       <button
         type="button"
         onClick={handlePrimaryOpen}
         onFocus={() => onHoverClassId?.(slot.classId)}
         onBlur={() => onHoverClassId?.(null)}
-        className="flex flex-1 flex-col px-2.5 pt-2.5 pb-2 text-left outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        className="flex flex-1 flex-col px-3 pb-2.5 pt-3 text-left outline-hidden focus-visible:bg-stone-50/80 dark:focus-visible:bg-stone-800/40"
       >
-        <div className="mb-3 flex items-start justify-between gap-2">
+        <div className="mb-2.5 flex items-start justify-between gap-2">
           <span
-            className="min-w-0 max-w-[55%] truncate rounded-full bg-white/95 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary shadow-xs ring-1 ring-primary/20 dark:bg-stone-900/95 dark:ring-primary/30"
+            className="min-w-0 max-w-[58%] truncate text-[10px] font-bold uppercase tracking-[0.12em] text-primary"
             title={c?.discipline}
           >
             {c?.discipline ?? "—"}
           </span>
-          <div className="flex shrink-0 flex-col items-end gap-1">
-            {duration && (
-              <span className="rounded bg-stone-900 px-1.5 py-0.5 text-[9px] font-black tracking-wide text-white shadow-xs dark:bg-stone-200 dark:text-stone-900">
+          <div className="flex shrink-0 flex-wrap items-center justify-end gap-1">
+            {duration ? (
+              <span className="rounded-md bg-stone-900/90 px-1.5 py-0.5 text-[10px] font-bold tabular-nums tracking-wide text-white dark:bg-stone-100 dark:text-stone-900">
                 {duration}
               </span>
-            )}
-            {isNew && (
-              <span className="rounded bg-emerald-600 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wide text-white shadow-xs">
-                NOWE
+            ) : null}
+            {isNew ? (
+              <span className="rounded-md bg-emerald-600 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white">
+                Nowe
               </span>
-            )}
-            {isEnrolled && (
-              <span className="text-[10px] font-bold text-primary bg-primary/20 dark:bg-primary/30 px-1.5 py-0.5 rounded">
+            ) : null}
+            {isEnrolled ? (
+              <span className="rounded-md bg-primary/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-primary dark:bg-primary/25">
                 Zapisany
               </span>
-            )}
-            {isInactive && (
-              <span className="rounded bg-stone-600 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wide text-white shadow-xs dark:bg-stone-500">
-                NIEAKTYWNA
+            ) : null}
+            {isInactive ? (
+              <span className="rounded-md bg-stone-500 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white">
+                Nieaktywna
               </span>
-            )}
+            ) : null}
           </div>
         </div>
-        <span className="font-bold text-sm text-text-main dark:text-white block truncate">
+        <span className="block truncate text-sm font-bold leading-snug text-text-main dark:text-white">
           {c?.name ?? "—"}
         </span>
-        <div className="mt-2 flex min-h-0 items-center gap-1">
-          <span className="material-symbols-outlined text-sm text-primary shrink-0">
+        <div className="mt-1.5 flex min-h-0 items-center gap-1">
+          <span className="material-symbols-outlined shrink-0 text-[16px] text-stone-400" aria-hidden>
             location_on
           </span>
-          <span className="min-w-0 truncate text-[11px] font-medium text-text-light dark:text-stone-400">
+          <span className="min-w-0 truncate text-[11px] font-medium text-stone-500 dark:text-stone-400">
             {locationName}
           </span>
         </div>
       </button>
-      <div className="mt-auto flex items-center justify-between gap-2 border-t border-stone-200/90 px-2.5 py-2 dark:border-stone-700/80">
+      <div className="mt-auto flex items-center justify-between gap-2 border-t border-stone-100 px-3 py-2 dark:border-stone-800">
         <div className="flex min-w-0 flex-1 items-center gap-1.5">
           <span
-            className={cn(
-              "h-2 w-2 shrink-0 rounded-full",
-              availabilityDotClass
-            )}
+            className={cn("size-1.5 shrink-0 rounded-full", availabilityDotClass)}
             aria-hidden
           />
           <span
             className={cn(
               "min-w-0 truncate text-[11px] font-medium",
               isFull
-                ? "font-bold text-amber-800 dark:text-amber-200"
-                : "text-text-light dark:text-stone-400"
+                ? "font-semibold text-amber-800 dark:text-amber-200"
+                : "text-stone-500 dark:text-stone-400"
             )}
           >
             {slotsLine}
@@ -415,7 +432,11 @@ function ClassCard({
           <Button
             type="button"
             size="sm"
-            className="h-8 shrink-0 px-3 text-xs font-bold"
+            variant={isEnrolled ? "outline" : "default"}
+            className={cn(
+              "h-7 shrink-0 rounded-lg px-2.5 text-[11px] font-bold",
+              !isEnrolled && "bg-primary hover:bg-primary-hover"
+            )}
             onClick={(e) => {
               e.stopPropagation();
               handlePrimaryOpen();
@@ -428,132 +449,179 @@ function ClassCard({
     </div>
   );
 
-  const detailsHeading = (
-    <div>
-      <h3 className="font-bold text-lg text-text-main dark:text-white">
-        {c?.name ?? "—"}
-      </h3>
-      <span className="inline-block px-2 py-0.5 rounded-full bg-primary/20 text-primary text-xs font-bold">
-        {c?.discipline ?? "—"}
-      </span>
-    </div>
+  const detailRows = [
+    { icon: "person", label: "Trener", value: coachName },
+    duration
+      ? { icon: "schedule", label: "Godziny", value: duration }
+      : null,
+    c?.ageGroup
+      ? { icon: "child_care", label: "Grupa wiekowa", value: c.ageGroup }
+      : null,
+    {
+      icon: "event_seat",
+      label: "Miejsca",
+      value:
+        maxCap !== undefined
+          ? isFull
+            ? `Brak wolnych miejsc (${enrolledCount}/${maxCap})`
+            : `Wolne: ${remaining} / ${maxCap}`
+          : "Bez limitu",
+    },
+    { icon: "location_on", label: "Lokalizacja", value: locationName },
+  ].filter(Boolean) as { icon: string; label: string; value: string }[];
+
+  const detailsMeta = (
+    <ul className="divide-y divide-stone-100 rounded-xl border border-stone-200/80 bg-stone-50/70 dark:divide-stone-800 dark:border-stone-800 dark:bg-stone-950/30">
+      {detailRows.map((row) => (
+        <li key={row.label} className="flex items-start gap-3 px-3.5 py-2.5">
+          <span
+            className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary"
+            aria-hidden
+          >
+            <span className="material-symbols-outlined text-[18px]">
+              {row.icon}
+            </span>
+          </span>
+          <div className="min-w-0 pt-0.5">
+            <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-stone-400">
+              {row.label}
+            </p>
+            <p className="text-sm font-semibold text-text-main dark:text-stone-100">
+              {row.value}
+            </p>
+          </div>
+        </li>
+      ))}
+    </ul>
   );
 
-  const detailsRest = (
-    <>
-      <ul className="space-y-2 text-sm">
-        <li className="flex items-center gap-2 text-text-main dark:text-stone-300">
-          <span className="material-symbols-outlined text-lg text-primary">
-            person
-          </span>
-          {coachName}
-        </li>
-        {duration && (
-          <li className="flex items-center gap-2 text-text-main dark:text-stone-300">
-            <span className="material-symbols-outlined text-lg text-primary">
-              schedule
-            </span>
-            {duration}
-          </li>
-        )}
-        {c?.ageGroup && (
-          <li className="flex items-center gap-2 text-text-main dark:text-stone-300">
-            <span className="material-symbols-outlined text-lg text-primary">
-              group
-            </span>
-            {c.ageGroup}
-          </li>
-        )}
-        <li className="flex items-center gap-2 text-text-main dark:text-stone-300">
-          <span className="material-symbols-outlined text-lg text-primary">
-            event_seat
-          </span>
-          <span>
-            {maxCap !== undefined
-              ? isFull
-                ? `Brak wolnych miejsc — ${enrolledCount} / ${maxCap}`
-                : `Wolne: ${remaining} / ${maxCap}`
-              : "Miejsca bez limitu (brak limitu w bazie)"}
-          </span>
-        </li>
-        <li className="flex items-center gap-2 text-text-main dark:text-stone-300">
-          <span className="material-symbols-outlined text-lg text-primary">
-            location_on
-          </span>
-          {locationName}
-        </li>
-      </ul>
-
+  const detailsActions = (
+    <div className="space-y-3">
       {!isLoggedIn && (
         <Link
           href={`/sign-in?redirect=${encodeURIComponent(signInRedirectPath)}`}
-          className="flex items-center justify-center gap-2 w-full rounded-xl h-11 font-bold bg-primary text-primary-foreground hover:bg-primary-hover"
+          className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary text-sm font-bold text-primary-foreground shadow-sm transition-colors hover:bg-primary-hover"
         >
-          <span className="material-symbols-outlined">login</span>
+          <span className="material-symbols-outlined text-[20px]" aria-hidden>
+            login
+          </span>
           Zaloguj się, aby zapisać
         </Link>
       )}
 
       {isLoggedIn && isEnrolled && subscription && (
-        <div className="space-y-2">
-          <p className="text-sm font-medium text-primary">
-            {subscription.status === "pending_payment"
-              ? "Oczekuje na płatność"
-              : "Zapisany"}
-          </p>
+        <div className="space-y-3 rounded-xl border border-stone-200/80 bg-primary/5 p-3.5 dark:border-stone-800 dark:bg-primary/10">
+          <div className="flex items-center gap-2">
+            <span
+              className={cn(
+                "inline-flex rounded-full px-2.5 py-1 text-[11px] font-bold",
+                subscription.status === "pending_payment"
+                  ? "bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-200"
+                  : "bg-primary/15 text-primary"
+              )}
+            >
+              {subscription.status === "pending_payment"
+                ? "Oczekuje na płatność"
+                : "Zapisany"}
+            </span>
+          </div>
           <Button
             type="button"
             variant="outline"
-            size="sm"
-            className="w-full"
+            className="h-10 w-full rounded-xl font-semibold"
             onClick={handleCancel}
           >
-            Wypisz
+            Wypisz z zajęć
           </Button>
+        </div>
+      )}
+
+      {isLoggedIn && !isEnrolled && !hasChildren && (
+        <div className="space-y-3 rounded-xl border border-stone-200/80 bg-orange-50/70 p-3.5 dark:border-stone-800 dark:bg-primary/10">
+          <p className="text-sm leading-relaxed text-stone-600 dark:text-stone-300">
+            Dodaj profil dziecka, aby zapisać je na te zajęcia.
+          </p>
+          <Link
+            href="/dashboard/dzieci"
+            className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-primary text-sm font-bold text-primary-foreground shadow-sm transition-colors hover:bg-primary-hover"
+          >
+            Moje dzieci
+          </Link>
         </div>
       )}
 
       {isLoggedIn && !isEnrolled && hasChildren && (
-        <div className="space-y-2">
-          <label className="text-xs font-bold text-text-light dark:text-stone-500 block">
-            Wybierz dziecko
-          </label>
-          <select
-            className="w-full rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 px-3 py-2 text-sm"
-            value={selectedChildId ?? ""}
-            onChange={(e) =>
-              setSelectedChildId((e.target.value as Id<"children">) || null)
-            }
-          >
-            <option value="">—</option>
-            {children.map((ch) => (
-              <option key={ch._id} value={ch._id}>
-                {ch.firstName} {ch.lastName}
-              </option>
-            ))}
-          </select>
-          {enrollError && (
-            <p className="text-xs text-red-600 dark:text-red-400">
-              {enrollError}
-            </p>
-          )}
+        <div className="space-y-3">
+          <div className="space-y-2">
+            <label
+              htmlFor={`enroll-child-${slot._id}`}
+              className="block text-[11px] font-bold uppercase tracking-[0.12em] text-stone-500 dark:text-stone-400"
+            >
+              Wybierz dziecko
+            </label>
+            <select
+              id={`enroll-child-${slot._id}`}
+              className="h-11 w-full rounded-xl border border-stone-200 bg-white px-3 text-sm font-medium text-text-main outline-hidden transition-colors focus:border-primary dark:border-stone-700 dark:bg-stone-950/50 dark:text-stone-100"
+              value={selectedChildId ?? ""}
+              onChange={(e) =>
+                setSelectedChildId((e.target.value as Id<"children">) || null)
+              }
+            >
+              <option value="">Wybierz…</option>
+              {children.map((ch) => (
+                <option key={ch._id} value={ch._id}>
+                  {ch.firstName} {ch.lastName}
+                </option>
+              ))}
+            </select>
+          </div>
+          {enrollError ? (
+            <div
+              role="alert"
+              className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-xs text-red-800 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-200"
+            >
+              <span className="material-symbols-outlined text-[16px]" aria-hidden>
+                error
+              </span>
+              <span>{enrollError}</span>
+            </div>
+          ) : null}
           <Button
             type="button"
-            className="w-full"
-            disabled={!selectedChildId || enrollPending}
+            className="h-11 w-full rounded-xl bg-primary text-sm font-bold hover:bg-primary-hover"
+            disabled={!selectedChildId || enrollPending || isFull}
             onClick={handleEnroll}
           >
-            {enrollPending ? "Zapisywanie…" : "Zapisz się"}
+            {enrollPending
+              ? "Zapisywanie…"
+              : isFull
+                ? "Brak miejsc"
+                : "Zapisz na zajęcia"}
           </Button>
         </div>
       )}
-    </>
+    </div>
   );
 
   const detailsBody = (
-    <div className="p-4 space-y-4">
-      {detailsHeading}
-      {detailsRest}
+    <div className="overflow-hidden">
+      <div className="border-b border-stone-100 px-5 py-4 dark:border-stone-800">
+        <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-primary">
+          {c?.discipline ?? "Zajęcia"}
+        </p>
+        <h3 className="mt-1 text-lg font-black tracking-tight text-text-main dark:text-white">
+          {c?.name ?? "—"}
+        </h3>
+        {isNew ? (
+          <span className="mt-2 inline-flex rounded-full bg-emerald-600 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
+            Nowe
+          </span>
+        ) : null}
+      </div>
+      <div className="space-y-4 px-5 py-4">
+        {detailsMeta}
+        {detailsActions}
+      </div>
     </div>
   );
 
@@ -566,15 +634,20 @@ function ClassCard({
       <>
         {card}
         <Drawer open={open} onOpenChange={setOpen}>
-          <DrawerContent className="border-stone-200 bg-white dark:border-stone-700 dark:bg-stone-900">
-            <DrawerHeader className="border-b border-stone-200 text-left dark:border-stone-700">
-              <DrawerTitle className="text-xl font-black text-text-main dark:text-white">
+          <DrawerContent className="border-stone-200 bg-[#FDFBF7] dark:border-stone-800 dark:bg-[#2a2015]">
+            <DrawerHeader className="border-b border-stone-200/80 px-5 pb-4 text-left dark:border-stone-800">
+              <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-primary">
+                {c?.discipline ?? "Zajęcia"}
+              </p>
+              <DrawerTitle className="mt-1 text-xl font-black tracking-tight text-text-main dark:text-white">
                 {c?.name ?? "—"}
               </DrawerTitle>
-              <p className="text-sm font-bold text-primary">{c?.discipline ?? "—"}</p>
             </DrawerHeader>
-            <div className="max-h-[min(75vh,32rem)] overflow-y-auto overscroll-contain pb-6">
-              <div className="space-y-4 p-4">{detailsRest}</div>
+            <div className="max-h-[min(75vh,32rem)] overflow-y-auto overscroll-contain px-5 py-4 pb-8">
+              <div className="space-y-4">
+                {detailsMeta}
+                {detailsActions}
+              </div>
             </div>
           </DrawerContent>
         </Drawer>
@@ -588,9 +661,9 @@ function ClassCard({
       <PopoverContent
         align="start"
         side="bottom"
-        sideOffset={8}
+        sideOffset={10}
         collisionPadding={16}
-        className="w-80 p-0 rounded-2xl border-2 border-stone-200 dark:border-stone-700 shadow-xl"
+        className="w-[22rem] overflow-hidden rounded-2xl border border-stone-200/80 bg-white p-0 text-popover-foreground shadow-card-hover dark:border-stone-800 dark:bg-[#2a2015] dark:shadow-card-dark-hover"
       >
         {detailsBody}
       </PopoverContent>
@@ -1085,13 +1158,13 @@ export function ScheduleView({
           <div className="w-full min-w-0 lg:hidden">
             <div
               className={cn(
-                "w-full min-w-0 max-w-full overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-soft dark:border-stone-700 dark:bg-stone-900/80",
+                "w-full min-w-0 max-w-full overflow-hidden rounded-2xl border border-stone-200/80 bg-white shadow-card dark:border-stone-800 dark:bg-[#2a2015] dark:shadow-card-dark",
                 isAdminMode &&
                   "border-0 bg-transparent shadow-none dark:bg-transparent"
               )}
             >
               {mobileDayTimes.length === 0 ? (
-                <p className="p-8 text-center text-sm font-medium text-text-light dark:text-stone-400">
+                <p className="p-8 text-center text-sm font-medium text-stone-500 dark:text-stone-400">
                   Brak zajęć w wybranym dniu przy aktualnych filtrach.
                 </p>
               ) : (
@@ -1104,14 +1177,16 @@ export function ScheduleView({
                     return (
                       <li key={time} className="p-3 sm:p-4">
                         <div className="mb-3 flex items-center gap-2">
-                          <span className="material-symbols-outlined text-xl text-primary">
-                            schedule
+                          <span className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                            <span className="material-symbols-outlined text-[18px]" aria-hidden>
+                              schedule
+                            </span>
                           </span>
-                          <span className="text-base font-black text-text-main dark:text-white">
+                          <span className="text-base font-bold tabular-nums text-text-main dark:text-white">
                             {time}
                           </span>
                         </div>
-                        <div className="flex flex-col gap-3">
+                        <div className="flex flex-col gap-2.5">
                           {cellSlots.map((slot) => (
                             <ClassCard
                               key={`${slot._id}-${slot.classId}`}
@@ -1150,81 +1225,107 @@ export function ScheduleView({
             </div>
           </div>
 
-          <div className="hidden overflow-x-auto rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 shadow-soft lg:block">
-            <table className="w-full min-w-[720px]">
-              <thead>
-                <tr>
-                  <th className="w-24 border-r border-stone-200/90 bg-stone-100 p-4 text-left text-xs font-bold text-text-light dark:border-stone-700 dark:bg-stone-800/60 dark:text-stone-400 uppercase">
-                    Godzina
-                  </th>
+          <div className="hidden overflow-hidden rounded-2xl border border-stone-200/80 bg-white shadow-card dark:border-stone-800 dark:bg-[#2a2015] dark:shadow-card-dark lg:block">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[720px] table-fixed border-separate border-spacing-0">
+                <colgroup>
+                  <col className="w-[5.5rem]" />
                   {visibleDays.map((d) => (
-                    <th
-                      key={d.key}
-                      className="p-4 text-center text-sm font-bold text-text-main dark:text-white"
-                    >
-                      {d.label}
-                    </th>
+                    <col key={d.key} />
                   ))}
-                </tr>
-              </thead>
-              <tbody>
-                {times.map((time) => (
-                  <tr
-                    key={time}
-                    className="border-t border-stone-100 dark:border-stone-800"
-                  >
-                    <td className="border-r border-stone-200/90 bg-stone-100 p-4 text-sm font-bold text-text-main dark:border-stone-700 dark:bg-stone-800/60 dark:text-stone-300">
-                      {time}
-                    </td>
-                    {visibleDays.map((d) => {
-                      const key = `${d.key}-${time}`;
-                      const cellSlots = (byKey[key] ?? []).filter((slot) =>
-                        matchesFilters(slot, discipline, ageGroup, locationId)
-                      );
-                      return (
-                        <td
-                          key={d.key}
-                          className="p-2 align-top min-w-[120px]"
-                        >
-                          <div className="flex flex-col gap-2">
-                            {cellSlots.map((slot) => (
-                              <ClassCard
-                                key={`${slot._id}-${slot.classId}`}
-                                slot={slot}
-                                isEnrolled={enrolledClassIds.has(
-                                  slot.classId
-                                )}
-                                subscription={
-                                  mySubscriptions?.find(
-                                    (s) =>
-                                      s.classId === slot.classId &&
-                                      (s.status === "pending_payment" ||
-                                        s.status === "active")
-                                  )
-                                }
-                                isLoggedIn={isLoggedIn}
-                                hasChildren={hasChildren}
-                                children={myChildren ?? []}
-                                onEnroll={enrollInClass}
-                                onCancel={cancelEnrollment}
-                                signInRedirectPath={signInRedirectPath}
-                                activeClassId={activeClassId}
-                                onHoverClassId={setActiveClassId}
-                                onAdminEdit={
-                                  isAdminMode && onAdminSelectClass
-                                    ? onAdminSelectClass
-                                    : undefined
-                                }
-                              />
-                            ))}
-                          </div>
-                        </td>
-                      );
-                    })}
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th className="sticky left-0 z-20 border-b border-stone-200/90 bg-stone-50 px-2 py-3.5 text-center align-middle dark:border-stone-700 dark:bg-[#241c12]">
+                      <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-stone-500 dark:text-stone-400">
+                        Godz.
+                      </span>
+                    </th>
+                    {visibleDays.map((d) => (
+                      <th
+                        key={d.key}
+                        className="border-b border-stone-200/90 bg-stone-50 px-2.5 py-3.5 text-center align-middle dark:border-stone-700 dark:bg-[#241c12]"
+                      >
+                        <span className="text-sm font-bold tracking-tight text-text-main dark:text-white">
+                          {d.label}
+                        </span>
+                      </th>
+                    ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {times.map((time, rowIndex) => (
+                    <tr key={time}>
+                      <td
+                        className={cn(
+                          "sticky left-0 z-10 px-2 py-3 text-center align-middle",
+                          "bg-white dark:bg-[#2a2015]",
+                          rowIndex < times.length - 1 &&
+                            "border-b border-stone-200/70 dark:border-stone-700/80"
+                        )}
+                      >
+                        <span className="inline-flex h-8 min-w-[3.5rem] items-center justify-center rounded-lg bg-stone-100 px-2 text-xs font-bold tabular-nums text-text-main dark:bg-stone-900/80 dark:text-stone-100">
+                          {time}
+                        </span>
+                      </td>
+                      {visibleDays.map((d) => {
+                        const key = `${d.key}-${time}`;
+                        const cellSlots = (byKey[key] ?? []).filter((slot) =>
+                          matchesFilters(slot, discipline, ageGroup, locationId)
+                        );
+                        return (
+                          <td
+                            key={d.key}
+                            className={cn(
+                              "min-w-0 px-2 py-3 align-top",
+                              rowIndex < times.length - 1 &&
+                                "border-b border-stone-200/70 dark:border-stone-700/80"
+                            )}
+                          >
+                            {cellSlots.length > 0 ? (
+                              <div className="flex flex-col gap-2">
+                                {cellSlots.map((slot) => (
+                                  <ClassCard
+                                    key={`${slot._id}-${slot.classId}`}
+                                    slot={slot}
+                                    isEnrolled={enrolledClassIds.has(
+                                      slot.classId
+                                    )}
+                                    subscription={
+                                      mySubscriptions?.find(
+                                        (s) =>
+                                          s.classId === slot.classId &&
+                                          (s.status === "pending_payment" ||
+                                            s.status === "active")
+                                      )
+                                    }
+                                    isLoggedIn={isLoggedIn}
+                                    hasChildren={hasChildren}
+                                    children={myChildren ?? []}
+                                    onEnroll={enrollInClass}
+                                    onCancel={cancelEnrollment}
+                                    signInRedirectPath={signInRedirectPath}
+                                    activeClassId={activeClassId}
+                                    onHoverClassId={setActiveClassId}
+                                    onAdminEdit={
+                                      isAdminMode && onAdminSelectClass
+                                        ? onAdminSelectClass
+                                        : undefined
+                                    }
+                                  />
+                                ))}
+                              </div>
+                            ) : (
+                              <div className="min-h-8" aria-hidden />
+                            )}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </>
       )}
@@ -1234,13 +1335,13 @@ export function ScheduleView({
         !hasChildren &&
         schedule !== undefined &&
         schedule.length > 0 && (
-        <div className="mt-6 rounded-2xl border-2 border-primary/30 bg-orange-50/50 dark:bg-orange-900/20 border-stone-200 dark:border-stone-700 p-4 flex flex-wrap items-center justify-center gap-3">
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-3 rounded-2xl border border-stone-200/80 bg-orange-50/60 p-4 dark:border-stone-800 dark:bg-primary/10">
           <p className="text-sm font-medium text-text-main dark:text-stone-300">
             Aby zapisać dziecko na zajęcia, dodaj je w panelu.
           </p>
           <Link
             href="/dashboard/dzieci"
-            className="inline-flex items-center justify-center gap-2 rounded-xl h-11 px-6 font-bold border-2 border-primary text-primary hover:bg-primary/10"
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-primary px-6 font-bold text-primary transition-colors hover:bg-primary/10"
           >
             Dodaj dziecko w Moje dzieci
           </Link>

@@ -3,9 +3,5 @@ export default async function Layout({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-stone-100 dark:bg-stone-900">
-      {children}
-    </div>
-  );
+  return <div className="min-h-screen bg-[#FDFBF7] dark:bg-background-dark">{children}</div>;
 }
