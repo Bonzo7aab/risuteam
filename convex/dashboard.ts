@@ -1,7 +1,7 @@
 import { query } from "./_generated/server";
 import { v } from "convex/values";
 import { requireAdmin } from "./authHelpers";
-import { isActiveEnrollmentStatus } from "./subscriptionCounts";
+import { isSeatHoldingStatus } from "./billingHelpers";
 
 /**
  * Dashboard stats for admin Pulpit. Pass asOfTimestamp (e.g. Date.now()) from client
@@ -140,15 +140,24 @@ export const getTodaysScheduleForAdmin = query({
       .collect();
     const classIds = new Set(classes.map((c) => c._id));
 
-    const allSlots = await ctx.db.query("timeSlots").collect();
-    const slots = allSlots.filter(
-      (s) => classIds.has(s.classId) && s.dayOfWeek === args.dayOfWeek
-    );
+    const daySlots = await ctx.db
+      .query("timeSlots")
+      .withIndex("by_day", (q) => q.eq("dayOfWeek", args.dayOfWeek))
+      .collect();
+    const nowMs = Date.now();
+    const slots = daySlots.filter((s) => {
+      if (!classIds.has(s.classId)) return false;
+      if (s.startDate != null && nowMs < s.startDate) return false;
+      if (s.endDate != null && nowMs > s.endDate) return false;
+      return true;
+    });
 
     const subscriptions = await ctx.db.query("subscriptions").collect();
     const enrolledByClass: Record<string, number> = {};
     for (const sub of subscriptions) {
-      if (!isActiveEnrollmentStatus(sub.status)) continue;
+      if (!isSeatHoldingStatus(sub.status, sub.paymentHoldExpiresAt, nowMs)) {
+        continue;
+      }
       const id = sub.classId;
       enrolledByClass[id] = (enrolledByClass[id] ?? 0) + 1;
     }

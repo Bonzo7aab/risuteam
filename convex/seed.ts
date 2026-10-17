@@ -1,5 +1,13 @@
 import { mutation } from "./_generated/server";
+import { v } from "convex/values";
 import type { Id } from "./_generated/dataModel";
+import {
+  classMonthlyFeeGrosze,
+  ensureClassInvoiceForPeriod,
+  ensureInvoicesThroughCurrentMonth,
+} from "./billingHelpers";
+
+const MOCK_EMAIL_SUFFIX = "@mock.risuteam.pl";
 
 /**
  * Seeds the schedule: locations, coaches, classes, and timeSlots.
@@ -72,6 +80,7 @@ export const seedSchedule = mutation({
         locationId,
         coachId: coachById("Piotr Nowak"),
         maxCapacity: 12,
+        monthlyFeeGrosze: 24000,
         isActive: true,
       });
       await ctx.db.insert("classes", {
@@ -81,6 +90,7 @@ export const seedSchedule = mutation({
         locationId,
         coachId: coachById("Piotr Nowak"),
         maxCapacity: 16,
+        monthlyFeeGrosze: 24000,
         isActive: true,
       });
       await ctx.db.insert("classes", {
@@ -90,6 +100,7 @@ export const seedSchedule = mutation({
         locationId,
         coachId: coachById("Michał Wiśniewski"),
         maxCapacity: 14,
+        monthlyFeeGrosze: 24000,
         isActive: true,
       });
       await ctx.db.insert("classes", {
@@ -99,6 +110,7 @@ export const seedSchedule = mutation({
         locationId,
         coachId: coachById("Anna Kowalska"),
         maxCapacity: 10,
+        monthlyFeeGrosze: 24000,
         isActive: true,
       });
       await ctx.db.insert("classes", {
@@ -108,6 +120,7 @@ export const seedSchedule = mutation({
         locationId,
         coachId: coachById("Katarzyna Lewandowska"),
         maxCapacity: 14,
+        monthlyFeeGrosze: 24000,
         isActive: true,
       });
     }
@@ -467,5 +480,342 @@ export const backfillKlubowaNocowanka = mutation({
     const { slug: _s, ...rest } = KLUBOWA_NOCOWANKA_FULL;
     await ctx.db.patch(doc._id, rest);
     return { ok: true, message: "Patched klubowa nocowanka with full fields." };
+  },
+});
+
+type MockParentSeed = {
+  email: string;
+  name: string;
+  phone: string;
+  children: Array<{
+    firstName: string;
+    lastName: string;
+    dateOfBirth: string;
+    /** Class names to enroll (matched against classes.name). */
+    classNames: string[];
+    /** Enrollment billing scenario */
+    scenario: "paid_current" | "unpaid_current" | "mixed_months" | "cancelled_past";
+  }>;
+};
+
+const MOCK_PARENTS: MockParentSeed[] = [
+  {
+    email: `anna.kowalska${MOCK_EMAIL_SUFFIX}`,
+    name: "Anna Kowalska",
+    phone: "+48 500 100 101",
+    children: [
+      {
+        firstName: "Zosia",
+        lastName: "Kowalska",
+        dateOfBirth: "2018-03-12",
+        classNames: ["Judo maluchy", "Gimnastyka maluchy"],
+        scenario: "paid_current",
+      },
+      {
+        firstName: "Antoni",
+        lastName: "Kowalski",
+        dateOfBirth: "2016-07-22",
+        classNames: ["Judo dzieci"],
+        scenario: "unpaid_current",
+      },
+    ],
+  },
+  {
+    email: `piotr.nowak${MOCK_EMAIL_SUFFIX}`,
+    name: "Piotr Nowak",
+    phone: "+48 500 100 102",
+    children: [
+      {
+        firstName: "Maja",
+        lastName: "Nowak",
+        dateOfBirth: "2015-11-03",
+        classNames: ["Karate dzieci"],
+        scenario: "mixed_months",
+      },
+    ],
+  },
+  {
+    email: `magdalena.wisniewska${MOCK_EMAIL_SUFFIX}`,
+    name: "Magdalena Wiśniewska",
+    phone: "+48 500 100 103",
+    children: [
+      {
+        firstName: "Jakub",
+        lastName: "Wiśniewski",
+        dateOfBirth: "2014-01-18",
+        classNames: ["Judo młodzież"],
+        scenario: "paid_current",
+      },
+      {
+        firstName: "Lena",
+        lastName: "Wiśniewska",
+        dateOfBirth: "2019-09-05",
+        classNames: ["Judo maluchy"],
+        scenario: "unpaid_current",
+      },
+    ],
+  },
+  {
+    email: `tomasz.lewandowski${MOCK_EMAIL_SUFFIX}`,
+    name: "Tomasz Lewandowski",
+    phone: "+48 500 100 104",
+    children: [
+      {
+        firstName: "Oliwia",
+        lastName: "Lewandowska",
+        dateOfBirth: "2017-05-30",
+        classNames: ["Judo dzieci", "Karate dzieci"],
+        scenario: "mixed_months",
+      },
+    ],
+  },
+  {
+    email: `katarzyna.zielinska${MOCK_EMAIL_SUFFIX}`,
+    name: "Katarzyna Zielińska",
+    phone: "+48 500 100 105",
+    children: [
+      {
+        firstName: "Szymon",
+        lastName: "Zieliński",
+        dateOfBirth: "2013-12-09",
+        classNames: ["Judo młodzież"],
+        scenario: "cancelled_past",
+      },
+    ],
+  },
+];
+
+/**
+ * Seed mock parent accounts, kids, class enrollments and monthly invoices.
+ * Idempotent via `@mock.risuteam.pl` emails — skips if already present.
+ *
+ *   npx convex run seed:seedMockParents
+ */
+export const seedMockParents = mutation({
+  args: {
+    force: v.optional(v.boolean()),
+  },
+  returns: v.object({
+    ok: v.boolean(),
+    message: v.string(),
+    usersCreated: v.number(),
+    childrenCreated: v.number(),
+    enrollmentsCreated: v.number(),
+  }),
+  handler: async (ctx, args) => {
+    const existingMock = await ctx.db
+      .query("users")
+      .withIndex("email", (q) =>
+        q.eq("email", `anna.kowalska${MOCK_EMAIL_SUFFIX}`)
+      )
+      .first();
+    if (existingMock && !args.force) {
+      return {
+        ok: false,
+        message:
+          "Mock parents already exist. Re-run with { force: true } to add another batch (may duplicate).",
+        usersCreated: 0,
+        childrenCreated: 0,
+        enrollmentsCreated: 0,
+      };
+    }
+
+    const classes = await ctx.db.query("classes").collect();
+    const activeClasses = classes.filter((c) => c.isActive);
+    if (activeClasses.length === 0) {
+      return {
+        ok: false,
+        message: "No active classes found. Create classes or run seed:seedSchedule first.",
+        usersCreated: 0,
+        childrenCreated: 0,
+        enrollmentsCreated: 0,
+      };
+    }
+    const classByName = new Map(classes.map((c) => [c.name, c]));
+    let fallbackIdx = 0;
+    const resolveClass = (className: string) => {
+      const named = classByName.get(className);
+      if (named?.isActive) return named;
+      // Prefer another active class with the same discipline keyword
+      const discHint = className.split(" ")[0]?.toLowerCase() ?? "";
+      const byDisc = activeClasses.find((c) =>
+        c.discipline.toLowerCase().includes(discHint)
+      );
+      if (byDisc) return byDisc;
+      const pick = activeClasses[fallbackIdx % activeClasses.length]!;
+      fallbackIdx += 1;
+      return pick;
+    };
+
+    const now = Date.now();
+    const msDay = 24 * 60 * 60 * 1000;
+    let usersCreated = 0;
+    let childrenCreated = 0;
+    let enrollmentsCreated = 0;
+
+    for (const parent of MOCK_PARENTS) {
+      let user = await ctx.db
+        .query("users")
+        .withIndex("email", (q) => q.eq("email", parent.email))
+        .first();
+      if (!user) {
+        const userId = await ctx.db.insert("users", {
+          name: parent.name,
+          email: parent.email,
+          phone: parent.phone,
+          emailVerificationTime: now,
+          onboardingCompletedAt: now,
+        });
+        user = await ctx.db.get("users", userId);
+        usersCreated += 1;
+      }
+      if (!user) continue;
+
+      for (const childSpec of parent.children) {
+        const existingChildren = await ctx.db
+          .query("children")
+          .withIndex("by_user", (q) => q.eq("userId", user!._id))
+          .collect();
+        let child =
+          existingChildren.find(
+            (c) =>
+              c.firstName === childSpec.firstName &&
+              c.lastName === childSpec.lastName
+          ) ?? null;
+        if (!child) {
+          const childId = await ctx.db.insert("children", {
+            userId: user._id,
+            firstName: childSpec.firstName,
+            lastName: childSpec.lastName,
+            dateOfBirth: childSpec.dateOfBirth,
+          });
+          child = await ctx.db.get("children", childId);
+          childrenCreated += 1;
+        }
+        if (!child) continue;
+
+        for (const className of childSpec.classNames) {
+          const cls = resolveClass(className);
+          if (!cls) continue;
+
+          const existingSubs = await ctx.db
+            .query("subscriptions")
+            .withIndex("by_user", (q) => q.eq("userId", user!._id))
+            .collect();
+          const already = existingSubs.find(
+            (s) =>
+              s.childId === child!._id &&
+              s.classId === cls._id &&
+              (s.status === "active" ||
+                s.status === "pending_payment" ||
+                s.status === "cancelled" ||
+                s.status === "ended")
+          );
+          if (already && !args.force) continue;
+
+          let startDate = now - 45 * msDay;
+          let status: "active" | "pending_payment" | "cancelled" | "ended" =
+            "active";
+          let endDate: number | undefined;
+
+          if (childSpec.scenario === "unpaid_current") {
+            startDate = now - 10 * msDay;
+            status = "pending_payment";
+          } else if (childSpec.scenario === "paid_current") {
+            startDate = now - 40 * msDay;
+            status = "active";
+          } else if (childSpec.scenario === "mixed_months") {
+            startDate = now - 70 * msDay;
+            status = "active";
+          } else if (childSpec.scenario === "cancelled_past") {
+            startDate = now - 90 * msDay;
+            endDate = now - 20 * msDay;
+            status = "cancelled";
+          }
+
+          const subscriptionId = await ctx.db.insert("subscriptions", {
+            userId: user._id,
+            childId: child._id,
+            classId: cls._id,
+            status,
+            startDate,
+            endDate,
+            paymentHoldExpiresAt:
+              status === "pending_payment"
+                ? now + 7 * msDay
+                : undefined,
+          });
+          enrollmentsCreated += 1;
+
+          const fee = classMonthlyFeeGrosze(cls);
+          await ensureInvoicesThroughCurrentMonth(ctx, {
+            subscriptionId,
+            startDate,
+            endDate,
+            status,
+            amountGrosze: fee,
+          });
+
+          const invoices = await ctx.db
+            .query("classInvoices")
+            .withIndex("by_subscription", (q) =>
+              q.eq("subscriptionId", subscriptionId)
+            )
+            .collect();
+          invoices.sort(
+            (a, b) => a.year - b.year || a.month - b.month
+          );
+
+          if (childSpec.scenario === "paid_current") {
+            for (const inv of invoices) {
+              await ctx.db.patch(inv._id, {
+                paymentStatus: "paid",
+                amountPaidGrosze: inv.amountGrosze,
+              });
+            }
+          } else if (childSpec.scenario === "unpaid_current") {
+            for (const inv of invoices) {
+              await ctx.db.patch(inv._id, {
+                paymentStatus: "unpaid",
+                amountPaidGrosze: 0,
+              });
+            }
+          } else if (childSpec.scenario === "mixed_months") {
+            // Pay all but the latest month
+            for (let i = 0; i < invoices.length; i++) {
+              const inv = invoices[i]!;
+              const isLast = i === invoices.length - 1;
+              await ctx.db.patch(inv._id, {
+                paymentStatus: isLast ? "unpaid" : "paid",
+                amountPaidGrosze: isLast ? 0 : inv.amountGrosze,
+              });
+            }
+          } else if (childSpec.scenario === "cancelled_past") {
+            for (const inv of invoices) {
+              await ctx.db.patch(inv._id, {
+                paymentStatus: "paid",
+                amountPaidGrosze: inv.amountGrosze,
+              });
+            }
+          }
+
+          // Ensure at least current-month invoice row exists for active scenarios
+          if (status === "active" || status === "pending_payment") {
+            await ensureClassInvoiceForPeriod(ctx, {
+              subscriptionId,
+              amountGrosze: fee,
+            });
+          }
+        }
+      }
+    }
+
+    return {
+      ok: true,
+      message: `Seeded mock parents (${MOCK_PARENTS.length} households).`,
+      usersCreated,
+      childrenCreated,
+      enrollmentsCreated,
+    };
   },
 });

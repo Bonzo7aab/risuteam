@@ -786,14 +786,14 @@ export default function AdminNewCampPage() {
                     ) : (
                       day.slots.map((slot, slotIndex) => (
                         <div key={slotIndex} className="flex gap-2 items-start">
-                          <div className="flex-1 grid grid-cols-[80px_1fr] gap-2">
+                          <div className="flex-1 grid grid-cols-[7.5rem_1fr] gap-2">
                             <Input
                               type="time"
                               value={slot.time}
                               onChange={(e) =>
                                 updateScheduleSlot(dayIndex, slotIndex, "time", e.target.value)
                               }
-                              className="font-mono"
+                              className="min-w-[7.5rem] font-mono"
                             />
                             <Input
                               placeholder="Nazwa aktywności"

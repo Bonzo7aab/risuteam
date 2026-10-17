@@ -200,10 +200,35 @@ interface ChildDoc {
   lastName: string;
 }
 
+const DAY_SHORT: Record<number, string> = {
+  0: "Nd",
+  1: "Pon",
+  2: "Wt",
+  3: "Śr",
+  4: "Czw",
+  5: "Pt",
+  6: "Sb",
+};
+
+function formatWeeklyBundle(slots: ScheduleSlot[]): string {
+  const sorted = [...slots].sort((a, b) => {
+    const dayA = a.dayOfWeek === 0 ? 7 : a.dayOfWeek;
+    const dayB = b.dayOfWeek === 0 ? 7 : b.dayOfWeek;
+    if (dayA !== dayB) return dayA - dayB;
+    return a.startTime.localeCompare(b.startTime);
+  });
+  return sorted
+    .map(
+      (s) =>
+        `${DAY_SHORT[s.dayOfWeek] ?? "?"} ${s.startTime}–${s.endTime}`
+    )
+    .join(" · ");
+}
+
 function ClassCard({
   slot,
-  isEnrolled,
-  subscription,
+  relatedSlots,
+  enrollments,
   isLoggedIn,
   hasChildren,
   children,
@@ -216,8 +241,14 @@ function ClassCard({
   onHoverClassId,
 }: {
   slot: ScheduleSlot;
-  isEnrolled: boolean;
-  subscription: { _id: Id<"subscriptions">; status: string } | undefined;
+  /** All weekly occurrences of the same class (payment bundle). */
+  relatedSlots: ScheduleSlot[];
+  /** Active seat-holding enrollments for this class (per child). */
+  enrollments: {
+    _id: Id<"subscriptions">;
+    status: string;
+    childId?: Id<"children">;
+  }[];
   isLoggedIn: boolean;
   hasChildren: boolean;
   children: ChildDoc[];
@@ -240,19 +271,34 @@ function ClassCard({
   const [enrollPending, setEnrollPending] = useState(false);
   const [enrollError, setEnrollError] = useState<string | null>(null);
   const [selectedChildId, setSelectedChildId] = useState<Id<"children"> | null>(null);
+  const [cancelChildId, setCancelChildId] = useState<Id<"children"> | null>(null);
+
+  const enrolledChildIds = useMemo(() => {
+    const set = new Set<string>();
+    for (const e of enrollments) {
+      if (e.childId) set.add(e.childId);
+    }
+    return set;
+  }, [enrollments]);
+
+  const enrollableChildren = useMemo(
+    () => children.filter((ch) => !enrolledChildIds.has(ch._id)),
+    [children, enrolledChildIds]
+  );
+
+  const isEnrolled = enrollments.length > 0;
+  const allChildrenEnrolled =
+    hasChildren && children.length > 0 && enrollableChildren.length === 0;
 
   useEffect(() => {
-    if (
-      !open ||
-      !isLoggedIn ||
-      isEnrolled ||
-      !hasChildren ||
-      children.length !== 1
-    ) {
-      return;
+    if (!open || !isLoggedIn || !hasChildren) return;
+    if (enrollableChildren.length === 1) {
+      setSelectedChildId(enrollableChildren[0]._id);
     }
-    setSelectedChildId(children[0]._id);
-  }, [open, isLoggedIn, isEnrolled, hasChildren, children]);
+    if (enrollments.length === 1 && enrollments[0].childId) {
+      setCancelChildId(enrollments[0].childId);
+    }
+  }, [open, isLoggedIn, hasChildren, enrollableChildren, enrollments]);
 
   const c = slot.class;
   const coachName = slot.coach?.name ?? "—";
@@ -287,9 +333,13 @@ function ClassCard({
   };
 
   const handleCancel = async () => {
-    if (!subscription) return;
+    const sub =
+      enrollments.length === 1
+        ? enrollments[0]
+        : enrollments.find((e) => e.childId === cancelChildId);
+    if (!sub) return;
     try {
-      await onCancel({ subscriptionId: subscription._id });
+      await onCancel({ subscriptionId: sub._id });
     } catch {
       // ignore
     }
@@ -449,11 +499,27 @@ function ClassCard({
     </div>
   );
 
+  const weeklyBundle =
+    relatedSlots.length > 1
+      ? formatWeeklyBundle(relatedSlots)
+      : duration
+        ? `${DAY_SHORT[slot.dayOfWeek] ?? "?"} ${duration}`
+        : "";
+
   const detailRows = [
     { icon: "person", label: "Trener", value: coachName },
-    duration
-      ? { icon: "schedule", label: "Godziny", value: duration }
-      : null,
+    weeklyBundle
+      ? {
+          icon: "calendar_month",
+          label:
+            relatedSlots.length > 1
+              ? `Terminy (${relatedSlots.length}× / tydz.)`
+              : "Termin",
+          value: weeklyBundle,
+        }
+      : duration
+        ? { icon: "schedule", label: "Godziny", value: duration }
+        : null,
     c?.ageGroup
       ? { icon: "child_care", label: "Grupa wiekowa", value: c.ageGroup }
       : null,
@@ -509,26 +575,73 @@ function ClassCard({
         </Link>
       )}
 
-      {isLoggedIn && isEnrolled && subscription && (
+      {isLoggedIn && isEnrolled && (
         <div className="space-y-3 rounded-xl border border-stone-200/80 bg-primary/5 p-3.5 dark:border-stone-800 dark:bg-primary/10">
-          <div className="flex items-center gap-2">
-            <span
-              className={cn(
-                "inline-flex rounded-full px-2.5 py-1 text-[11px] font-bold",
-                subscription.status === "pending_payment"
-                  ? "bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-200"
-                  : "bg-primary/15 text-primary"
-              )}
-            >
-              {subscription.status === "pending_payment"
-                ? "Oczekuje na płatność"
-                : "Zapisany"}
-            </span>
-          </div>
+          <ul className="space-y-2">
+            {enrollments.map((subscription) => {
+              const child = children.find((ch) => ch._id === subscription.childId);
+              const label = child
+                ? `${child.firstName} ${child.lastName}`
+                : "Zapis";
+              return (
+                <li
+                  key={subscription._id}
+                  className="flex flex-wrap items-center justify-between gap-2"
+                >
+                  <span className="text-sm font-semibold text-text-main dark:text-stone-100">
+                    {label}
+                  </span>
+                  <span
+                    className={cn(
+                      "inline-flex rounded-full px-2.5 py-1 text-[11px] font-bold",
+                      subscription.status === "pending_payment"
+                        ? "bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-200"
+                        : "bg-primary/15 text-primary"
+                    )}
+                  >
+                    {subscription.status === "pending_payment"
+                      ? "Oczekuje na płatność"
+                      : "Zapisany"}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+          {enrollments.length > 1 ? (
+            <div className="space-y-2">
+              <label
+                htmlFor={`cancel-child-${slot._id}`}
+                className="block text-[11px] font-bold uppercase tracking-[0.12em] text-stone-500 dark:text-stone-400"
+              >
+                Wypisz dziecko
+              </label>
+              <select
+                id={`cancel-child-${slot._id}`}
+                className="h-11 w-full rounded-xl border border-stone-200 bg-white px-3 text-sm font-medium text-text-main outline-hidden transition-colors focus:border-primary dark:border-stone-700 dark:bg-stone-950/50 dark:text-stone-100"
+                value={cancelChildId ?? ""}
+                onChange={(e) =>
+                  setCancelChildId((e.target.value as Id<"children">) || null)
+                }
+              >
+                <option value="">Wybierz…</option>
+                {enrollments.map((e) => {
+                  const child = children.find((ch) => ch._id === e.childId);
+                  return (
+                    <option key={e._id} value={e.childId ?? ""}>
+                      {child
+                        ? `${child.firstName} ${child.lastName}`
+                        : "Uczestnik"}
+                    </option>
+                  );
+                })}
+              </select>
+            </div>
+          ) : null}
           <Button
             type="button"
             variant="outline"
             className="h-10 w-full rounded-xl font-semibold"
+            disabled={enrollments.length > 1 && !cancelChildId}
             onClick={handleCancel}
           >
             Wypisz z zajęć
@@ -536,7 +649,7 @@ function ClassCard({
         </div>
       )}
 
-      {isLoggedIn && !isEnrolled && !hasChildren && (
+      {isLoggedIn && !hasChildren && (
         <div className="space-y-3 rounded-xl border border-stone-200/80 bg-orange-50/70 p-3.5 dark:border-stone-800 dark:bg-primary/10">
           <p className="text-sm leading-relaxed text-stone-600 dark:text-stone-300">
             Dodaj profil dziecka, aby zapisać je na te zajęcia.
@@ -550,7 +663,7 @@ function ClassCard({
         </div>
       )}
 
-      {isLoggedIn && !isEnrolled && hasChildren && (
+      {isLoggedIn && hasChildren && !allChildrenEnrolled && (
         <div className="space-y-3">
           <div className="space-y-2">
             <label
@@ -568,7 +681,7 @@ function ClassCard({
               }
             >
               <option value="">Wybierz…</option>
-              {children.map((ch) => (
+              {enrollableChildren.map((ch) => (
                 <option key={ch._id} value={ch._id}>
                   {ch.firstName} {ch.lastName}
                 </option>
@@ -681,6 +794,8 @@ export interface ScheduleViewProps {
     startTime?: string,
     endTime?: string
   ) => void;
+  /** Keep all weekly occurrences of this class highlighted (e.g. open editor). */
+  highlightedClassId?: Id<"classes"> | null;
   /** Override hero copy (defaults by mode). */
   pageTitle?: string;
   pageDescription?: string;
@@ -757,6 +872,7 @@ export function ScheduleView({
   signInRedirectPath,
   mode = "public",
   onAdminSelectClass,
+  highlightedClassId = null,
   pageTitle,
   pageDescription,
 }: ScheduleViewProps) {
@@ -773,7 +889,10 @@ export function ScheduleView({
   const [mobileTableDayKey, setMobileTableDayKey] =
     useState<(typeof DAY_KEYS)[number]>("mon");
   const [mobileFiltersExpanded, setMobileFiltersExpanded] = useState(false);
-  const [activeClassId, setActiveClassId] = useState<Id<"classes"> | null>(null);
+  const [hoveredClassId, setHoveredClassId] = useState<Id<"classes"> | null>(
+    null
+  );
+  const activeClassId = highlightedClassId ?? hoveredClassId;
 
   const schedulePublic = useQuery(
     api.classes.getSchedule,
@@ -806,13 +925,45 @@ export function ScheduleView({
     return buildGrid(schedule);
   }, [schedule]);
 
-  const enrolledClassIds = useMemo(() => {
-    if (!mySubscriptions) return new Set<string>();
-    return new Set(
-      mySubscriptions
-        .filter((s) => s.status === "pending_payment" || s.status === "active")
-        .map((s) => s.classId)
-    );
+  const relatedSlotsByClassId = useMemo(() => {
+    const map = new Map<string, ScheduleSlot[]>();
+    if (!schedule) return map;
+    for (const s of schedule) {
+      const key = String(s.classId);
+      const list = map.get(key) ?? [];
+      list.push(s);
+      map.set(key, list);
+    }
+    return map;
+  }, [schedule]);
+
+  const enrollmentsByClassId = useMemo(() => {
+    const map = new Map<
+      string,
+      {
+        _id: Id<"subscriptions">;
+        status: string;
+        childId?: Id<"children">;
+      }[]
+    >();
+    if (!mySubscriptions) return map;
+    const now = Date.now();
+    for (const s of mySubscriptions) {
+      const holdOk =
+        s.status === "active" ||
+        (s.status === "pending_payment" &&
+          (s.paymentHoldExpiresAt == null || s.paymentHoldExpiresAt >= now));
+      if (!holdOk) continue;
+      const key = String(s.classId);
+      const list = map.get(key) ?? [];
+      list.push({
+        _id: s._id,
+        status: s.status,
+        childId: s.childId,
+      });
+      map.set(key, list);
+    }
+    return map;
   }, [mySubscriptions]);
 
   const locations = useMemo(() => {
@@ -1191,14 +1342,13 @@ export function ScheduleView({
                             <ClassCard
                               key={`${slot._id}-${slot.classId}`}
                               slot={slot}
-                              isEnrolled={enrolledClassIds.has(slot.classId)}
-                              subscription={
-                                mySubscriptions?.find(
-                                  (s) =>
-                                    s.classId === slot.classId &&
-                                    (s.status === "pending_payment" ||
-                                      s.status === "active")
-                                )
+                              relatedSlots={
+                                relatedSlotsByClassId.get(String(slot.classId)) ??
+                                [slot]
+                              }
+                              enrollments={
+                                enrollmentsByClassId.get(String(slot.classId)) ??
+                                []
                               }
                               isLoggedIn={isLoggedIn}
                               hasChildren={hasChildren}
@@ -1208,7 +1358,7 @@ export function ScheduleView({
                               signInRedirectPath={signInRedirectPath}
                               detailsVariant="drawer"
                               activeClassId={activeClassId}
-                              onHoverClassId={setActiveClassId}
+                              onHoverClassId={setHoveredClassId}
                               onAdminEdit={
                                 isAdminMode && onAdminSelectClass
                                   ? onAdminSelectClass
@@ -1288,16 +1438,15 @@ export function ScheduleView({
                                   <ClassCard
                                     key={`${slot._id}-${slot.classId}`}
                                     slot={slot}
-                                    isEnrolled={enrolledClassIds.has(
-                                      slot.classId
-                                    )}
-                                    subscription={
-                                      mySubscriptions?.find(
-                                        (s) =>
-                                          s.classId === slot.classId &&
-                                          (s.status === "pending_payment" ||
-                                            s.status === "active")
-                                      )
+                                    relatedSlots={
+                                      relatedSlotsByClassId.get(
+                                        String(slot.classId)
+                                      ) ?? [slot]
+                                    }
+                                    enrollments={
+                                      enrollmentsByClassId.get(
+                                        String(slot.classId)
+                                      ) ?? []
                                     }
                                     isLoggedIn={isLoggedIn}
                                     hasChildren={hasChildren}
@@ -1306,7 +1455,7 @@ export function ScheduleView({
                                     onCancel={cancelEnrollment}
                                     signInRedirectPath={signInRedirectPath}
                                     activeClassId={activeClassId}
-                                    onHoverClassId={setActiveClassId}
+                                    onHoverClassId={setHoveredClassId}
                                     onAdminEdit={
                                       isAdminMode && onAdminSelectClass
                                         ? onAdminSelectClass

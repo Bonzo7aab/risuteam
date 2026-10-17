@@ -174,6 +174,15 @@ export const create = mutation({
     includedItems: v.optional(v.array(v.string())),
     generalAttractions: v.optional(v.array(v.string())),
     coachIds: v.optional(v.array(v.id("coaches"))),
+    installmentSchedule: v.optional(
+      v.array(
+        v.object({
+          label: v.string(),
+          deadlineLabel: v.optional(v.string()),
+          amount: v.number(),
+        })
+      )
+    ),
   },
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
@@ -206,6 +215,7 @@ export const create = mutation({
       includedItems: args.includedItems,
       generalAttractions: args.generalAttractions,
       coachIds: args.coachIds,
+      installmentSchedule: args.installmentSchedule,
       updatedAt: Date.now(),
     });
   },
@@ -247,6 +257,15 @@ export const update = mutation({
     ),
     includedItems: v.optional(v.array(v.string())),
     generalAttractions: v.optional(v.array(v.string())),
+    installmentSchedule: v.optional(
+      v.array(
+        v.object({
+          label: v.string(),
+          deadlineLabel: v.optional(v.string()),
+          amount: v.number(),
+        })
+      )
+    ),
   },
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
@@ -286,6 +305,9 @@ export const update = mutation({
     if (rest.scheduleByDay !== undefined) updates.scheduleByDay = rest.scheduleByDay;
     if (rest.includedItems !== undefined) updates.includedItems = rest.includedItems;
     if (rest.generalAttractions !== undefined) updates.generalAttractions = rest.generalAttractions;
+    if (rest.installmentSchedule !== undefined) {
+      updates.installmentSchedule = rest.installmentSchedule;
+    }
     updates.coachIds = coachIds;
     if (Object.keys(updates).length > 0) {
       updates.updatedAt = Date.now();

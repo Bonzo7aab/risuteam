@@ -130,6 +130,7 @@ export default function AdminRejestracjeObozPage() {
         campSlug={camp.slug}
         formQuestionsHref={`/admin/wydarzenia/oboz/${encodeURIComponent(camp.slug)}/pytania`}
         editCampHref={`/admin/wydarzenia/oboz/${encodeURIComponent(camp.slug)}/edit`}
+        paymentsHref="/admin/platnosci"
         customQuestionLabels={customQuestionLabels}
         participants={participants}
         totalRegistered={registrations.length}

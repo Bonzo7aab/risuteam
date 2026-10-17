@@ -162,8 +162,6 @@ export function DashboardHome() {
     );
   }
 
-  const monthLabel = new Date().toLocaleDateString("pl-PL", { month: "long" });
-
   return (
     <div className="mx-auto max-w-6xl space-y-6">
       <header className="mb-1 max-w-2xl sm:mb-2">
@@ -358,11 +356,11 @@ export function DashboardHome() {
               <ul className="mb-5 space-y-2.5">
                 {home.pendingPayments.map((p) => (
                   <li
-                    key={p.subscriptionId}
+                    key={`${p.subscriptionId}-${p.year}-${p.month}`}
                     className="flex justify-between gap-2 text-sm"
                   >
                     <span className="truncate text-stone-500 dark:text-stone-400">
-                      {p.childName} — składka {monthLabel}
+                      {p.childName} — {p.className} ({p.periodLabel})
                     </span>
                     <span className="shrink-0 font-semibold text-text-main dark:text-stone-200">
                       {formatPln(p.amountGrosze)} zł
@@ -375,7 +373,7 @@ export function DashboardHome() {
                     className="flex justify-between gap-2 text-sm"
                   >
                     <span className="truncate text-stone-500 dark:text-stone-400">
-                      {line.childName} — składka {monthLabel}
+                      {line.childName} — {line.className}
                     </span>
                     <span className="shrink-0 font-semibold text-emerald-600 dark:text-emerald-400">
                       Zapłacono

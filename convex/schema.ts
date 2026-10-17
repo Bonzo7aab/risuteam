@@ -25,6 +25,8 @@ export default defineSchema({
     coachId: v.id("coaches"),
     ageGroup: v.optional(v.string()),
     maxCapacity: v.optional(v.number()),
+    /** Monthly membership fee in grosze (e.g. 24000 = 240 zł). */
+    monthlyFeeGrosze: v.optional(v.number()),
     isActive: v.boolean(),
   })
     .index("by_discipline", ["discipline"])
@@ -105,6 +107,16 @@ export default defineSchema({
     ),
     includedItems: v.optional(v.array(v.string())),
     generalAttractions: v.optional(v.array(v.string())),
+    /** Optional installment plan (amounts in PLN, same unit as `price`). */
+    installmentSchedule: v.optional(
+      v.array(
+        v.object({
+          label: v.string(),
+          deadlineLabel: v.optional(v.string()),
+          amount: v.number(),
+        })
+      )
+    ),
     updatedAt: v.optional(v.number()),
   })
     .index("by_slug", ["slug"])
@@ -256,11 +268,77 @@ export default defineSchema({
     status: v.string(),
     startDate: v.number(),
     endDate: v.optional(v.number()),
+    /** When set, `pending_payment` holds expire after this timestamp. */
+    paymentHoldExpiresAt: v.optional(v.number()),
   })
     .index("by_user", ["userId"])
     .index("by_class", ["classId"])
     .index("by_status", ["status"])
     .index("by_class_status", ["classId", "status"]),
+
+  /** Monthly billing invoice for a class subscription (enrollment ≠ payment). */
+  classInvoices: defineTable({
+    subscriptionId: v.id("subscriptions"),
+    year: v.number(),
+    month: v.number(),
+    periodStart: v.number(),
+    periodEnd: v.number(),
+    amountGrosze: v.number(),
+    paymentStatus: v.union(
+      v.literal("paid"),
+      v.literal("partial"),
+      v.literal("unpaid")
+    ),
+    amountPaidGrosze: v.number(),
+  })
+    .index("by_subscription", ["subscriptionId"])
+    .index("by_subscription_period", ["subscriptionId", "year", "month"])
+    .index("by_payment_status", ["paymentStatus"])
+    .index("by_period", ["year", "month"]),
+
+  /**
+   * Append-only payment ledger for class invoices and event registrations.
+   * PSP webhooks (Stripe/P24) can record rows with provider + externalId.
+   */
+  payments: defineTable({
+    source: v.union(
+      v.literal("class_invoice"),
+      v.literal("camp_registration"),
+      v.literal("nocowanka_registration")
+    ),
+    sourceId: v.string(),
+    amountGrosze: v.number(),
+    recordedAt: v.number(),
+    recordedBy: v.optional(v.id("users")),
+    note: v.optional(v.string()),
+    method: v.optional(
+      v.union(
+        v.literal("bank_transfer"),
+        v.literal("card"),
+        v.literal("online"),
+        v.literal("manual")
+      )
+    ),
+    provider: v.optional(
+      v.union(
+        v.literal("stripe"),
+        v.literal("przelewy24"),
+        v.literal("manual")
+      )
+    ),
+    externalId: v.optional(v.string()),
+    status: v.optional(
+      v.union(
+        v.literal("recorded"),
+        v.literal("pending"),
+        v.literal("failed"),
+        v.literal("refunded")
+      )
+    ),
+  })
+    .index("by_source", ["source", "sourceId"])
+    .index("by_external", ["provider", "externalId"])
+    .index("by_recorded_at", ["recordedAt"]),
 
   galleryCategories: defineTable({
     name: v.string(),

@@ -166,6 +166,7 @@ export default function AdminRejestracjeNocowankaPage() {
             ? `/admin/wydarzenia/nocowanka/${encodeURIComponent(slug)}/edit`
             : undefined
         }
+        paymentsHref="/admin/platnosci"
         editEventLabel="Edytuj nocowankę"
         customQuestionLabels={customQuestionLabels}
         participants={participants}

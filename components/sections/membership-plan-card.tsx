@@ -1,23 +1,41 @@
+"use client";
+
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import { cn } from "@/lib/utils";
 import { BlurFade } from "@/components/ui/blur-fade";
+import {
+  DEFAULT_MONTHLY_FEE_GROSZE,
+  formatPlnFromGrosze,
+  groszeToZlString,
+} from "@/lib/pricing";
 
-export const MEMBERSHIP_PLAN = {
-  title: "Abonament Miesięczny",
-  price: "249 zł",
-  priceAmount: "249",
-  features: [
-    "8 zajęć w miesiącu",
-    "Judo, Karate lub Gimnastyka",
-    "Grafik dopasowany do grupy",
-    "Progres i wsparcie na każdym etapie",
-  ],
-} as const;
+export function getMembershipPlan(amountGrosze: number = DEFAULT_MONTHLY_FEE_GROSZE) {
+  const price = formatPlnFromGrosze(amountGrosze);
+  return {
+    title: "Abonament Miesięczny",
+    price,
+    priceAmount: groszeToZlString(amountGrosze),
+    features: [
+      "8 zajęć w miesiącu",
+      "Judo, Karate lub Gimnastyka",
+      "Grafik dopasowany do grupy",
+      "Progres i wsparcie na każdym etapie",
+    ],
+  } as const;
+}
+
+/** @deprecated Prefer getMembershipPlan() — kept for static imports. */
+export const MEMBERSHIP_PLAN = getMembershipPlan(DEFAULT_MONTHLY_FEE_GROSZE);
 
 export function MembershipPlanCard({
   className,
 }: {
   className?: string;
 }) {
+  const fee = useQuery(api.payments.getPublicMonthlyClassFee);
+  const plan = getMembershipPlan(fee?.amountGrosze ?? DEFAULT_MONTHLY_FEE_GROSZE);
+
   return (
     <div
       className={cn(
@@ -32,11 +50,11 @@ export function MembershipPlanCard({
       <div className="pointer-events-none absolute -right-10 -top-10 size-36 rounded-full bg-primary/10 blur-2xl" aria-hidden />
       <div>
         <h3 className="text-xl font-black text-text-main dark:text-white mb-2">
-          {MEMBERSHIP_PLAN.title}
+          {plan.title}
         </h3>
         <div className="flex items-baseline gap-2 flex-wrap">
           <span className="text-4xl font-black tracking-tight text-primary">
-            {MEMBERSHIP_PLAN.price}
+            {plan.price}
           </span>
           <span className="text-sm font-semibold text-stone-500 dark:text-stone-400">
             / miesiąc
@@ -45,7 +63,7 @@ export function MembershipPlanCard({
       </div>
 
       <ul className="flex flex-col gap-3 flex-1">
-        {MEMBERSHIP_PLAN.features.map((f, i) => (
+        {plan.features.map((f, i) => (
           <li
             key={f}
             className="flex items-start gap-3 text-sm text-text-main dark:text-stone-300"

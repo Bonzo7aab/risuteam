@@ -46,17 +46,28 @@ const DEFAULT_WHAT_TO_BRING = [
   "Dużo dobrego humoru!",
 ];
 
-/** Build placeholder installments with deadlines (I/II/III Rata, Przy zapisie, Do 30 maja, etc.) */
-function buildPlaceholderInstallments(priceTotal: number): { label: string; deadline?: string; amount: string }[] {
-  const deposit = 500;
-  const rest = Math.max(0, priceTotal - deposit);
-  const second = Math.ceil(rest / 2);
-  const third = rest - second;
-  return [
-    { label: "I Rata - Zadatek", deadline: "Przy zapisie", amount: `${deposit} PLN` },
-    { label: "II Rata", deadline: "Do 30 maja", amount: `${second} PLN` },
-    { label: "III Rata", deadline: "Do 15 czerwca", amount: `${third} PLN` },
-  ];
+/** Use stored installment schedule, or a single full-price payment (no fake deadlines). */
+function buildInstallments(
+  priceTotal: number,
+  schedule?: { label: string; deadlineLabel?: string; amount: number }[] | null
+): { label: string; deadline?: string; amount: string }[] {
+  if (schedule && schedule.length > 0) {
+    return schedule.map((row) => ({
+      label: row.label,
+      deadline: row.deadlineLabel,
+      amount: `${row.amount} PLN`,
+    }));
+  }
+  if (priceTotal > 0) {
+    return [
+      {
+        label: "Płatność",
+        deadline: "Przy zapisie / przelewem",
+        amount: `${priceTotal} PLN`,
+      },
+    ];
+  }
+  return [];
 }
 
 export default function CampBySlugPage() {
@@ -145,14 +156,10 @@ export default function CampBySlugPage() {
   const priceIncluded = camp.includedItems?.length
     ? [...camp.includedItems, "Ubezpieczenie NNW w cenie"].slice(0, 4)
     : ["Rabat rodzinny: -100 PLN na drugie dziecko", "Ubezpieczenie NNW w cenie"];
-  const installments =
-    priceNum >= 500
-      ? buildPlaceholderInstallments(priceNum)
-      : [
-          { label: "I Rata - Zadatek", deadline: "Przy zapisie", amount: "500 PLN" },
-          { label: "II Rata", deadline: "Do 30 maja", amount: "—" },
-          { label: "III Rata", deadline: "Do 15 czerwca", amount: "—" },
-        ];
+  const installments = buildInstallments(
+    priceNum,
+    camp.installmentSchedule ?? null
+  );
 
   const galleryImages = (camp.galleryImageUrls ?? []).filter(Boolean);
   const promoBannerUrl = camp.promoBannerUrl?.trim() || "";

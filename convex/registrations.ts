@@ -41,6 +41,8 @@ export const createCampRegistration = mutation({
       parentPhone: args.parentPhone,
       parentEmail: args.parentEmail,
       status: "new",
+      paymentStatus: "unpaid",
+      amountPaid: 0,
       customAnswers: args.customAnswers,
     });
   },
@@ -129,6 +131,8 @@ export const createNocowankaRegistration = mutation({
       parentPhone: args.parentPhone || undefined,
       parentEmail: args.parentEmail.trim(),
       status: "new",
+      paymentStatus: "unpaid",
+      amountPaid: 0,
       customAnswers: args.customAnswers,
     });
   },

@@ -2,9 +2,14 @@ import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { requireAdmin, requireAuthUserId } from "./authHelpers";
 import {
-  countActiveEnrollmentsForClass,
-  isActiveEnrollmentStatus,
-} from "./subscriptionCounts";
+  classMonthlyFeeGrosze,
+  ensureClassInvoiceForPeriod,
+  ensureInvoicesThroughCurrentMonth,
+  expirePaymentHolds,
+  PAYMENT_HOLD_MS,
+  isSeatHoldingStatus,
+} from "./billingHelpers";
+import { countActiveEnrollmentsForClass } from "./subscriptionCounts";
 
 const subscriptionStatus = v.union(
   v.literal("pending_payment"),
@@ -22,6 +27,7 @@ const subscriptionDoc = v.object({
   status: v.string(),
   startDate: v.number(),
   endDate: v.optional(v.number()),
+  paymentHoldExpiresAt: v.optional(v.number()),
 });
 
 export const listMySubscriptions = query({
@@ -42,10 +48,6 @@ export const listMySubscriptions = query({
   },
 });
 
-function isActiveStatus(status: string): boolean {
-  return isActiveEnrollmentStatus(status);
-}
-
 export const enrollInClass = mutation({
   args: {
     classId: v.id("classes"),
@@ -54,6 +56,7 @@ export const enrollInClass = mutation({
   returns: v.id("subscriptions"),
   handler: async (ctx, args) => {
     const userId = await requireAuthUserId(ctx);
+    await expirePaymentHolds(ctx);
 
     const cls = await ctx.db.get("classes", args.classId);
     if (!cls) throw new Error("Zajęcia nie istnieją.");
@@ -61,8 +64,11 @@ export const enrollInClass = mutation({
 
     const child = await ctx.db.get("children", args.childId);
     if (!child) throw new Error("Nie znaleziono dziecka.");
-    if (child.userId !== userId) throw new Error("To dziecko nie należy do Twojego konta.");
+    if (child.userId !== userId) {
+      throw new Error("To dziecko nie należy do Twojego konta.");
+    }
 
+    const now = Date.now();
     const existing = await ctx.db
       .query("subscriptions")
       .withIndex("by_user", (q) => q.eq("userId", userId))
@@ -71,23 +77,37 @@ export const enrollInClass = mutation({
       (s) =>
         s.classId === args.classId &&
         s.childId === args.childId &&
-        isActiveStatus(s.status)
+        isSeatHoldingStatus(s.status, s.paymentHoldExpiresAt, now)
     );
     if (duplicate) throw new Error("Już jesteś zapisany na te zajęcia.");
 
-    const count = await countActiveEnrollmentsForClass(ctx.db, args.classId);
+    const count = await countActiveEnrollmentsForClass(
+      ctx.db,
+      args.classId,
+      now
+    );
     const maxCapacity = cls.maxCapacity ?? undefined;
     if (maxCapacity !== undefined && count >= maxCapacity) {
       throw new Error("Brak wolnych miejsc na te zajęcia.");
     }
 
-    return await ctx.db.insert("subscriptions", {
+    const subscriptionId = await ctx.db.insert("subscriptions", {
       userId,
       childId: args.childId,
       classId: args.classId,
       status: "pending_payment",
-      startDate: Date.now(),
+      startDate: now,
+      paymentHoldExpiresAt: now + PAYMENT_HOLD_MS,
     });
+
+    await ensureInvoicesThroughCurrentMonth(ctx, {
+      subscriptionId,
+      startDate: now,
+      status: "pending_payment",
+      amountGrosze: classMonthlyFeeGrosze(cls),
+    });
+
+    return subscriptionId;
   },
 });
 
@@ -100,11 +120,16 @@ export const cancelEnrollment = mutation({
     const userId = await requireAuthUserId(ctx);
     const sub = await ctx.db.get("subscriptions", args.subscriptionId);
     if (!sub) throw new Error("Zapis nie istnieje.");
-    if (sub.userId !== userId) throw new Error("Nie możesz anulować cudzego zapisu.");
+    if (sub.userId !== userId) {
+      throw new Error("Nie możesz anulować cudzego zapisu.");
+    }
     if (sub.status !== "pending_payment" && sub.status !== "active") {
       throw new Error("Ten zapis nie może być anulowany.");
     }
-    await ctx.db.patch(args.subscriptionId, { status: "cancelled" });
+    await ctx.db.patch(args.subscriptionId, {
+      status: "cancelled",
+      endDate: Date.now(),
+    });
     return null;
   },
 });
@@ -117,10 +142,11 @@ export const getClassActiveEnrollmentCountsForAdmin = query({
   returns: v.record(v.string(), v.number()),
   handler: async (ctx) => {
     await requireAdmin(ctx);
+    const now = Date.now();
     const list = await ctx.db.query("subscriptions").collect();
     const counts: Record<string, number> = {};
     for (const s of list) {
-      if (!isActiveEnrollmentStatus(s.status)) continue;
+      if (!isSeatHoldingStatus(s.status, s.paymentHoldExpiresAt, now)) continue;
       const id = s.classId as string;
       counts[id] = (counts[id] ?? 0) + 1;
     }
@@ -136,16 +162,21 @@ export const listByClassForAdmin = query({
   },
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
+    const now = Date.now();
     let subs = await ctx.db
       .query("subscriptions")
       .withIndex("by_class", (q) => q.eq("classId", args.classId))
       .collect();
     if (!args.includeInactive) {
-      subs = subs.filter((s) => isActiveEnrollmentStatus(s.status));
+      subs = subs.filter((s) =>
+        isSeatHoldingStatus(s.status, s.paymentHoldExpiresAt, now)
+      );
     }
     const result = await Promise.all(
       subs.map(async (sub) => {
-        const child = sub.childId ? await ctx.db.get("children", sub.childId) : null;
+        const child = sub.childId
+          ? await ctx.db.get("children", sub.childId)
+          : null;
         const user = await ctx.db.get("users", sub.userId);
         return {
           ...sub,
@@ -167,7 +198,10 @@ export const adminRemoveEnrollment = mutation({
     await requireAdmin(ctx);
     const sub = await ctx.db.get("subscriptions", args.subscriptionId);
     if (!sub) throw new Error("Zapis nie istnieje.");
-    await ctx.db.patch(args.subscriptionId, { status: "cancelled" });
+    await ctx.db.patch(args.subscriptionId, {
+      status: "cancelled",
+      endDate: Date.now(),
+    });
     return null;
   },
 });
@@ -180,32 +214,55 @@ export const adminEnrollInClass = mutation({
   returns: v.id("subscriptions"),
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
+    await expirePaymentHolds(ctx);
     const cls = await ctx.db.get("classes", args.classId);
     if (!cls) throw new Error("Zajęcia nie istnieją.");
     const child = await ctx.db.get("children", args.childId);
     if (!child) throw new Error("Nie znaleziono dziecka.");
+    const now = Date.now();
     const existing = await ctx.db
       .query("subscriptions")
       .withIndex("by_class", (q) => q.eq("classId", args.classId))
       .collect();
     const duplicate = existing.find(
       (s) =>
-        s.childId === args.childId && isActiveStatus(s.status)
+        s.childId === args.childId &&
+        isSeatHoldingStatus(s.status, s.paymentHoldExpiresAt, now)
     );
-    if (duplicate) throw new Error("To dziecko jest już zapisane na te zajęcia.");
+    if (duplicate) {
+      throw new Error("To dziecko jest już zapisane na te zajęcia.");
+    }
     const activeCount = existing.filter((s) =>
-      isActiveEnrollmentStatus(s.status)
+      isSeatHoldingStatus(s.status, s.paymentHoldExpiresAt, now)
     ).length;
     const maxCapacity = cls.maxCapacity ?? undefined;
     if (maxCapacity !== undefined && activeCount >= maxCapacity) {
       throw new Error("Brak wolnych miejsc na te zajęcia.");
     }
-    return await ctx.db.insert("subscriptions", {
+    const subscriptionId = await ctx.db.insert("subscriptions", {
       userId: child.userId,
       childId: args.childId,
       classId: args.classId,
       status: "active",
-      startDate: Date.now(),
+      startDate: now,
     });
+    await ensureClassInvoiceForPeriod(ctx, {
+      subscriptionId,
+      amountGrosze: classMonthlyFeeGrosze(cls),
+      paymentStatus: "paid",
+      amountPaidGrosze: classMonthlyFeeGrosze(cls),
+    });
+    return subscriptionId;
+  },
+});
+
+/** Expire abandoned payment holds (also run from cron). */
+export const expireAbandonedPaymentHolds = mutation({
+  args: {},
+  returns: v.object({ expired: v.number() }),
+  handler: async (ctx) => {
+    await requireAdmin(ctx);
+    const expired = await expirePaymentHolds(ctx);
+    return { expired };
   },
 });

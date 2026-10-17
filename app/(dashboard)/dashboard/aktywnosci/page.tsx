@@ -85,6 +85,34 @@ function ListSkeleton() {
   );
 }
 
+/**
+ * True if enrollment window covered at least one scheduled class day
+ * (proxy for "attended at least once" — we do not store check-ins).
+ */
+function hadScheduledClassDuringEnrollment(
+  startMs: number,
+  endMs: number,
+  dayOfWeeks: number[]
+): boolean {
+  if (!Number.isFinite(startMs) || endMs < startMs) return false;
+  if (dayOfWeeks.length === 0) {
+    // No timetable: require at least one full day as a weak signal
+    return endMs - startMs >= 24 * 60 * 60 * 1000;
+  }
+  const dowSet = new Set(dayOfWeeks);
+  const cursor = new Date(startMs);
+  cursor.setHours(0, 0, 0, 0);
+  const endDay = new Date(endMs);
+  endDay.setHours(23, 59, 59, 999);
+  let guard = 0;
+  while (cursor.getTime() <= endDay.getTime() && guard < 180) {
+    if (dowSet.has(cursor.getDay())) return true;
+    cursor.setDate(cursor.getDate() + 1);
+    guard += 1;
+  }
+  return false;
+}
+
 function AktywnosciPageInner() {
   const searchParams = useSearchParams();
   const [tab, setTab] = useState<TabId>("nadchodzace");
@@ -97,7 +125,9 @@ function AktywnosciPageInner() {
   }, [searchParams]);
 
   const subscriptions = useQuery(api.subscriptions.listMySubscriptions, {});
+  const classBilling = useQuery(api.payments.listMyClassBilling, {});
   const classes = useQuery(api.classes.getClasses, { activeOnly: false });
+  const schedule = useQuery(api.classes.getSchedule, {});
   const children = useQuery(api.children.listMyChildren, {});
   const cancelEnrollment = useMutation(api.subscriptions.cancelEnrollment);
 
@@ -116,22 +146,77 @@ function AktywnosciPageInner() {
     );
   }, [children]);
 
+  const slotDaysByClassId = useMemo(() => {
+    const map = new Map<string, number[]>();
+    if (!schedule) return map;
+    for (const slot of schedule) {
+      const key = String(slot.classId);
+      const list = map.get(key) ?? [];
+      if (!list.includes(slot.dayOfWeek)) list.push(slot.dayOfWeek);
+      map.set(key, list);
+    }
+    return map;
+  }, [schedule]);
+
+  const dueBillingItems = useMemo(() => {
+    if (!classBilling) return [];
+    return classBilling.flatMap((row) =>
+      row.dueMonths.map((m) => ({
+        key: `${row.subscriptionId}-${m.year}-${m.month}`,
+        subscriptionId: row.subscriptionId,
+        className: row.className,
+        discipline: row.discipline,
+        childName: row.childName,
+        periodLabel: m.label,
+        dueGrosze: m.dueGrosze,
+        paymentStatus: m.paymentStatus,
+      }))
+    );
+  }, [classBilling]);
+
   const byTab = useMemo(() => {
     if (!subscriptions) {
       return { nadchodzace: [], do_zaplaty: [], przeszle: [] };
     }
+    const dueSubIds = new Set(
+      (classBilling ?? [])
+        .filter((b) => b.dueMonths.length > 0)
+        .map((b) => b.subscriptionId)
+    );
+    const paidSubIds = new Set(
+      (classBilling ?? [])
+        .filter((b) => b.months.some((m) => m.paymentStatus === "paid"))
+        .map((b) => b.subscriptionId)
+    );
     return {
       nadchodzace: subscriptions.filter((s) => s.status === "active"),
-      do_zaplaty: subscriptions.filter((s) => s.status === "pending_payment"),
-      przeszle: subscriptions.filter(
-        (s) => s.status === "cancelled" || s.status === "ended"
+      do_zaplaty: subscriptions.filter(
+        (s) => s.status === "pending_payment" || dueSubIds.has(s._id)
       ),
+      // Past: ended/cancelled enrollments where the child had at least one
+      // scheduled class day in the enrollment window (or a paid month).
+      // Excludes abandoned unpaid holds that never reached a class day.
+      przeszle: subscriptions.filter((s) => {
+        if (s.status !== "cancelled" && s.status !== "ended") return false;
+        const endMs = s.endDate ?? Date.now();
+        const days = slotDaysByClassId.get(String(s.classId)) ?? [];
+        if (
+          hadScheduledClassDuringEnrollment(s.startDate, endMs, days)
+        ) {
+          return true;
+        }
+        return paidSubIds.has(s._id);
+      }),
     };
-  }, [subscriptions]);
+  }, [subscriptions, classBilling, slotDaysByClassId]);
 
   const list = byTab[tab];
-  const pendingCount = byTab.do_zaplaty.length;
+  const pendingCount = dueBillingItems.length;
   const activeCount = byTab.nadchodzace.length;
+  const pendingTotalGrosze = dueBillingItems.reduce(
+    (sum, i) => sum + i.dueGrosze,
+    0
+  );
   const canCancel = (status: string) =>
     status === "pending_payment" || status === "active";
 
@@ -169,10 +254,12 @@ function AktywnosciPageInner() {
                 Do zapłaty
               </p>
               <p className="mt-0.5 text-2xl font-black tabular-nums text-primary">
-                {pendingCount}
+                {(pendingTotalGrosze / 100).toFixed(0)} zł
               </p>
               <p className="text-xs font-medium text-stone-500 dark:text-stone-400">
-                {pendingCount === 1 ? "pozycja" : "pozycje"}
+                {pendingCount === 1
+                  ? "1 miesiąc"
+                  : `${pendingCount} miesięcy`}
               </p>
             </div>
           </div>
@@ -257,7 +344,8 @@ function AktywnosciPageInner() {
         <div className="inline-flex min-w-full gap-1 rounded-2xl border border-stone-200/80 bg-white/90 p-1.5 shadow-card dark:border-stone-800 dark:bg-[#2a2015]/90 dark:shadow-card-dark sm:min-w-0">
           {TABS.map((t) => {
             const selected = tab === t.id;
-            const count = byTab[t.id].length;
+            const count =
+              t.id === "do_zaplaty" ? pendingCount : byTab[t.id].length;
             return (
               <button
                 key={t.id}
@@ -323,6 +411,52 @@ function AktywnosciPageInner() {
             <ArrowRightIcon className="text-[1em]" />
           </Link>
         </div>
+      ) : tab === "do_zaplaty" ? (
+        dueBillingItems.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-stone-300 px-6 py-12 text-center dark:border-stone-600">
+            <p className="text-sm text-stone-500 dark:text-stone-400">
+              Brak zaległych miesięcy do opłacenia.
+            </p>
+          </div>
+        ) : (
+          <ul className="space-y-3">
+            {dueBillingItems.map((item) => (
+              <li
+                key={item.key}
+                className="flex flex-col gap-3 rounded-2xl border border-stone-200/80 bg-white p-5 shadow-card dark:border-stone-800 dark:bg-[#2a2015] dark:shadow-card-dark sm:flex-row sm:items-center sm:justify-between"
+              >
+                <div className="flex min-w-0 items-start gap-3.5">
+                  <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-200">
+                    <span className="material-symbols-outlined text-[22px]" aria-hidden>
+                      calendar_month
+                    </span>
+                  </span>
+                  <div className="min-w-0">
+                    <p className="font-bold tracking-tight text-text-main dark:text-white">
+                      {item.className}
+                    </p>
+                    <p className="mt-0.5 text-sm text-stone-500 dark:text-stone-400">
+                      {[item.discipline, item.childName]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </p>
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      <span className="inline-flex rounded-full bg-amber-100 px-2.5 py-1 text-[11px] font-bold text-amber-800 dark:bg-amber-950/50 dark:text-amber-200">
+                        {item.periodLabel}
+                      </span>
+                      <span className="inline-flex rounded-full bg-stone-100 px-2.5 py-1 text-[11px] font-bold text-stone-600 dark:bg-stone-800 dark:text-stone-300">
+                        {(item.dueGrosze / 100).toFixed(0)} zł
+                      </span>
+                    </div>
+                    <p className="mt-2 text-xs text-stone-500 dark:text-stone-400">
+                      W tytule przelewu podaj: {item.childName}, {item.periodLabel}
+                    </p>
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )
       ) : list.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-stone-300 px-6 py-12 text-center dark:border-stone-600">
           <p className="text-sm text-stone-500 dark:text-stone-400">
@@ -336,6 +470,9 @@ function AktywnosciPageInner() {
             const childName = s.childId
               ? (childMap.get(s.childId) ?? "—")
               : "—";
+            const billing = classBilling?.find(
+              (b) => b.subscriptionId === s._id
+            );
             return (
               <li
                 key={s._id}
@@ -366,6 +503,24 @@ function AktywnosciPageInner() {
                     >
                       {statusLabel(s.status)}
                     </span>
+                    {billing && billing.months.length > 0 ? (
+                      <div className="mt-2 flex flex-wrap gap-1">
+                        {billing.months.map((m) => (
+                          <span
+                            key={`${s._id}-${m.year}-${m.month}`}
+                            className={cn(
+                              "rounded-full px-2 py-0.5 text-[10px] font-bold",
+                              m.dueGrosze > 0
+                                ? "bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-200"
+                                : "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200"
+                            )}
+                          >
+                            {m.label}
+                            {m.dueGrosze > 0 ? " · brak" : " · OK"}
+                          </span>
+                        ))}
+                      </div>
+                    ) : null}
                   </div>
                 </div>
 

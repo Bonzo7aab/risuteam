@@ -2,9 +2,13 @@ import { query } from "./_generated/server";
 import { v } from "convex/values";
 import type { Doc, Id } from "./_generated/dataModel";
 import { requireAuthUserId } from "./authHelpers";
-import { isActiveEnrollmentStatus } from "./subscriptionCounts";
-
-const MONTHLY_FEE_GROSZE = 24000;
+import {
+  classMonthlyFeeGrosze,
+  expectedBillingMonthsForSubscription,
+  formatPeriodLabelPl,
+  isSeatHoldingStatus,
+  listInvoicesForSubscription,
+} from "./billingHelpers";
 
 const DOW_PL = ["NDZ", "PN", "WT", "ŚR", "CZW", "PT", "SOB"];
 
@@ -78,9 +82,13 @@ export const getParentDashboardHome = query({
     pendingPayments: v.array(
       v.object({
         subscriptionId: v.id("subscriptions"),
+        invoiceId: v.optional(v.id("classInvoices")),
         childName: v.string(),
         className: v.string(),
         amountGrosze: v.number(),
+        periodLabel: v.string(),
+        year: v.number(),
+        month: v.number(),
       })
     ),
     activePaidLines: v.array(
@@ -160,7 +168,9 @@ export const getParentDashboardHome = query({
 
     const childrenRows = children.map((ch) => {
       const hasEnrollment = subscriptions.some(
-        (s) => s.childId === ch._id && isActiveEnrollmentStatus(s.status)
+        (s) =>
+          s.childId === ch._id &&
+          isSeatHoldingStatus(s.status, s.paymentHoldExpiresAt, asOf)
       );
       return {
         childId: ch._id,
@@ -199,7 +209,9 @@ export const getParentDashboardHome = query({
     const upcomingCandidates: UpcomingCand[] = [];
 
     for (const sub of subscriptions) {
-      if (!isActiveEnrollmentStatus(sub.status)) continue;
+      if (!isSeatHoldingStatus(sub.status, sub.paymentHoldExpiresAt, asOf)) {
+        continue;
+      }
       const cls = classMap[sub.classId];
       if (!cls) continue;
       const slots = slotsByClass[sub.classId] ?? [];
@@ -309,27 +321,66 @@ export const getParentDashboardHome = query({
       if (upcoming.length >= 8) break;
     }
 
-    const pendingPayments = subscriptions
-      .filter((s) => s.status === "pending_payment")
-      .map((s) => {
-        const cls = classMap[s.classId];
-        return {
-          subscriptionId: s._id,
+    const pendingPayments: {
+      subscriptionId: Id<"subscriptions">;
+      invoiceId?: Id<"classInvoices">;
+      childName: string;
+      className: string;
+      amountGrosze: number;
+      periodLabel: string;
+      year: number;
+      month: number;
+    }[] = [];
+    const activePaidLines: { childName: string; className: string }[] = [];
+
+    for (const s of subscriptions) {
+      if (!isSeatHoldingStatus(s.status, s.paymentHoldExpiresAt, asOf)) {
+        continue;
+      }
+      const cls = classMap[s.classId];
+      const fee = classMonthlyFeeGrosze(cls);
+      const invoices = await listInvoicesForSubscription(ctx.db, s._id);
+      const invoiceByPeriod = new Map(
+        invoices.map((inv) => [`${inv.year}-${inv.month}`, inv])
+      );
+      let hasDue = false;
+      for (const { year, month } of expectedBillingMonthsForSubscription(s)) {
+        const invoice = invoiceByPeriod.get(`${year}-${month}`);
+        const paymentStatus = invoice?.paymentStatus ?? "unpaid";
+        const amountGrosze = invoice?.amountGrosze ?? fee;
+        const amountPaidGrosze =
+          invoice?.amountPaidGrosze ??
+          (paymentStatus === "paid" ? amountGrosze : 0);
+        const dueGrosze = Math.max(0, amountGrosze - amountPaidGrosze);
+        if (dueGrosze > 0) {
+          hasDue = true;
+          pendingPayments.push({
+            subscriptionId: s._id,
+            invoiceId: invoice?._id,
+            childName: childName(s.childId),
+            className: cls?.name ?? "Zajęcia",
+            amountGrosze: dueGrosze,
+            periodLabel: formatPeriodLabelPl(year, month),
+            year,
+            month,
+          });
+        }
+      }
+      if (!hasDue) {
+        activePaidLines.push({
           childName: childName(s.childId),
           className: cls?.name ?? "Zajęcia",
-          amountGrosze: MONTHLY_FEE_GROSZE,
-        };
-      });
+        });
+      }
+    }
+    pendingPayments.sort((a, b) =>
+      a.year !== b.year ? a.year - b.year : a.month - b.month
+    );
 
-    const activePaidLines = subscriptions
-      .filter((s) => s.status === "active")
-      .map((s) => ({
-        childName: childName(s.childId),
-        className: classMap[s.classId]?.name ?? "Zajęcia",
-      }));
-
-    const pendingTotalGrosze =
-      pendingPayments.length * MONTHLY_FEE_GROSZE;
+    const pendingTotalGrosze = pendingPayments.reduce(
+      (sum, p) => sum + p.amountGrosze,
+      0
+    );
 
     return {
       childrenRows,

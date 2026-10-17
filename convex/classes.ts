@@ -3,6 +3,7 @@ import { v } from "convex/values";
 import type { Id } from "./_generated/dataModel";
 import { requireAdmin } from "./authHelpers";
 import { countActiveEnrollmentsForClass } from "./subscriptionCounts";
+import { DEFAULT_MONTHLY_FEE_GROSZE } from "./billingHelpers";
 
 export const getSchedule = query({
   args: {
@@ -21,12 +22,29 @@ export const getSchedule = query({
         : classes;
     const classIds = new Set(filtered.map((c) => c._id));
 
-    const allSlots = await ctx.db.query("timeSlots").collect();
-    const slots = allSlots.filter(
-      (s) =>
-        classIds.has(s.classId) &&
-        (args.dayOfWeek === undefined || s.dayOfWeek === args.dayOfWeek)
-    );
+    let slots =
+      args.dayOfWeek !== undefined
+        ? await ctx.db
+            .query("timeSlots")
+            .withIndex("by_day", (q) => q.eq("dayOfWeek", args.dayOfWeek!))
+            .collect()
+        : (
+            await Promise.all(
+              [...classIds].map((classId) =>
+                ctx.db
+                  .query("timeSlots")
+                  .withIndex("by_class", (q) => q.eq("classId", classId))
+                  .collect()
+              )
+            )
+          ).flat();
+    slots = slots.filter((s) => classIds.has(s.classId));
+    const nowMs = Date.now();
+    slots = slots.filter((s) => {
+      if (s.startDate != null && nowMs < s.startDate) return false;
+      if (s.endDate != null && nowMs > s.endDate) return false;
+      return true;
+    });
 
     const locations = await ctx.db.query("locations").collect();
     const coaches = await ctx.db.query("coaches").collect();
@@ -63,10 +81,12 @@ export const getClasses = query({
   },
   handler: async (ctx, args) => {
     const activeOnly = args.activeOnly ?? true;
-    let classes = await ctx.db.query("classes").collect();
-    if (activeOnly) {
-      classes = classes.filter((c) => c.isActive);
-    }
+    let classes = activeOnly
+      ? await ctx.db
+          .query("classes")
+          .withIndex("by_active", (q) => q.eq("isActive", true))
+          .collect()
+      : await ctx.db.query("classes").collect();
     if (args.discipline) {
       classes = classes.filter((c) => c.discipline === args.discipline);
     }
@@ -189,6 +209,7 @@ const classCreateArgs = {
   coachId: v.id("coaches"),
   ageGroup: v.optional(v.string()),
   maxCapacity: v.optional(v.number()),
+  monthlyFeeGrosze: v.optional(v.number()),
   isActive: v.boolean(),
 };
 
@@ -203,6 +224,10 @@ export const create = mutation({
     if (!location) throw new Error("Nie znaleziono lokalizacji.");
     const coach = await ctx.db.get(args.coachId);
     if (!coach) throw new Error("Nie znaleziono trenera.");
+    const fee =
+      args.monthlyFeeGrosze != null && args.monthlyFeeGrosze > 0
+        ? Math.round(args.monthlyFeeGrosze)
+        : DEFAULT_MONTHLY_FEE_GROSZE;
     return await ctx.db.insert("classes", {
       name,
       discipline: args.discipline.trim(),
@@ -211,6 +236,7 @@ export const create = mutation({
       coachId: args.coachId,
       ageGroup: args.ageGroup?.trim() || undefined,
       maxCapacity: args.maxCapacity,
+      monthlyFeeGrosze: fee,
       isActive: args.isActive,
     });
   },
@@ -225,6 +251,7 @@ const classUpdateArgs = {
   coachId: v.optional(v.id("coaches")),
   ageGroup: v.optional(v.string()),
   maxCapacity: v.optional(v.number()),
+  monthlyFeeGrosze: v.optional(v.number()),
   isActive: v.optional(v.boolean()),
 };
 
@@ -258,42 +285,85 @@ export const update = mutation({
     }
     if (rest.ageGroup !== undefined) updates.ageGroup = rest.ageGroup?.trim() || undefined;
     if (rest.maxCapacity !== undefined) updates.maxCapacity = rest.maxCapacity;
+    if (rest.monthlyFeeGrosze !== undefined) {
+      if (rest.monthlyFeeGrosze <= 0) {
+        throw new Error("Opłata miesięczna musi być większa od zera.");
+      }
+      updates.monthlyFeeGrosze = Math.round(rest.monthlyFeeGrosze);
+    }
     if (rest.isActive !== undefined) updates.isActive = rest.isActive;
     if (Object.keys(updates).length > 0) await ctx.db.patch(id, updates);
   },
 });
 
+/**
+ * Remove a class from the schedule.
+ * - Always deletes time slots (disappears from grafik).
+ * - Cancels active / pending-payment enrollments.
+ * - Hard-deletes the class only when no subscription history remains;
+ *   otherwise deactivates it so payment history stays intact.
+ */
 export const remove = mutation({
   args: { id: v.id("classes") },
+  returns: v.object({
+    deleted: v.boolean(),
+    deactivated: v.boolean(),
+    cancelledEnrollments: v.number(),
+  }),
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
     const cls = await ctx.db.get("classes", args.id);
     if (!cls) throw new Error("Nie znaleziono grupy zajęć.");
-    // Delete every slot for this class (index + filter so nothing is left behind)
-    const slotsByIndex = await ctx.db
+
+    const slots = await ctx.db
       .query("timeSlots")
       .withIndex("by_class", (q) => q.eq("classId", args.id))
       .collect();
-    const slotsByFilter = await ctx.db
-      .query("timeSlots")
-      .filter((q) => q.eq(q.field("classId"), args.id))
-      .collect();
-    const slotIdSet = new Set(
-      [...slotsByIndex, ...slotsByFilter].map((s) => s._id)
-    );
-    for (const slotId of slotIdSet) {
-      await ctx.db.delete(slotId);
+    for (const slot of slots) {
+      await ctx.db.delete(slot._id);
     }
-    const sub = await ctx.db
+
+    const now = Date.now();
+    const subscriptions = await ctx.db
+      .query("subscriptions")
+      .withIndex("by_class", (q) => q.eq("classId", args.id))
+      .collect();
+
+    let cancelledEnrollments = 0;
+    for (const sub of subscriptions) {
+      if (sub.status === "active" || sub.status === "pending_payment") {
+        await ctx.db.patch(sub._id, {
+          status: "cancelled",
+          endDate: now,
+          paymentHoldExpiresAt: undefined,
+        });
+        cancelledEnrollments += 1;
+      }
+    }
+
+    // Re-check after cancellations — any remaining rows are historical.
+    const remaining = await ctx.db
       .query("subscriptions")
       .withIndex("by_class", (q) => q.eq("classId", args.id))
       .first();
-    if (sub) {
-      throw new Error(
-        "Nie można usunąć — do grupy są przypisani uczestnicy."
-      );
+
+    if (remaining) {
+      if (cls.isActive) {
+        await ctx.db.patch(args.id, { isActive: false });
+      }
+      return {
+        deleted: false,
+        deactivated: true,
+        cancelledEnrollments,
+      };
     }
+
     await ctx.db.delete(args.id);
+    return {
+      deleted: true,
+      deactivated: false,
+      cancelledEnrollments,
+    };
   },
 });
 
@@ -301,7 +371,6 @@ export const listTimeSlotsForAdmin = query({
   args: {},
   handler: async (ctx) => {
     await requireAdmin(ctx);
-    const allSlots = await ctx.db.query("timeSlots").collect();
     const classList = await ctx.db.query("classes").collect();
     const classMap = Object.fromEntries(classList.map((c) => [c._id, c]));
     const locationIds = [...new Set(classList.map((c) => c.locationId))];
@@ -314,10 +383,21 @@ export const listTimeSlotsForAdmin = query({
     const coachMap = Object.fromEntries(
       coaches.filter(Boolean).map((c) => [c!._id, c!])
     );
+    const allSlots = (
+      await Promise.all(
+        classList.map((c) =>
+          ctx.db
+            .query("timeSlots")
+            .withIndex("by_class", (q) => q.eq("classId", c._id))
+            .collect()
+        )
+      )
+    ).flat();
+    const nowMs = Date.now();
     const uniqueClassIds = [...new Set(allSlots.map((s) => s.classId))];
     const enrolledEntries = await Promise.all(
       uniqueClassIds.map(async (classId) => {
-        const n = await countActiveEnrollmentsForClass(ctx.db, classId);
+        const n = await countActiveEnrollmentsForClass(ctx.db, classId, nowMs);
         return [classId, n] as const;
       })
     );

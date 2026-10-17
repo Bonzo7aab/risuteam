@@ -55,6 +55,12 @@ function getInitials(childName: string, childSurname: string): string {
   return (a + b) || "—";
 }
 
+function paymentsHrefForKid(childName: string, childSurname: string): string {
+  const q = `${childName} ${childSurname}`.trim();
+  const params = new URLSearchParams({ scope: "camps", q });
+  return `/admin/platnosci?${params.toString()}`;
+}
+
 function getPaymentLabel(status: "paid" | "partial" | "unpaid" | undefined): string {
   switch (status ?? "unpaid") {
     case "paid": return "Opłacone";
@@ -98,6 +104,8 @@ export type EventRegistrationsViewProps = {
   formQuestionsHref?: string;
   /** When set, shows "Edytuj obóz" button linking to camp edit page */
   editCampHref?: string;
+  /** Deep-link to admin payments for this event */
+  paymentsHref?: string;
   /** Map question id -> label for displaying custom answers in Podgląd dziecka dialog */
   customQuestionLabels?: Record<string, string>;
   participants: ParticipantRow[];
@@ -278,6 +286,7 @@ export function EventRegistrationsView({
   newRegistrationOnClick,
   formQuestionsHref,
   editCampHref,
+  paymentsHref,
   editEventLabel = "Edytuj obóz",
   customQuestionLabels,
   participants,
@@ -382,7 +391,10 @@ export function EventRegistrationsView({
 
   const needsAttention = pendingPaymentsCount > 0 || missingMedicalFormsCount > 0;
   const hasHeaderActions = Boolean(
-    formQuestionsHref || editCampHref || onToggleRegistrationOpen,
+    formQuestionsHref ||
+      editCampHref ||
+      paymentsHref ||
+      onToggleRegistrationOpen,
   );
 
   return (
@@ -429,6 +441,18 @@ export function EventRegistrationsView({
         <div className="flex shrink-0 flex-wrap items-center gap-2">
           {hasHeaderActions ? (
             <div className="inline-flex divide-x divide-stone-200 overflow-hidden rounded-lg border border-stone-200 dark:divide-stone-700 dark:border-stone-700">
+              {paymentsHref ? (
+                <Link
+                  href={paymentsHref}
+                  className={headerActionClass}
+                  title="Płatności"
+                >
+                  <span className="material-symbols-outlined text-[18px]" aria-hidden>
+                    payments
+                  </span>
+                  Płatności
+                </Link>
+              ) : null}
               {formQuestionsHref ? (
                 <Link
                   href={formQuestionsHref}
@@ -695,6 +719,19 @@ export function EventRegistrationsView({
                                     visibility
                                   </span>
                                 </button>
+                                <Link
+                                  href={paymentsHrefForKid(
+                                    p.childName,
+                                    p.childSurname
+                                  )}
+                                  className="touch-manipulation rounded-xl p-2 text-text-main hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800"
+                                  title="Płatności"
+                                  aria-label="Płatności"
+                                >
+                                  <span className="material-symbols-outlined text-xl">
+                                    payments
+                                  </span>
+                                </Link>
                                 <button
                                   type="button"
                                   className="touch-manipulation rounded-xl p-2 text-text-main hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800"
@@ -896,6 +933,19 @@ export function EventRegistrationsView({
                                     visibility
                                   </span>
                                 </button>
+                                <Link
+                                  href={paymentsHrefForKid(
+                                    p.childName,
+                                    p.childSurname
+                                  )}
+                                  className="rounded-lg p-2 text-text-main hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800"
+                                  title="Płatności"
+                                  aria-label="Płatności"
+                                >
+                                  <span className="material-symbols-outlined text-lg">
+                                    payments
+                                  </span>
+                                </Link>
                                 <button
                                   type="button"
                                   className="rounded-lg p-2 text-text-main hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800"

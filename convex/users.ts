@@ -21,8 +21,10 @@ export const listForAdmin = query({
           _creationTime: u._creationTime,
           name: u.name,
           email: u.email,
+          phone: u.phone,
           role: u.role,
           emailVerificationTime: u.emailVerificationTime,
+          onboardingCompletedAt: u.onboardingCompletedAt,
           isAnonymous: u.isAnonymous,
           childrenCount: children.length,
         };

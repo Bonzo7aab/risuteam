@@ -1,16 +1,16 @@
 "use client";
 
 import { Fragment, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useAction, useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { getNocowankaPrice } from "@/lib/nocowanki";
 import { cn } from "@/lib/utils";
 
 const PAGE_SIZE = 10;
@@ -34,6 +34,16 @@ type CampsPaymentRow = {
   slug?: string;
 };
 
+type ClassMonthBilling = {
+  year: number;
+  month: number;
+  label: string;
+  invoiceId?: Id<"classInvoices">;
+  paymentStatus: "paid" | "partial" | "unpaid";
+  amount: number;
+  amountPaid: number;
+};
+
 type ClassPaymentRow = {
   id: string;
   source: "class";
@@ -54,6 +64,10 @@ type ClassPaymentRow = {
   paymentStatus: "paid" | "partial" | "unpaid";
   sessionsPerWeek: number;
   parentEmail?: string | null;
+  months?: ClassMonthBilling[];
+  paidMonthCount?: number;
+  unpaidMonthCount?: number;
+  missingMonthLabels?: string[];
 };
 
 type PaymentRow = CampsPaymentRow | ClassPaymentRow;
@@ -182,6 +196,7 @@ function getGroupLastPaymentDate(group: GroupedClassRow): number {
 }
 
 export default function AdminPlatnosciPage() {
+  const searchParams = useSearchParams();
   const campsRowsRaw = useQuery(api.payments.listPaymentRowsForAdmin);
   const classRowsRaw = useQuery(api.payments.listClassPaymentRowsForAdmin);
   const classesList = useQuery(api.classes.listForAdmin);
@@ -189,14 +204,25 @@ export default function AdminPlatnosciPage() {
   const setClassSubscriptionsPaymentStatus = useMutation(
     api.payments.setClassSubscriptionsPaymentStatusForAdmin
   );
+  const setClassMonthPaymentStatus = useMutation(
+    api.payments.setClassMonthPaymentStatusForAdmin
+  );
+  const ensureClassInvoices = useMutation(
+    api.payments.ensureClassInvoicesThroughCurrentMonth
+  );
   const sendClassPaymentReminderEmail = useAction(
     api.payments.sendClassPaymentReminderEmail
   );
 
-  const [paymentScope, setPaymentScope] = useState<"camps" | "classes">("camps");
+  const initialScope = searchParams.get("scope");
+  const initialQ = searchParams.get("q") ?? searchParams.get("search") ?? "";
+
+  const [paymentScope, setPaymentScope] = useState<"camps" | "classes">(
+    initialScope === "classes" ? "classes" : "camps"
+  );
   const [openEventType, setOpenEventType] = useState<"camp" | "nocowanka">("camp");
   const [closedEventKey, setClosedEventKey] = useState("all");
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(initialQ);
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
@@ -228,8 +254,7 @@ export default function AdminPlatnosciPage() {
     if (!campsRowsRaw) return [];
     return campsRowsRaw.map((r) => ({
       ...r,
-      amount:
-        r.source === "nocowanka" && r.slug ? getNocowankaPrice(r.slug) : r.amount,
+      amount: r.amount,
     }));
   }, [campsRowsRaw]);
 
@@ -240,10 +265,43 @@ export default function AdminPlatnosciPage() {
             ...r,
             paymentStatus: r.paymentStatus as "paid" | "partial" | "unpaid",
             sessionsPerWeek: r.sessionsPerWeek ?? 1,
+            months: (r.months ?? []).map((m) => ({
+              year: m.year,
+              month: m.month,
+              label: m.label,
+              invoiceId: m.invoiceId,
+              paymentStatus: m.paymentStatus as "paid" | "partial" | "unpaid",
+              amount: m.amount,
+              amountPaid: m.amountPaid,
+            })),
+            paidMonthCount: r.paidMonthCount ?? 0,
+            unpaidMonthCount: r.unpaidMonthCount ?? 0,
+            missingMonthLabels: r.missingMonthLabels ?? [],
           }))
         : [],
     [classRowsRaw]
   );
+
+  useEffect(() => {
+    const scope = searchParams.get("scope");
+    const q = searchParams.get("q") ?? searchParams.get("search");
+    if (scope === "camps" || scope === "classes") {
+      setPaymentScope(scope);
+    }
+    if (q != null && q !== "") {
+      setSearch(q);
+      setPage(0);
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    if (paymentScope !== "classes" || classRowsRaw === undefined) return;
+    void ensureClassInvoices({}).catch(() => {
+      /* non-blocking backfill */
+    });
+    // Run once when opening the classes payments tab with data.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [paymentScope, classRowsRaw === undefined]);
 
   const groupedClassRows = useMemo<GroupedClassRow[]>(() => {
     const groups = new Map<string, GroupedClassRow>();
@@ -541,8 +599,36 @@ export default function AdminPlatnosciPage() {
       });
       setInfo(
         markPaid
-          ? "Zapisano jako opłacone."
-          : "Zapisano jako nieopłacone (oczekuje na płatność)."
+          ? "Oznaczono brakujące miesiące jako opłacone."
+          : "Bieżący miesiąc oznaczono jako nieopłacony."
+      );
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Wystąpił błąd.");
+    } finally {
+      setClassPaymentUpdating(null);
+    }
+  };
+
+  const markClassMonth = async (
+    subscriptionId: Id<"subscriptions">,
+    year: number,
+    month: number,
+    markPaid: boolean,
+    updatingKey: string
+  ) => {
+    setError(null);
+    setClassPaymentUpdating(updatingKey);
+    try {
+      await setClassMonthPaymentStatus({
+        subscriptionId,
+        year,
+        month,
+        markPaid,
+      });
+      setInfo(
+        markPaid
+          ? "Miesiąc oznaczono jako opłacony."
+          : "Miesiąc oznaczono jako nieopłacony."
       );
     } catch (e) {
       setError(e instanceof Error ? e.message : "Wystąpił błąd.");
@@ -618,9 +704,21 @@ export default function AdminPlatnosciPage() {
 
   return (
     <div className="space-y-5 sm:space-y-6">
-      <h1 className="text-2xl font-bold text-text-main dark:text-white">Zarządzanie płatnościami</h1>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-text-main dark:text-white">
+            Płatności
+          </h1>
+          <p className="mt-1 text-sm text-text-light dark:text-stone-400">
+            Rozliczenia zajęć, obozów i nocowanek.
+          </p>
+        </div>
+        <p className="text-sm text-text-light dark:text-stone-400">
+          {totalRowsCount} {totalRowsCount === 1 ? "wiersz" : "wierszy"}
+        </p>
+      </div>
 
-      <div className="inline-flex rounded-lg border border-stone-200 bg-white p-1 dark:border-stone-700 dark:bg-stone-900/70">
+      <div className="flex flex-wrap gap-2">
         <button
           type="button"
           onClick={() => {
@@ -628,10 +726,10 @@ export default function AdminPlatnosciPage() {
             setPage(0);
           }}
           className={cn(
-            "rounded-md px-3 py-1.5 text-sm font-medium",
+            "rounded-md border px-3 py-1.5 text-sm font-medium transition-colors",
             paymentScope === "camps"
-              ? "bg-primary text-primary-foreground"
-              : "text-text-main dark:text-stone-300"
+              ? "border-primary bg-primary/10 text-primary"
+              : "border-stone-300 bg-white text-stone-700 dark:border-stone-600 dark:bg-stone-900 dark:text-stone-200"
           )}
         >
           Obozy i nocowanki
@@ -643,34 +741,53 @@ export default function AdminPlatnosciPage() {
             setPage(0);
           }}
           className={cn(
-            "rounded-md px-3 py-1.5 text-sm font-medium",
+            "rounded-md border px-3 py-1.5 text-sm font-medium transition-colors",
             paymentScope === "classes"
-              ? "bg-primary text-primary-foreground"
-              : "text-text-main dark:text-stone-300"
+              ? "border-primary bg-primary/10 text-primary"
+              : "border-stone-300 bg-white text-stone-700 dark:border-stone-600 dark:bg-stone-900 dark:text-stone-200"
           )}
         >
           Zajęcia
         </button>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-xs uppercase tracking-wide text-stone-500">Przychód (miesiąc)</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-black text-text-main dark:text-white">{formatPln(revenueThisMonth)}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-xs uppercase tracking-wide text-stone-500">Status płatności</CardTitle>
-          </CardHeader>
-          <CardContent className="flex gap-8">
-            <div><p className="text-xs text-amber-700">Nieopłacone</p><p className="text-2xl font-black text-amber-600">{stats.unpaidCount}</p></div>
-            <div><p className="text-xs text-green-700">Opłacone</p><p className="text-2xl font-black text-green-600">{stats.paidCount}</p></div>
-          </CardContent>
-        </Card>
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="rounded-xl border border-stone-200 bg-white px-4 py-3 dark:border-stone-700 dark:bg-stone-900/60">
+          <div className="flex items-center gap-2 text-xs font-medium text-text-light dark:text-stone-400">
+            <span className="material-symbols-outlined text-base">payments</span>
+            Przychód (miesiąc)
+          </div>
+          <p className="mt-1 text-2xl font-bold tabular-nums text-text-main dark:text-white">
+            {formatPln(revenueThisMonth)}
+          </p>
+        </div>
+        <div className="rounded-xl border border-stone-200 bg-white px-4 py-3 dark:border-stone-700 dark:bg-stone-900/60">
+          <div className="flex items-center gap-2 text-xs font-medium text-text-light dark:text-stone-400">
+            <span className="material-symbols-outlined text-base">check_circle</span>
+            Opłacone
+          </div>
+          <p className="mt-1 text-2xl font-bold tabular-nums text-green-600 dark:text-green-400">
+            {stats.paidCount}
+          </p>
+        </div>
+        <div className="rounded-xl border border-stone-200 bg-white px-4 py-3 dark:border-stone-700 dark:bg-stone-900/60">
+          <div className="flex items-center gap-2 text-xs font-medium text-text-light dark:text-stone-400">
+            <span className="material-symbols-outlined text-base">schedule</span>
+            Nieopłacone
+          </div>
+          <p className="mt-1 text-2xl font-bold tabular-nums text-amber-600 dark:text-amber-400">
+            {stats.unpaidCount}
+          </p>
+        </div>
+        <div className="rounded-xl border border-stone-200 bg-white px-4 py-3 dark:border-stone-700 dark:bg-stone-900/60">
+          <div className="flex items-center gap-2 text-xs font-medium text-text-light dark:text-stone-400">
+            <span className="material-symbols-outlined text-base">table_rows</span>
+            Na liście
+          </div>
+          <p className="mt-1 text-2xl font-bold tabular-nums text-text-main dark:text-white">
+            {totalRowsCount}
+          </p>
+        </div>
       </div>
 
       {paymentScope === "camps" && (
@@ -781,7 +898,7 @@ export default function AdminPlatnosciPage() {
               setPage(0);
             }}
             placeholder="Szukaj ucznia lub rodzica…"
-            className="min-w-[16rem] flex-1"
+            className="min-w-[16rem] flex-1 bg-white dark:bg-stone-900"
           />
           <Input
             type="date"
@@ -790,7 +907,7 @@ export default function AdminPlatnosciPage() {
               setDateFrom(e.target.value);
               setPage(0);
             }}
-            className="w-42"
+            className="w-42 bg-white dark:bg-stone-900"
           />
           <Input
             type="date"
@@ -799,10 +916,11 @@ export default function AdminPlatnosciPage() {
               setDateTo(e.target.value);
               setPage(0);
             }}
-            className="w-42"
+            className="w-42 bg-white dark:bg-stone-900"
           />
           <Button
-            className="ml-auto bg-amber-600 text-white hover:bg-amber-700 dark:bg-amber-500 dark:hover:bg-amber-600"
+            variant="outline"
+            className="ml-auto bg-white dark:bg-stone-900"
             onClick={() => {
               setSearch("");
               setDateFrom("");
@@ -883,49 +1001,59 @@ export default function AdminPlatnosciPage() {
                 <thead>
                   <tr className="border-b border-stone-200 bg-stone-50 dark:border-stone-700 dark:bg-stone-800/80">
                     <th className="px-4 py-3 text-left font-bold">Uczeń / rodzic</th>
-                    <th className="px-4 py-3 text-left font-bold">
+                    <th className="px-4 py-3 text-left">
                       <button
                         type="button"
-                        className="inline-flex items-center gap-1"
+                        className="inline-flex items-center gap-1 font-bold"
                         onClick={() => {
                           setSortDirection((prev) => (prev === "desc" ? "asc" : "desc"));
                         }}
                       >
                         Data
-                        <span className="material-symbols-outlined text-base">swap_vert</span>
+                        <span
+                          className={cn(
+                            "material-symbols-outlined text-base",
+                            sortDirection === "desc" ? "text-primary" : "text-stone-400"
+                          )}
+                        >
+                          {sortDirection === "desc" ? "arrow_downward" : "arrow_upward"}
+                        </span>
                       </button>
                     </th>
-                    <th className="px-4 py-3 text-left font-bold">
-                      Status
-                    </th>
+                    <th className="px-4 py-3 text-left font-bold">Status</th>
                     <th className="px-4 py-3 text-left font-bold">Kwota</th>
                     <th className="px-4 py-3 text-left font-bold">Opłacone</th>
                     <th className="px-4 py-3 text-left font-bold">Do zapłaty</th>
-                    <th className="px-4 py-3 text-left font-bold">Akcje</th>
+                    <th className="px-4 py-3 text-right font-bold">Akcje</th>
                   </tr>
                 </thead>
                 <tbody>
                   {pageCampRows.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="py-10 text-center text-text-light dark:text-stone-400">Brak wyników.</td>
+                      <td colSpan={7} className="py-12 text-center text-text-light dark:text-stone-400">Brak wyników.</td>
                     </tr>
                   ) : (
                     pageCampRows.map((row) => (
-                      <tr key={row.id} className="border-b border-stone-100 dark:border-stone-800">
+                      <tr
+                        key={row.id}
+                        className="border-b border-stone-100 transition-colors hover:bg-stone-50/80 dark:border-stone-800 dark:hover:bg-stone-800/40"
+                      >
                         <td className="px-4 py-3">
                           <p className="font-medium text-text-main dark:text-white">{row.studentName}</p>
                           <p className="text-xs text-text-light dark:text-stone-400">{row.parentName}</p>
                           <p className="text-xs text-text-light dark:text-stone-500">{row.eventName}</p>
                         </td>
-                        <td className="px-4 py-3">{formatDate(row.date)}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-text-light dark:text-stone-400">
+                          {formatDate(row.date)}
+                        </td>
                         <td className="px-4 py-3">
                           <PaymentStatusBadge row={row} />
                         </td>
-                        <td className="px-4 py-3">{formatPln(row.amount)}</td>
-                        <td className="px-4 py-3">{formatPln(getPaidValue(row))}</td>
-                        <td className="px-4 py-3">{formatPln(getDueValue(row))}</td>
+                        <td className="px-4 py-3 tabular-nums">{formatPln(row.amount)}</td>
+                        <td className="px-4 py-3 tabular-nums">{formatPln(getPaidValue(row))}</td>
+                        <td className="px-4 py-3 tabular-nums">{formatPln(getDueValue(row))}</td>
                         <td className="px-4 py-3">
-                          <div className="flex items-center gap-1">
+                          <div className="flex items-center justify-end gap-1">
                             <Button
                               variant="outline"
                               size="icon"
@@ -975,32 +1103,42 @@ export default function AdminPlatnosciPage() {
                     <th className="px-4 py-3 text-left font-bold">Dziecko</th>
                     <th className="px-4 py-3 text-left font-bold">Zajęć w tygodniu</th>
                     <th className="px-4 py-3 text-left font-bold">Status</th>
-                    <th className="px-4 py-3 text-left font-bold">
+                    <th className="px-4 py-3 text-left">
                       <button
                         type="button"
-                        className="inline-flex items-center gap-1"
+                        className="inline-flex items-center gap-1 font-bold"
                         onClick={() => {
                           setSortDirection((prev) => (prev === "desc" ? "asc" : "desc"));
                         }}
                       >
                         Ostatnia płatność
-                        <span className="material-symbols-outlined text-base">swap_vert</span>
+                        <span
+                          className={cn(
+                            "material-symbols-outlined text-base",
+                            sortDirection === "desc" ? "text-primary" : "text-stone-400"
+                          )}
+                        >
+                          {sortDirection === "desc" ? "arrow_downward" : "arrow_upward"}
+                        </span>
                       </button>
                     </th>
-                    <th className="px-4 py-3 text-left font-bold">Akcje</th>
+                    <th className="px-4 py-3 text-right font-bold">Akcje</th>
                   </tr>
                 </thead>
                 <tbody>
                   {pageClassGroups.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="py-10 text-center text-text-light dark:text-stone-400">Brak wyników.</td>
+                      <td colSpan={7} className="py-12 text-center text-text-light dark:text-stone-400">Brak wyników.</td>
                     </tr>
                   ) : (
                     pageClassGroups.map((group) => {
                       const isExpanded = expandedGroupKeys.has(group.groupKey);
                       const canExpand =
                         group.classCount > EXPAND_SPECIAL_CASE_CLASS_COUNT ||
-                        group.weeklySessionsTotal > 2;
+                        group.weeklySessionsTotal > 2 ||
+                        group.subscriptions.some(
+                          (s) => (s.months?.length ?? 0) > 0
+                        );
                       const toggleExpand = () =>
                         setExpandedGroupKeys((prev) => {
                           const next = new Set(prev);
@@ -1012,9 +1150,8 @@ export default function AdminPlatnosciPage() {
                         <Fragment key={group.groupKey}>
                           <tr
                             className={cn(
-                              canExpand &&
-                                "cursor-pointer transition-colors hover:bg-stone-50 dark:hover:bg-stone-800/40",
-                              "border-b border-stone-100 dark:border-stone-800",
+                              "border-b border-stone-100 transition-colors hover:bg-stone-50/80 dark:border-stone-800 dark:hover:bg-stone-800/40",
+                              canExpand && "cursor-pointer",
                               isExpanded && "bg-stone-50/80 dark:bg-stone-800/40"
                             )}
                             onClick={canExpand ? toggleExpand : undefined}
@@ -1035,11 +1172,15 @@ export default function AdminPlatnosciPage() {
                                   </span>
                                 </button>
                               ) : (
-                                <span className="text-xs text-stone-400">-</span>
+                                <span className="text-xs text-stone-400">—</span>
                               )}
                             </td>
-                            <td className="px-4 py-3">{group.parentName}</td>
-                            <td className="px-4 py-3">{group.studentName}</td>
+                            <td className="px-4 py-3 font-medium text-text-main dark:text-white">
+                              {group.parentName}
+                            </td>
+                            <td className="px-4 py-3 text-text-main dark:text-stone-200">
+                              {group.studentName}
+                            </td>
                             <td className="px-4 py-3">
                               <p className="font-medium text-text-main dark:text-white">
                                 {group.weeklySessionsTotal}
@@ -1051,15 +1192,64 @@ export default function AdminPlatnosciPage() {
                                 {" · "}
                                 {group.paidCount} opłaconych
                               </p>
+                              {(() => {
+                                const missing = [
+                                  ...new Set(
+                                    group.subscriptions.flatMap(
+                                      (s) => s.missingMonthLabels ?? []
+                                    )
+                                  ),
+                                ];
+                                if (missing.length === 0) return null;
+                                return (
+                                  <p className="mt-1 text-xs font-medium text-amber-700 dark:text-amber-300">
+                                    Brak: {missing.join(", ")}
+                                  </p>
+                                );
+                              })()}
                             </td>
                             <td className="px-4 py-3">
                               <GroupedStatusBadge statusKey={group.worstStatusKey} />
+                              <div className="mt-2 flex max-w-[220px] flex-wrap gap-1">
+                                {group.subscriptions
+                                  .flatMap((s) => s.months ?? [])
+                                  .filter(
+                                    (m, i, arr) =>
+                                      arr.findIndex(
+                                        (x) =>
+                                          x.year === m.year && x.month === m.month
+                                      ) === i
+                                  )
+                                  .slice(-6)
+                                  .map((m) => (
+                                    <span
+                                      key={`${group.groupKey}-${m.year}-${m.month}`}
+                                      className={cn(
+                                        "rounded-full px-2 py-0.5 text-[10px] font-bold",
+                                        m.paymentStatus === "paid"
+                                          ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200"
+                                          : m.paymentStatus === "partial"
+                                            ? "bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-200"
+                                            : "bg-stone-200 text-stone-700 dark:bg-stone-800 dark:text-stone-300"
+                                      )}
+                                      title={
+                                        m.paymentStatus === "paid"
+                                          ? "Opłacone"
+                                          : m.paymentStatus === "partial"
+                                            ? "Częściowo"
+                                            : "Brak płatności"
+                                      }
+                                    >
+                                      {m.label}
+                                    </span>
+                                  ))}
+                              </div>
                             </td>
-                            <td className="px-4 py-3">
+                            <td className="px-4 py-3 whitespace-nowrap text-text-light dark:text-stone-400">
                               {group.latestPaidAt ? formatDate(group.latestPaidAt) : "Brak wpłaty"}
                             </td>
                             <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
-                              <div className="flex items-center gap-1">
+                              <div className="flex items-center justify-end gap-1">
                                 <Button
                                   variant="outline"
                                   size="icon"
@@ -1129,7 +1319,7 @@ export default function AdminPlatnosciPage() {
                                         <th className="px-3 py-2 text-left font-semibold">Typ zajęć</th>
                                         <th className="px-3 py-2 text-left font-semibold">W tygodniu</th>
                                         <th className="px-3 py-2 text-left font-semibold">Grupa</th>
-                                        <th className="px-3 py-2 text-left font-semibold">Status</th>
+                                        <th className="px-3 py-2 text-left font-semibold">Miesiące</th>
                                         <th className="px-3 py-2 text-left font-semibold">Start</th>
                                         <th className="px-3 py-2 text-left font-semibold">Akcje</th>
                                       </tr>
@@ -1144,7 +1334,65 @@ export default function AdminPlatnosciPage() {
                                           <td className="px-3 py-2">{sub.sessionsPerWeek}</td>
                                           <td className="px-3 py-2">{sub.eventName}</td>
                                           <td className="px-3 py-2">
-                                            <PaymentStatusBadge row={sub} />
+                                            <div className="flex flex-col gap-1.5">
+                                              {(sub.months ?? []).length === 0 ? (
+                                                <PaymentStatusBadge row={sub} />
+                                              ) : (
+                                                (sub.months ?? []).map((m) => (
+                                                  <div
+                                                    key={`${sub.id}-${m.year}-${m.month}`}
+                                                    className="flex flex-wrap items-center gap-1.5"
+                                                  >
+                                                    <span
+                                                      className={cn(
+                                                        "rounded-full px-2 py-0.5 text-[10px] font-bold",
+                                                        m.paymentStatus === "paid"
+                                                          ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200"
+                                                          : m.paymentStatus === "partial"
+                                                            ? "bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-200"
+                                                            : "bg-stone-200 text-stone-700 dark:bg-stone-800 dark:text-stone-300"
+                                                      )}
+                                                    >
+                                                      {m.label}
+                                                      {m.paymentStatus === "paid"
+                                                        ? " · OK"
+                                                        : m.paymentStatus === "partial"
+                                                          ? " · częściowo"
+                                                          : " · brak"}
+                                                    </span>
+                                                    <Button
+                                                      variant="outline"
+                                                      size="icon"
+                                                      className="h-6 w-6"
+                                                      title={
+                                                        m.paymentStatus === "paid"
+                                                          ? "Oznacz jako nieopłacone"
+                                                          : "Oznacz jako opłacone"
+                                                      }
+                                                      disabled={
+                                                        classPaymentUpdating ===
+                                                        `month:${sub.subscriptionId}:${m.year}-${m.month}`
+                                                      }
+                                                      onClick={() =>
+                                                        markClassMonth(
+                                                          sub.subscriptionId,
+                                                          m.year,
+                                                          m.month,
+                                                          m.paymentStatus !== "paid",
+                                                          `month:${sub.subscriptionId}:${m.year}-${m.month}`
+                                                        )
+                                                      }
+                                                    >
+                                                      <span className="material-symbols-outlined text-sm">
+                                                        {m.paymentStatus === "paid"
+                                                          ? "money_off"
+                                                          : "check_circle"}
+                                                      </span>
+                                                    </Button>
+                                                  </div>
+                                                ))
+                                              )}
+                                            </div>
                                           </td>
                                           <td className="px-3 py-2">{formatDate(sub.date)}</td>
                                           <td className="px-3 py-2">

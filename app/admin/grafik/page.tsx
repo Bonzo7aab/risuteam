@@ -28,6 +28,8 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -43,6 +45,11 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { DISCIPLINE_OPTIONS } from "@/lib/disciplines";
+import {
+  DEFAULT_MONTHLY_FEE_GROSZE,
+  groszeToZlString,
+} from "@/lib/pricing";
 
 const DAYS = [
   { value: 0, label: "Nd" },
@@ -53,8 +60,6 @@ const DAYS = [
   { value: 5, label: "Pt" },
   { value: 6, label: "Sb" },
 ] as const;
-
-const DISCIPLINE_OPTIONS = ["Judo", "Karate", "Gimnastyka"] as const;
 
 const STATUS_LABELS: Record<string, string> = {
   active: "Aktywny",
@@ -125,10 +130,17 @@ function AdminGrafikPageInner() {
   const [formAgeGroup, setFormAgeGroup] = useState("");
   const [formCoachId, setFormCoachId] = useState("");
   const [formMaxCapacity, setFormMaxCapacity] = useState("");
+  const [formMonthlyFeeZl, setFormMonthlyFeeZl] = useState(
+    groszeToZlString(DEFAULT_MONTHLY_FEE_GROSZE)
+  );
   const [formIsActive, setFormIsActive] = useState(true);
   const [slotsDraft, setSlotsDraft] = useState<SlotDraft[]>([]);
   const [selectedDays, setSelectedDays] = useState<number[]>([]);
   const [focusedDayForSlots, setFocusedDayForSlots] = useState<number | null>(null);
+  /** Slot clicked on the grid — highlighted among the full weekly package. */
+  const [highlightedSlotKey, setHighlightedSlotKey] = useState<string | null>(
+    null
+  );
   const [pendingSlotFromTable, setPendingSlotFromTable] =
     useState<PendingSlotFromTable | null>(null);
   const [timeStart, setTimeStart] = useState("16:00");
@@ -211,26 +223,35 @@ function AdminGrafikPageInner() {
     setFormMaxCapacity(
       classDetail.maxCapacity != null ? String(classDetail.maxCapacity) : ""
     );
+    setFormMonthlyFeeZl(
+      groszeToZlString(
+        classDetail.monthlyFeeGrosze ?? DEFAULT_MONTHLY_FEE_GROSZE
+      )
+    );
     setFormIsActive(classDetail.isActive);
   }, [isCreating, classDetail, selectedClassId]);
 
   useEffect(() => {
     if (timeSlots === undefined || !selectedClassId) return;
-    setSlotsDraft(
-      timeSlots.map((s) => ({
-        dayOfWeek: s.dayOfWeek,
-        startTime: s.startTime,
-        endTime: s.endTime,
-      }))
-    );
+    const nextSlots = timeSlots.map((s) => ({
+      dayOfWeek: s.dayOfWeek,
+      startTime: s.startTime,
+      endTime: s.endTime,
+    }));
+    setSlotsDraft(nextSlots);
     if (pendingSlotFromTable !== null) {
-      setFocusedDayForSlots(pendingSlotFromTable.dayOfWeek);
-      setSelectedDays([pendingSlotFromTable.dayOfWeek]);
+      // Keep the full weekly package visible; only highlight the clicked occurrence.
+      setHighlightedSlotKey(
+        `${pendingSlotFromTable.dayOfWeek}-${pendingSlotFromTable.startTime}-${pendingSlotFromTable.endTime}`
+      );
+      setFocusedDayForSlots(null);
+      setSelectedDays([]);
       setTimeStart(pendingSlotFromTable.startTime);
       setTimeEnd(pendingSlotFromTable.endTime);
       setPendingSlotFromTable(null);
     } else {
       setFocusedDayForSlots(null);
+      setHighlightedSlotKey(null);
     }
   }, [timeSlots, selectedClassId, pendingSlotFromTable]);
 
@@ -239,6 +260,9 @@ function AdminGrafikPageInner() {
     setCreateError(null);
     setSelectedClassId(null);
     setPendingSlotFromTable(null);
+    setHighlightedSlotKey(null);
+    setFocusedDayForSlots(null);
+    setSelectedDays([]);
     setAddStudentOpen(false);
     setEnrollmentSearch("");
     setChildSearch("");
@@ -268,6 +292,11 @@ function AdminGrafikPageInner() {
         setError("Podaj poprawną maks. liczbę uczestników (min. 1) lub zostaw puste.");
         return;
       }
+      const feeZl = parseFloat(formMonthlyFeeZl.replace(",", "."));
+      if (!Number.isFinite(feeZl) || feeZl <= 0) {
+        setError("Podaj poprawną opłatę miesięczną (zł).");
+        return;
+      }
       await updateClass({
         id: selectedClassId,
         name: formName.trim() || undefined,
@@ -279,6 +308,7 @@ function AdminGrafikPageInner() {
         ageGroup: formAgeGroup.trim() || undefined,
         coachId: formCoachId ? (formCoachId as Id<"coaches">) : undefined,
         maxCapacity: maxCapParsed,
+        monthlyFeeGrosze: Math.round(feeZl * 100),
         isActive: formIsActive,
       });
       const validSlots = slotsDraft.filter(
@@ -302,7 +332,13 @@ function AdminGrafikPageInner() {
 
   const handleDeleteClass = async () => {
     if (!selectedClassId) return;
-    if (!confirm("Na pewno chcesz usunąć tę grupę zajęć?")) return;
+    if (
+      !confirm(
+        "Na pewno usunąć tę grupę z grafiku? Zapisani uczestnicy zostaną wypisani. Historia płatności zostanie zachowana."
+      )
+    ) {
+      return;
+    }
     setError(null);
     setSuccess(null);
     setDeleting(true);
@@ -339,6 +375,11 @@ function AdminGrafikPageInner() {
       );
       return;
     }
+    const feeZl = parseFloat(formMonthlyFeeZl.replace(",", "."));
+    if (!Number.isFinite(feeZl) || feeZl <= 0) {
+      setCreateError("Podaj poprawną opłatę miesięczną (zł).");
+      return;
+    }
     setCreateSaving(true);
     try {
       const newId = await createClass({
@@ -349,6 +390,7 @@ function AdminGrafikPageInner() {
         coachId: formCoachId as Id<"coaches">,
         ageGroup: formAgeGroup.trim() || undefined,
         maxCapacity: maxCapParsed,
+        monthlyFeeGrosze: Math.round(feeZl * 100),
         isActive: formIsActive,
       });
       const validSlots = slotsDraft.filter(
@@ -387,6 +429,7 @@ function AdminGrafikPageInner() {
     setFormAgeGroup("");
     setFormCoachId("");
     setFormMaxCapacity("");
+    setFormMonthlyFeeZl(groszeToZlString(DEFAULT_MONTHLY_FEE_GROSZE));
     setFormIsActive(true);
     setSlotsDraft([]);
     setSelectedDays([]);
@@ -437,8 +480,36 @@ function AdminGrafikPageInner() {
     });
   };
 
-  const removeSlot = (index: number) => {
-    setSlotsDraft((prev) => prev.filter((_, i) => i !== index));
+  const [slotPendingRemoval, setSlotPendingRemoval] = useState<{
+    index: number;
+    label: string;
+  } | null>(null);
+  const [removingFromSchedule, setRemovingFromSchedule] = useState(false);
+
+  const confirmRemoveFromSchedule = async () => {
+    if (slotPendingRemoval == null) return;
+    setError(null);
+    setSuccess(null);
+
+    // New class (not saved yet): only drop the draft slot.
+    if (isCreating || !selectedClassId) {
+      const { index } = slotPendingRemoval;
+      setSlotsDraft((prev) => prev.filter((_, i) => i !== index));
+      setSlotPendingRemoval(null);
+      return;
+    }
+
+    setRemovingFromSchedule(true);
+    try {
+      await removeClass({ id: selectedClassId });
+      setSlotPendingRemoval(null);
+      closePanel();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Wystąpił błąd.");
+      setSlotPendingRemoval(null);
+    } finally {
+      setRemovingFromSchedule(false);
+    }
   };
 
   const slotsByDayCount = useMemo(() => {
@@ -464,14 +535,6 @@ function AdminGrafikPageInner() {
         }),
     [slotsDraft]
   );
-
-  const visibleSlotEntries = useMemo(() => {
-    if (selectedDays.length === 0) return sortedSlotEntries;
-    const selectedSet = new Set(selectedDays);
-    return sortedSlotEntries.filter((entry) =>
-      selectedSet.has(entry.slot.dayOfWeek)
-    );
-  }, [sortedSlotEntries, selectedDays]);
 
   const handleRemoveEnrollment = async (subscriptionId: Id<"subscriptions">) => {
     if (!confirm("Usunąć tego uczestnika z listy?")) return;
@@ -778,6 +841,23 @@ function AdminGrafikPageInner() {
                       </div>
                       <div>
                         <Label
+                          htmlFor="formMonthlyFeeZl"
+                          className="text-text-main dark:text-stone-200"
+                        >
+                          Opłata miesięczna (zł)
+                        </Label>
+                        <Input
+                          id="formMonthlyFeeZl"
+                          type="number"
+                          min={1}
+                          step="1"
+                          value={formMonthlyFeeZl}
+                          onChange={(e) => setFormMonthlyFeeZl(e.target.value)}
+                          className="mt-1.5 rounded-xl"
+                        />
+                      </div>
+                      <div>
+                        <Label
                           htmlFor="formMaxCapacity"
                           className="text-text-main dark:text-stone-200"
                         >
@@ -810,10 +890,27 @@ function AdminGrafikPageInner() {
                         Grafik
                       </CardTitle>
                       <CardDescription className="text-text-light dark:text-stone-400">
-                        Dodaj terminy: wybierz dni, ustaw godziny i kliknij +.
+                        Pakiet tygodniowy (zwykle 2–3 terminy) = jedna opłata.
+                        Wybierz dni, ustaw godziny i kliknij +, aby dodać.
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
+                      {slotsDraft.length > 0 && (
+                        <div className="rounded-xl border border-primary/20 bg-primary/5 px-3 py-2.5 text-sm dark:border-primary/30 dark:bg-primary/10">
+                          <p className="font-semibold text-text-main dark:text-white">
+                            {slotsDraft.length}{" "}
+                            {slotsDraft.length === 1
+                              ? "termin w tygodniu"
+                              : slotsDraft.length < 5
+                                ? "terminy w tygodniu"
+                                : "terminów w tygodniu"}
+                          </p>
+                          <p className="mt-0.5 text-xs text-text-light dark:text-stone-400">
+                            Wszystkie poniższe zajęcia należą do tej grupy i
+                            rozliczane są łącznie.
+                          </p>
+                        </div>
+                      )}
                       <div>
                         <Label className="mb-2 block text-text-main dark:text-stone-200">
                           Dni tygodnia
@@ -884,43 +981,57 @@ function AdminGrafikPageInner() {
                         <div>
                           <div className="mb-2 flex items-center justify-between gap-3">
                             <Label className="block text-text-main dark:text-stone-200">
-                              Terminy
+                              Terminy w pakiecie
                             </Label>
-                            {focusedDayForSlots !== null && (
+                            {highlightedSlotKey !== null && (
                               <button
                                 type="button"
                                 className="text-xs font-semibold text-primary underline underline-offset-4"
-                                onClick={() => setFocusedDayForSlots(null)}
+                                onClick={() => setHighlightedSlotKey(null)}
                               >
-                                Pokaż wszystkie dni
+                                Wyczyść podświetlenie
                               </button>
                             )}
                           </div>
                           <div className="flex flex-wrap gap-2">
-                            {visibleSlotEntries.map(({ slot, index }) => (
-                              <span
-                                key={`${slot.dayOfWeek}-${slot.startTime}-${slot.endTime}-${index}`}
-                                className="inline-flex min-h-10 items-center gap-1 rounded-full bg-primary/10 px-3 py-1.5 text-sm font-medium text-primary"
-                              >
-                                {slotChipLabel(slot)}
-                                <button
-                                  type="button"
-                                  onClick={() => removeSlot(index)}
-                                  className="touch-manipulation rounded-full p-2 hover:bg-primary/20 sm:p-0.5"
-                                  aria-label="Usuń"
+                            {sortedSlotEntries.map(({ slot, index }) => {
+                              const key = `${slot.dayOfWeek}-${slot.startTime}-${slot.endTime}`;
+                              const isHighlighted = highlightedSlotKey === key;
+                              return (
+                                <span
+                                  key={`${key}-${index}`}
+                                  className={cn(
+                                    "inline-flex min-h-10 items-center gap-1 rounded-full px-3 py-1.5 text-sm font-medium",
+                                    isHighlighted
+                                      ? "bg-primary text-primary-foreground ring-2 ring-primary/40"
+                                      : "bg-primary/10 text-primary"
+                                  )}
                                 >
-                                  <span className="material-symbols-outlined text-lg">
-                                    close
-                                  </span>
-                                </button>
-                              </span>
-                            ))}
+                                  {slotChipLabel(slot)}
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      setSlotPendingRemoval({
+                                        index,
+                                        label: slotChipLabel(slot),
+                                      })
+                                    }
+                                    className={cn(
+                                      "touch-manipulation rounded-full p-2 sm:p-0.5",
+                                      isHighlighted
+                                        ? "hover:bg-primary-foreground/20"
+                                        : "hover:bg-primary/20"
+                                    )}
+                                    aria-label="Usuń termin"
+                                  >
+                                    <span className="material-symbols-outlined text-lg">
+                                      close
+                                    </span>
+                                  </button>
+                                </span>
+                              );
+                            })}
                           </div>
-                          {visibleSlotEntries.length === 0 && focusedDayForSlots !== null && (
-                            <p className="mt-2 text-sm text-text-light dark:text-stone-400">
-                              Brak terminów dla dnia: {dayLabel(focusedDayForSlots)}.
-                            </p>
-                          )}
                         </div>
                       )}
                     </CardContent>
@@ -1112,6 +1223,7 @@ function AdminGrafikPageInner() {
           <ScheduleView
             mode="admin"
             signInRedirectPath="/admin/grafik"
+            highlightedClassId={selectedClassId}
             onAdminSelectClass={(id, dayOfWeek, startTime, endTime) => {
               setIsCreating(false);
               if (
@@ -1126,6 +1238,54 @@ function AdminGrafikPageInner() {
           />
         </Suspense>
       </div>
+
+      <Dialog
+        open={slotPendingRemoval != null}
+        onOpenChange={(open) => {
+          if (!open && !removingFromSchedule) setSlotPendingRemoval(null);
+        }}
+      >
+        <DialogContent className="z-[100] sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {isCreating || !selectedClassId
+                ? "Usunąć termin z pakietu?"
+                : "Usunąć grupę z grafiku?"}
+            </DialogTitle>
+            <DialogDescription>
+              {isCreating || !selectedClassId
+                ? slotPendingRemoval
+                  ? `Termin „${slotPendingRemoval.label}” zostanie usunięty z listy przed zapisaniem grupy.`
+                  : ""
+                : slotPendingRemoval
+                  ? `Grupa „${formName.trim() || classDetail?.name || "zajęcia"}” zniknie z grafiku (wszystkie terminy w pakiecie). Zapisani uczestnicy zostaną wypisani; historia płatności zostanie zachowana.`
+                  : ""}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={removingFromSchedule}
+              onClick={() => setSlotPendingRemoval(null)}
+            >
+              Anuluj
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              disabled={removingFromSchedule}
+              onClick={() => void confirmRemoveFromSchedule()}
+            >
+              {removingFromSchedule
+                ? "Usuwanie…"
+                : isCreating || !selectedClassId
+                  ? "Usuń termin"
+                  : "Usuń z grafiku"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {useDrawerForEditor ? (
         <Drawer
