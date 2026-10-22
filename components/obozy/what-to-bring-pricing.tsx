@@ -61,7 +61,7 @@ export function WhatToBringPricing({
           </div>
 
           {/* Cena wyjazdu */}
-          <div className="rounded-2xl border border-stone-200 dark:border-stone-700 bg-orange-50 dark:bg-orange-900/20 p-6 md:p-8 shadow-md">
+          <div className="border-t border-stone-200 pt-8 dark:border-stone-700 md:rounded-2xl md:border md:border-stone-200 md:bg-orange-50 md:p-8 md:pt-8 md:shadow-md dark:md:border-stone-700 dark:md:bg-orange-900/20">
             <h2 className="text-2xl md:text-3xl font-bold text-stone-900 dark:text-white mb-4">
               {priceTitle}
             </h2>

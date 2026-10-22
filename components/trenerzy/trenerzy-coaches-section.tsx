@@ -40,7 +40,7 @@ export function TrenerzyCoachesSection() {
         {[0, 1, 2, 3].map((i) => (
           <div
             key={i}
-            className="overflow-hidden rounded-2xl border border-stone-200 bg-stone-100 dark:border-stone-700 dark:bg-stone-800/80"
+            className="overflow-hidden md:rounded-2xl md:border md:border-stone-200 md:bg-stone-100 dark:md:border-stone-700 dark:md:bg-stone-800/80"
           >
             <div className="aspect-5/4 animate-pulse bg-stone-200 dark:bg-stone-700 sm:aspect-16/10" />
             <div className="space-y-3 p-6 sm:p-8">
@@ -73,7 +73,7 @@ export function TrenerzyCoachesSection() {
           <article
             key={c._id}
             id={c._id}
-            className="scroll-mt-28 flex flex-col overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-soft transition-shadow hover:shadow-glow dark:border-stone-700 dark:bg-stone-900/80"
+            className="scroll-mt-28 flex flex-col overflow-hidden border-b border-stone-200 pb-8 last:border-b-0 dark:border-stone-700 md:rounded-2xl md:border md:bg-white md:pb-0 md:shadow-soft md:last:border hover:md:shadow-glow dark:md:border-stone-700 dark:md:bg-stone-900/80"
           >
             <div className="relative aspect-5/4 w-full shrink-0 sm:aspect-16/10">
               <Image

@@ -295,7 +295,7 @@ export function SignUpForm() {
       <p className="text-center text-sm text-stone-500 dark:text-stone-400">
         Masz już konto?{" "}
         <Link
-          href="/sign-in"
+          href="/logowanie"
           className="font-semibold text-primary hover:text-primary-hover"
         >
           Zaloguj się

@@ -69,8 +69,8 @@ const MD_BREAKPOINT = 768;
 
 const CARD_TINTS = [
   "",
-  "bg-primary/6! dark:bg-[#2a2015]!",
-  "bg-amber-50/80! dark:bg-[#2a2015]!",
+  "md:bg-primary/6! dark:md:bg-[#2a2015]!",
+  "md:bg-amber-50/80! dark:md:bg-[#2a2015]!",
 ] as const;
 
 export function TestimonialsSection() {
@@ -176,7 +176,8 @@ export function TestimonialsSection() {
               <article
                 key={t.id}
                 className={cn(
-                  "risu-card risu-card-hover relative flex min-h-[240px] flex-col rounded-2xl p-6 sm:min-h-[280px] md:p-7",
+                  "relative flex min-h-[240px] flex-col border-b border-stone-200 py-6 last:border-b-0 dark:border-stone-700 sm:min-h-[280px]",
+                  "md:risu-card md:risu-card-hover md:rounded-2xl md:border-0 md:p-7 md:last:border-0",
                   CARD_TINTS[variantIdx],
                 )}
               >

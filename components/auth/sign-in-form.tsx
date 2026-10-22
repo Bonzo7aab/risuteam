@@ -185,7 +185,7 @@ export function SignInForm() {
       <p className="text-center text-sm text-stone-500 dark:text-stone-400">
         Nie masz konta?{" "}
         <Link
-          href="/sign-up"
+          href="/rejestracja"
           className="font-semibold text-primary hover:text-primary-hover"
         >
           Zarejestruj się

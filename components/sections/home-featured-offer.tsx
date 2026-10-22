@@ -166,7 +166,7 @@ export function HomeFeaturedOffer() {
     >
       <Link
         href={offer.href}
-        className="group relative grid overflow-hidden rounded-2xl border border-stone-200/80 bg-white shadow-card transition-[box-shadow,transform] duration-300 hover:-translate-y-0.5 hover:shadow-card-hover motion-reduce:hover:translate-y-0 dark:border-stone-800 dark:bg-[#2a2015] dark:shadow-card-dark dark:hover:shadow-card-dark-hover lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]"
+        className="group relative grid overflow-hidden transition-[box-shadow,transform] duration-300 dark:border-stone-800 md:rounded-2xl md:border md:border-stone-200/80 md:bg-white md:shadow-card hover:md:-translate-y-0.5 hover:md:shadow-card-hover motion-reduce:hover:md:translate-y-0 dark:md:bg-[#2a2015] dark:md:shadow-card-dark dark:hover:md:shadow-card-dark-hover lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]"
       >
         <span
           className={`absolute right-3 top-3 z-10 inline-flex max-w-[min(100%-1.5rem,16rem)] items-center gap-1.5 truncate rounded-full px-3 py-1.5 text-xs font-bold tracking-wide ${badgeTone(badge.urgent)}`}

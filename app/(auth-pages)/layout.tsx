@@ -3,5 +3,5 @@ export default async function Layout({
 }: {
   children: React.ReactNode;
 }) {
-  return <div className="min-h-screen bg-[#FDFBF7] dark:bg-background-dark">{children}</div>;
+  return <div className="relative min-h-0 bg-transparent">{children}</div>;
 }

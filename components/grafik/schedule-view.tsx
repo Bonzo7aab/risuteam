@@ -565,7 +565,7 @@ function ClassCard({
     <div className="space-y-3">
       {!isLoggedIn && (
         <Link
-          href={`/sign-in?redirect=${encodeURIComponent(signInRedirectPath)}`}
+          href={`/logowanie?redirect=${encodeURIComponent(signInRedirectPath)}`}
           className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary text-sm font-bold text-primary-foreground shadow-sm transition-colors hover:bg-primary-hover"
         >
           <span className="material-symbols-outlined text-[20px]" aria-hidden>
@@ -1138,9 +1138,10 @@ export function ScheduleView({
 
       <div
         className={cn(
-          "mb-8 rounded-2xl border border-stone-200 bg-white p-3 shadow-soft dark:border-stone-700 dark:bg-stone-900/80 sm:mb-10 sm:p-4",
+          "mb-8 p-0 sm:mb-10",
+          "md:rounded-2xl md:border md:border-stone-200 md:bg-white md:p-4 md:shadow-soft dark:md:border-stone-700 dark:md:bg-stone-900/80",
           isAdminMode &&
-            "max-lg:border-0 max-lg:bg-transparent max-lg:shadow-none dark:max-lg:bg-transparent"
+            "max-lg:border-0 max-lg:bg-transparent max-lg:p-0 max-lg:shadow-none dark:max-lg:bg-transparent"
         )}
       >
         {/* Desktop: wszystkie filtry od razu */}
@@ -1309,7 +1310,8 @@ export function ScheduleView({
           <div className="w-full min-w-0 lg:hidden">
             <div
               className={cn(
-                "w-full min-w-0 max-w-full overflow-hidden rounded-2xl border border-stone-200/80 bg-white shadow-card dark:border-stone-800 dark:bg-[#2a2015] dark:shadow-card-dark",
+                "w-full min-w-0 max-w-full overflow-hidden",
+                "md:rounded-2xl md:border md:border-stone-200/80 md:bg-white md:shadow-card dark:md:border-stone-800 dark:md:bg-[#2a2015] dark:md:shadow-card-dark",
                 isAdminMode &&
                   "border-0 bg-transparent shadow-none dark:bg-transparent"
               )}
@@ -1484,7 +1486,7 @@ export function ScheduleView({
         !hasChildren &&
         schedule !== undefined &&
         schedule.length > 0 && (
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-3 rounded-2xl border border-stone-200/80 bg-orange-50/60 p-4 dark:border-stone-800 dark:bg-primary/10">
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-3 border-t border-stone-200/80 py-4 dark:border-stone-800 md:rounded-2xl md:border md:bg-orange-50/60 md:p-4 dark:md:bg-primary/10">
           <p className="text-sm font-medium text-text-main dark:text-stone-300">
             Aby zapisać dziecko na zajęcia, dodaj je w panelu.
           </p>

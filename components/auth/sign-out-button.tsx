@@ -18,7 +18,7 @@ export function SignOutButton({
 
   const handleClick = async () => {
     await signOut();
-    router.push("/sign-in");
+    router.push("/logowanie");
   };
 
   return (

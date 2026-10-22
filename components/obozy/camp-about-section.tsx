@@ -1,3 +1,5 @@
+import { sectionSurfaceSoft } from "@/lib/utils";
+
 export type CampAboutAndAttractionsSectionProps = {
   description?: string | null;
   attractions?: string[] | null;
@@ -14,16 +16,16 @@ export function CampAboutAndAttractionsSection({
   const both = Boolean(text) && items.length > 0;
 
   return (
-    <section className="border-t border-stone-200 bg-white py-12 dark:border-stone-700 dark:bg-stone-900/50 md:py-16">
+    <section className="border-t border-stone-200 bg-white py-10 dark:border-stone-700 dark:bg-stone-900/50 md:py-16">
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
         {both ? (
           <>
-            <h2 className="mb-6 text-2xl font-bold text-stone-900 dark:text-white md:text-3xl">
+            <h2 className="mb-5 text-2xl font-bold text-stone-900 dark:text-white md:mb-6 md:text-3xl">
               O obozie
             </h2>
-            <div className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-soft dark:border-stone-700 dark:bg-stone-900/80">
-              <div className="grid md:grid-cols-2">
-                <div className="flex flex-col justify-center border-b border-stone-200 p-6 dark:border-stone-700 md:border-b-0 md:border-r md:p-8">
+            <div className={sectionSurfaceSoft}>
+              <div className="grid gap-8 md:grid-cols-2 md:gap-0">
+                <div className="flex flex-col justify-center md:border-r md:border-stone-200 md:p-8 dark:md:border-stone-700">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-stone-500 dark:text-stone-400">
                     Opis
                   </p>
@@ -31,7 +33,7 @@ export function CampAboutAndAttractionsSection({
                     {text}
                   </p>
                 </div>
-                <div className="bg-stone-50/90 p-6 dark:bg-stone-950/35 md:p-8">
+                <div className="md:bg-stone-50/90 md:p-8 dark:md:bg-stone-950/35">
                   <h3 className="text-base font-bold text-stone-900 dark:text-white">
                     Atrakcje
                   </h3>
@@ -59,10 +61,10 @@ export function CampAboutAndAttractionsSection({
           </>
         ) : text ? (
           <>
-            <h2 className="mb-6 text-2xl font-bold text-stone-900 dark:text-white md:text-3xl">
+            <h2 className="mb-5 text-2xl font-bold text-stone-900 dark:text-white md:mb-6 md:text-3xl">
               O obozie
             </h2>
-            <div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-soft dark:border-stone-700 dark:bg-stone-900/80 md:p-8">
+            <div className={`${sectionSurfaceSoft} md:p-8`}>
               <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-stone-500 dark:text-stone-400">
                 Opis
               </p>
@@ -76,14 +78,16 @@ export function CampAboutAndAttractionsSection({
             <h2 className="text-2xl font-bold text-stone-900 dark:text-white md:text-3xl">
               Atrakcje
             </h2>
-            <p className="mt-2 mb-6 text-sm text-stone-500 dark:text-stone-400">
+            <p className="mt-2 mb-5 text-sm text-stone-500 dark:text-stone-400 md:mb-6">
               Wspólne atrakcje i aktywności dla całej grupy — oprócz programu dnia.
             </p>
-            <ol className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-soft dark:border-stone-700 dark:bg-stone-900/80">
+            <ol
+              className={`${sectionSurfaceSoft} divide-y divide-stone-200/80 dark:divide-stone-700/80`}
+            >
               {items.map((item, i) => (
                 <li
                   key={`${item}-${i}`}
-                  className="flex items-start gap-4 border-b border-stone-200 px-4 py-3.5 last:border-b-0 dark:border-stone-700 sm:gap-5 sm:px-5"
+                  className="flex items-start gap-4 py-3.5 first:pt-0 last:pb-0 md:gap-5 md:px-5 md:first:pt-3.5 md:last:pb-3.5"
                 >
                   <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-md bg-primary/10 text-[11px] font-bold tabular-nums text-primary">
                     {String(i + 1).padStart(2, "0")}

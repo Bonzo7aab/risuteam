@@ -28,7 +28,7 @@ export default function GaleriaPage() {
             {Array.from({ length: 6 }).map((_, index) => (
               <div
                 key={index}
-                className="overflow-hidden rounded-2xl border border-stone-200 bg-white dark:border-stone-700 dark:bg-stone-900/80"
+                className="overflow-hidden border-b border-stone-200 pb-4 last:border-b-0 dark:border-stone-700 md:rounded-2xl md:border md:bg-white md:pb-0 md:last:border dark:md:border-stone-700 dark:md:bg-stone-900/80"
               >
                 <div className="aspect-4/3 animate-pulse bg-stone-100 dark:bg-stone-800" />
                 <div className="space-y-2 px-4 py-3.5">

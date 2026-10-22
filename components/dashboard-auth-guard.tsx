@@ -14,7 +14,7 @@ export function DashboardAuthGuard({ children }: { children: React.ReactNode }) 
   useEffect(() => {
     if (isAuthenticated === false && pathname) {
       const redirect = encodeURIComponent(pathname);
-      router.replace(`/sign-in?redirect=${redirect}`);
+      router.replace(`/logowanie?redirect=${redirect}`);
     }
   }, [isAuthenticated, router, pathname]);
 

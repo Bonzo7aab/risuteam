@@ -79,7 +79,7 @@ export function GalleryAlbumCard({
   return (
     <Link
       href={href}
-      className="group block overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-soft transition-colors hover:border-stone-300 dark:border-stone-700 dark:bg-stone-900/80 dark:hover:border-stone-600"
+      className="group block overflow-hidden border-b border-stone-200 pb-4 transition-colors last:border-b-0 dark:border-stone-700 md:rounded-2xl md:border md:bg-white md:pb-0 md:shadow-soft md:last:border hover:md:border-stone-300 dark:md:bg-stone-900/80 dark:hover:md:border-stone-600"
     >
       <div className="relative aspect-4/3 overflow-hidden bg-stone-100 dark:bg-stone-800">
         <AlbumCover mosaic={coverUrls} />

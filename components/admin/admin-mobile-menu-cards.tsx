@@ -12,7 +12,7 @@ function isAdminLinkActive(href: string, pathname: string): boolean {
 }
 
 /**
- * Mobile-only shortcuts on the admin pulpit — sidebar destinations except Pulpit.
+ * Mobile-only shortcuts on the admin home — sidebar destinations except Admin.
  */
 export function AdminMobileMenuCards() {
   const pathname = usePathname();

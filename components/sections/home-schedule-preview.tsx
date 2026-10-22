@@ -79,7 +79,7 @@ export function HomeSchedulePreview() {
         </Link>
       </div>
 
-      <ul className="overflow-hidden rounded-2xl border border-stone-200/80 bg-white shadow-card dark:border-stone-800 dark:bg-[#2a2015] dark:shadow-card-dark">
+      <ul className="divide-y divide-stone-100 overflow-hidden dark:divide-stone-800 md:rounded-2xl md:border md:border-stone-200/80 md:bg-white md:shadow-card dark:md:border-stone-800 dark:md:bg-[#2a2015] dark:md:shadow-card-dark md:divide-y-0">
         {rows.map(({ day, primary, extra }) => {
           const age = primary.class?.ageGroup?.trim();
           const details = [
@@ -90,11 +90,11 @@ export function HomeSchedulePreview() {
           return (
             <li
               key={`${day}-${primary._id}`}
-              className="border-b border-stone-100 last:border-0 dark:border-stone-800"
+              className="md:border-b md:border-stone-100 md:last:border-0 dark:md:border-stone-800"
             >
               <Link
                 href="/grafik"
-                className="grid grid-cols-[4.75rem_1fr] items-center gap-3 px-4 py-3.5 transition-colors hover:bg-stone-50 sm:grid-cols-[8.5rem_1fr_auto] sm:px-5 dark:hover:bg-stone-800/40"
+                className="grid grid-cols-[4.75rem_1fr] items-center gap-3 px-0 py-3.5 transition-colors hover:bg-stone-50 sm:grid-cols-[8.5rem_1fr_auto] md:px-5 dark:hover:bg-stone-800/40"
               >
                 <div>
                   <p className="text-[11px] font-bold uppercase tracking-wide text-primary">

@@ -200,10 +200,10 @@ export default function RodzajeZajecPage() {
                   {d.description}
                 </p>
                 <div
-                  className={`p-6 rounded-2xl border border-dashed border-stone-200 dark:border-stone-700 ${
+                  className={`border-t border-dashed border-stone-200 pt-6 dark:border-stone-700 md:rounded-2xl md:border md:p-6 md:pt-6 ${
                     i % 2 === 0
-                      ? "bg-background-light dark:bg-background-dark"
-                      : "bg-white dark:bg-[#2c241b]"
+                      ? "md:bg-background-light dark:md:bg-background-dark"
+                      : "md:bg-white dark:md:bg-[#2c241b]"
                   }`}
                 >
                   <h3 className="text-lg font-bold text-text-main dark:text-white mb-4">

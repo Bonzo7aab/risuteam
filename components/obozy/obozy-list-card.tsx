@@ -57,7 +57,7 @@ export function ObozyListCard({
   ctaDisabled = false,
 }: ObozyListCardProps) {
   return (
-    <article className="group relative grid overflow-hidden rounded-2xl border border-stone-200/80 bg-white shadow-card transition-[box-shadow,transform] duration-300 hover:-translate-y-0.5 hover:shadow-card-hover motion-reduce:hover:translate-y-0 dark:border-stone-800 dark:bg-[#2a2015] dark:shadow-card-dark dark:hover:shadow-card-dark-hover lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1.15fr)]">
+    <article className="group relative grid overflow-hidden border-b border-stone-200/80 pb-8 last:border-b-0 transition-[box-shadow,transform] duration-300 dark:border-stone-800 md:rounded-2xl md:border md:bg-white md:pb-0 md:shadow-card md:last:border hover:md:-translate-y-0.5 hover:md:shadow-card-hover motion-reduce:hover:md:translate-y-0 dark:md:bg-[#2a2015] dark:md:shadow-card-dark dark:hover:md:shadow-card-dark-hover lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1.15fr)]">
       <Link href={href} className="absolute inset-0 z-0" aria-label={`Zobacz szczegóły: ${title}`} />
 
       <div className="relative aspect-16/10 min-h-48 bg-stone-100 dark:bg-stone-800 lg:aspect-auto lg:min-h-64">

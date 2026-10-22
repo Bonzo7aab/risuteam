@@ -1,6 +1,6 @@
 /** Admin sidebar / mobile „Administrator” links */
 export const adminNavItems = [
-  { label: "Pulpit", href: "/admin", icon: "dashboard" },
+  { label: "Admin", href: "/admin", icon: "dashboard" },
   { label: "Użytkownicy", href: "/admin/uzytkownicy", icon: "group" },
   { label: "Rejestracje", href: "/admin/rejestracje", icon: "how_to_reg" },
   { label: "Wydarzenia", href: "/admin/wydarzenia", icon: "event" },

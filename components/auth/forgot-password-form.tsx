@@ -126,7 +126,7 @@ export function ForgotPasswordForm() {
         <h1 className="text-2xl font-medium">Resetowanie hasła</h1>
         <p className="text-sm text-secondary-foreground">
           Masz już konto?{" "}
-          <Link className="text-primary underline" href="/sign-in">
+          <Link className="text-primary underline" href="/logowanie">
             Zaloguj się
           </Link>
         </p>

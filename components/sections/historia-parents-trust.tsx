@@ -46,7 +46,7 @@ const gallery = [
 
 export function HistoriaParentsTrust() {
   return (
-    <section className="rounded-[2rem] border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 p-6 sm:p-8 md:p-12 lg:p-14 shadow-soft">
+    <section className="md:rounded-[2rem] md:border md:border-stone-200 md:bg-white md:p-12 md:shadow-soft lg:p-14 dark:md:border-stone-700 dark:md:bg-stone-900/80">
       <div className="grid gap-10 lg:gap-14 lg:grid-cols-2 lg:items-center">
         <div className="space-y-6">
           <span className="inline-flex items-center gap-2 rounded-full bg-stone-100 dark:bg-stone-800 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-text-main dark:text-stone-300">
@@ -66,7 +66,7 @@ export function HistoriaParentsTrust() {
             {features.map(({ icon: Icon, title, description, iconWrap }) => (
               <li
                 key={title}
-                className="flex gap-4 rounded-2xl border border-stone-100 dark:border-stone-700/80 bg-stone-50/80 dark:bg-stone-800/40 p-4 sm:p-5"
+                className="flex gap-4 py-1 md:rounded-2xl md:border md:border-stone-100 md:bg-stone-50/80 md:p-5 dark:md:border-stone-700/80 dark:md:bg-stone-800/40"
               >
                 <div
                   className={`flex size-12 shrink-0 items-center justify-center rounded-full ${iconWrap}`}

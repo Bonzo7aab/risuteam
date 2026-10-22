@@ -15,7 +15,7 @@ const tabs: { id: TabId; label: string }[] = [
 
 function CardWrapper({ children }: { children: ReactNode }) {
   return (
-    <div className="rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 p-6 md:p-10">
+    <div className="md:rounded-2xl md:border md:border-stone-200 md:bg-white md:p-10 dark:md:border-stone-700 dark:md:bg-stone-900/80">
       {children}
     </div>
   );

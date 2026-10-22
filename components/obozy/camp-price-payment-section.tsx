@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { campRegistrationCtaHref } from "@/lib/camp-registration-links";
+import { sectionSurfaceSoft } from "@/lib/utils";
 
 export type InstallmentRow = {
   label: string;
@@ -34,16 +35,16 @@ export function CampPricePaymentSection({
   return (
     <section
       id="cennik"
-      className="border-t border-stone-200 bg-stone-50 py-12 dark:border-stone-700 dark:bg-stone-900/30 md:py-16"
+      className="border-t border-stone-200 bg-stone-50 py-10 dark:border-stone-700 dark:bg-stone-900/30 md:py-16"
     >
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-        <h2 className="mb-6 text-2xl font-bold text-stone-900 dark:text-white md:text-3xl">
+        <h2 className="mb-5 text-2xl font-bold text-stone-900 dark:text-white md:mb-6 md:text-3xl">
           Cena i płatność
         </h2>
 
-        <div className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-soft dark:border-stone-700 dark:bg-stone-900/80">
-          <div className="grid md:grid-cols-2">
-            <div className="flex flex-col border-b border-stone-200 p-6 dark:border-stone-700 md:border-b-0 md:border-r md:p-8">
+        <div className={sectionSurfaceSoft}>
+          <div className="grid gap-8 md:grid-cols-2 md:gap-0">
+            <div className="flex flex-col md:border-r md:border-stone-200 md:p-8 dark:md:border-stone-700">
               <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-stone-500 dark:text-stone-400">
                 Cena za uczestnika
               </p>
@@ -78,7 +79,7 @@ export function CampPricePaymentSection({
               <div className="mt-auto pt-6">
                 <Button
                   asChild
-                  className="h-11 rounded-xl px-6 text-sm font-bold"
+                  className="h-11 w-full rounded-xl px-6 text-sm font-bold sm:w-auto"
                   disabled={isRegistrationClosed}
                 >
                   <Link
@@ -99,7 +100,7 @@ export function CampPricePaymentSection({
               </div>
             </div>
 
-            <div className="bg-stone-50/90 p-6 dark:bg-stone-950/35 md:p-8">
+            <div className="border-t border-stone-200/80 pt-8 dark:border-stone-700/80 md:border-t-0 md:bg-stone-50/90 md:p-8 md:pt-8 dark:md:bg-stone-950/35">
               <h3 className="text-base font-bold text-stone-900 dark:text-white">
                 Harmonogram wpłat
               </h3>
@@ -114,7 +115,7 @@ export function CampPricePaymentSection({
                     <li key={row.label} className="relative flex gap-3">
                       {!isLast ? (
                         <span
-                          className="absolute left-[13px] top-7 bottom-0 w-px bg-stone-200 dark:bg-stone-700"
+                          className="absolute bottom-0 left-[13px] top-7 w-px bg-stone-200 dark:bg-stone-700"
                           aria-hidden
                         />
                       ) : null}

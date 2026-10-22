@@ -269,7 +269,7 @@ export function ZapisyContent({ steps }: { steps: Step[] }) {
           Zaloguj się, aby zapisać dziecko i zarządzać aktywnością.
         </p>
         <Link
-          href={`/sign-in?redirect=${encodeURIComponent("/dashboard/zapisy")}`}
+          href={`/logowanie?redirect=${encodeURIComponent("/dashboard/zapisy")}`}
           className="mt-4 inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-sm transition-colors hover:bg-primary-hover"
         >
           <span className="material-symbols-outlined text-[20px]" aria-hidden>

@@ -65,7 +65,7 @@ function normalizeCampCategory(raw: unknown, slug: string): CampCategory {
 
 function ListState({ children }: { children: React.ReactNode }) {
   return (
-    <div className="rounded-2xl border border-stone-200/80 bg-white px-6 py-14 text-center shadow-card dark:border-stone-800 dark:bg-[#2a2015] dark:shadow-card-dark">
+    <div className="py-10 text-center md:rounded-2xl md:border md:border-stone-200/80 md:bg-white md:px-6 md:py-14 md:shadow-card dark:md:border-stone-800 dark:md:bg-[#2a2015] dark:md:shadow-card-dark">
       <p className="text-sm text-stone-500 dark:text-stone-400 sm:text-base">{children}</p>
     </div>
   );
@@ -192,45 +192,59 @@ function ObozyContent() {
           </header>
 
           <div
-            className="mb-8 overflow-x-auto pb-1 sm:mb-10"
+            className={cn(
+              "mb-8 flex flex-wrap gap-2 sm:mb-10",
+              "sm:inline-flex sm:gap-1 sm:rounded-2xl sm:border sm:border-stone-200/80 sm:bg-white/90 sm:p-1.5 sm:shadow-card sm:backdrop-blur-sm",
+              "sm:dark:border-stone-800 sm:dark:bg-[#2a2015]/90 sm:dark:shadow-card-dark"
+            )}
             role="tablist"
             aria-label="Wybierz typ oferty"
           >
-            <div className="inline-flex min-w-full gap-1 rounded-2xl border border-stone-200/80 bg-white/90 p-1.5 shadow-card backdrop-blur-sm dark:border-stone-800 dark:bg-[#2a2015]/90 dark:shadow-card-dark sm:min-w-0 sm:flex-wrap">
-              {TABS.map((item) => {
-                const selected = tab === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    role="tab"
-                    aria-selected={selected}
-                    aria-controls={
-                      item.panel === "obozy" ? "obozy-panel" : "nocowanki-panel"
-                    }
-                    id={`${item.id}-tab`}
-                    onClick={() => setTabWithUrl(item.id)}
+            {TABS.map((item) => {
+              const selected = tab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={selected}
+                  aria-controls={
+                    item.panel === "obozy" ? "obozy-panel" : "nocowanki-panel"
+                  }
+                  id={`${item.id}-tab`}
+                  onClick={() => setTabWithUrl(item.id)}
+                  className={cn(
+                    "inline-flex items-center gap-1.5 text-sm font-bold transition-colors sm:gap-2 sm:px-4 sm:py-2.5",
+                    // Mobile pills
+                    "rounded-full px-3.5 py-2",
+                    // Desktop segmented tabs
+                    "sm:rounded-xl",
+                    selected
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : cn(
+                          "border border-stone-200/90 bg-white/90 text-stone-600 shadow-sm",
+                          "hover:border-primary/30 hover:text-text-main",
+                          "dark:border-stone-700 dark:bg-[#2a2015]/90 dark:text-stone-300",
+                          "dark:hover:border-primary/40 dark:hover:text-white",
+                          "sm:border-0 sm:bg-transparent sm:shadow-none",
+                          "sm:hover:bg-stone-100 sm:hover:border-transparent",
+                          "sm:dark:hover:bg-stone-800/70"
+                        )
+                  )}
+                >
+                  <span
                     className={cn(
-                      "inline-flex shrink-0 items-center gap-2 rounded-xl px-3.5 py-2.5 text-sm font-bold transition-colors sm:px-4",
-                      selected
-                        ? "bg-primary text-primary-foreground shadow-sm"
-                        : "text-stone-600 hover:bg-stone-100 hover:text-text-main dark:text-stone-300 dark:hover:bg-stone-800/70 dark:hover:text-white"
+                      "material-symbols-outlined text-[16px] sm:text-[18px]",
+                      selected ? "text-primary-foreground" : "text-primary"
                     )}
+                    aria-hidden
                   >
-                    <span
-                      className={cn(
-                        "material-symbols-outlined text-[18px]",
-                        selected ? "text-primary-foreground" : "text-primary"
-                      )}
-                      aria-hidden
-                    >
-                      {item.icon}
-                    </span>
-                    {item.label}
-                  </button>
-                );
-              })}
-            </div>
+                    {item.icon}
+                  </span>
+                  {item.label}
+                </button>
+              );
+            })}
           </div>
 
           {(tab === "letnie" || tab === "zimowe" || tab === "polkolonie") && (

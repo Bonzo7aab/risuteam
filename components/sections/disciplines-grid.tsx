@@ -52,7 +52,8 @@ export function DisciplinesGrid() {
             <Link
               href={d.href}
               className={cn(
-                "risu-card risu-card-hover group relative flex h-full flex-col gap-3 overflow-hidden rounded-2xl p-6",
+                "group relative flex h-full flex-col gap-3 overflow-hidden border-b border-stone-200 py-6 last:border-b-0 dark:border-stone-700",
+                "md:risu-card md:risu-card-hover md:rounded-2xl md:border-0 md:p-6 md:last:border-0",
               )}
             >
               <span

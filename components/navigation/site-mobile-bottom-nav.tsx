@@ -45,8 +45,9 @@ function isDashboardNavActive(href: string, currentPath: string): boolean {
 }
 
 function isAdminNavActive(href: string, currentPath: string): boolean {
+  // Admin home is exact-only — otherwise it stays active on every /admin/* route.
   if (href === "/admin") {
-    return currentPath === "/admin" || currentPath.startsWith("/admin/");
+    return currentPath === "/admin";
   }
   return currentPath === href || currentPath.startsWith(`${href}/`);
 }
@@ -179,9 +180,9 @@ export function SiteMobileBottomNav() {
     if (isAuthenticated !== true || currentUser == null) return null;
     if (currentUser.role === "admin") {
       return {
-        label: "Admin",
-        href: "/admin",
-        icon: "admin_panel_settings",
+        label: "Wydarzenia",
+        href: "/admin/wydarzenia",
+        icon: "event",
       };
     }
     return { label: "Panel", href: "/dashboard", icon: "dashboard" };
@@ -202,20 +203,15 @@ export function SiteMobileBottomNav() {
     [pathname]
   );
 
-  const moreHasActiveAdmin = useMemo(() => {
-    if (!isAdmin) return false;
-    return adminNavItems.some((item) => isAdminNavActive(item.href, pathname));
-  }, [isAdmin, pathname]);
-
   /**
-   * Admin routes are covered by the „Admin” tab — do not highlight „Więcej” for /admin/*.
-   * Dashboard routes are covered by the „Panel” tab for parents.
+   * Admin routes never highlight „Więcej” — Wydarzenia has its own bar tab,
+   * and other admin pages are reached from the drawer without a bar indicator.
    */
   const isMoreActive =
-    moreHasActivePublic ||
-    (moreHasActiveAdmin && !pathname.startsWith("/admin")) ||
-    pathname === "/sign-in" ||
-    pathname === "/sign-up";
+    !pathname.startsWith("/admin") &&
+    (moreHasActivePublic ||
+      pathname === "/logowanie" ||
+      pathname === "/rejestracja");
 
   return (
     <div className="md:hidden">
@@ -228,8 +224,9 @@ export function SiteMobileBottomNav() {
             const active =
               item.href === "/dashboard"
                 ? pathname === "/dashboard" || pathname.startsWith("/dashboard/")
-                : item.href === "/admin"
-                  ? pathname === "/admin" || pathname.startsWith("/admin/")
+                : item.href === "/admin/wydarzenia"
+                  ? pathname === "/admin/wydarzenia" ||
+                    pathname.startsWith("/admin/wydarzenia/")
                   : isPublicBarActive(item.href, pathname);
             return (
               <Link
@@ -310,22 +307,15 @@ export function SiteMobileBottomNav() {
                       </span>
                       Przewodnik po panelu
                     </button>
-                    <SignOutButton
-                      variant="ghost"
-                      className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-xl border-0 bg-red-500/10 py-3 text-sm font-semibold text-red-600 shadow-none hover:bg-red-500/15 dark:text-red-400 dark:hover:bg-red-500/20"
-                    >
-                      <span className="material-symbols-outlined text-[20px]" aria-hidden>
-                        logout
-                      </span>
-                      Wyloguj się
-                    </SignOutButton>
                   </MoreSection>
                 )}
 
                 {isAdmin && (
                   <MoreSection title="Administrator" variant="admin">
                     <div className="flex flex-col">
-                      {adminNavItems.map((item) => {
+                      {adminNavItems
+                        .filter((item) => item.href !== "/admin/wydarzenia")
+                        .map((item) => {
                         const active = isAdminNavActive(item.href, pathname);
                         return (
                           <Link
@@ -344,9 +334,14 @@ export function SiteMobileBottomNav() {
                         );
                       })}
                     </div>
+                  </MoreSection>
+                )}
+
+                {isAuthenticated === true ? (
+                  <MoreSection title="Konto" variant="account">
                     <SignOutButton
                       variant="ghost"
-                      className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-xl border-0 bg-red-500/10 py-3 text-sm font-semibold text-red-600 shadow-none hover:bg-red-500/15 dark:text-red-400 dark:hover:bg-red-500/20"
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-xl border-0 bg-red-500/10 py-3 text-sm font-semibold text-red-600 shadow-none hover:bg-red-500/15 dark:text-red-400 dark:hover:bg-red-500/20"
                     >
                       <span className="material-symbols-outlined text-[20px]" aria-hidden>
                         logout
@@ -354,19 +349,17 @@ export function SiteMobileBottomNav() {
                       Wyloguj się
                     </SignOutButton>
                   </MoreSection>
-                )}
-
-                {!isAuthenticated && (
+                ) : (
                   <MoreSection title="Konto" variant="account">
                     <div className="flex flex-col">
                       <Link
-                        href="/sign-in"
+                        href="/logowanie"
                         className={cn(menuLinkBase, "justify-center", menuLinkInactive)}
                       >
                         Zaloguj się
                       </Link>
                       <Link
-                        href="/sign-up"
+                        href="/rejestracja"
                         className={cn(
                           menuLinkBase,
                           "justify-center bg-primary font-bold text-primary-foreground hover:opacity-95"

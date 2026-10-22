@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Id } from "@/convex/_generated/dataModel";
+import { sectionSurfaceSoft } from "@/lib/utils";
 
 export type CampCoachListItem = {
   id: Id<"coaches">;
@@ -26,28 +27,27 @@ export function CampCoachesList({ title, subtitle, coaches }: CampCoachesListPro
   return (
     <section
       id="kadra"
-      className="border-t border-stone-200 bg-white py-12 dark:border-stone-700 dark:bg-stone-900/50 md:py-16"
+      className="border-t border-stone-200 bg-white py-10 dark:border-stone-700 dark:bg-stone-900/50 md:py-16"
     >
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
         <h2 className="text-2xl font-bold text-stone-900 dark:text-white md:text-3xl">
           {title}
         </h2>
         {subtitle ? (
-          <p className="mt-2 mb-6 text-sm text-stone-500 dark:text-stone-400">
+          <p className="mt-2 mb-5 text-sm text-stone-500 dark:text-stone-400 md:mb-6">
             {subtitle}
           </p>
         ) : (
-          <div className="mb-6" aria-hidden />
+          <div className="mb-5 md:mb-6" aria-hidden />
         )}
-        <ul className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-soft dark:border-stone-700 dark:bg-stone-900/80">
+        <ul
+          className={`${sectionSurfaceSoft} divide-y divide-stone-200/80 dark:divide-stone-700/80`}
+        >
           {coaches.map((coach) => (
-            <li
-              key={coach.id}
-              className="border-b border-stone-200 last:border-b-0 dark:border-stone-700"
-            >
+            <li key={coach.id}>
               <Link
                 href={`/trenerzy#${coach.id}`}
-                className="flex items-center gap-4 px-4 py-3.5 transition-colors hover:bg-stone-50 sm:gap-5 sm:px-5 dark:hover:bg-stone-800/50"
+                className="-mx-1 flex items-center gap-4 rounded-xl px-1 py-3.5 transition-colors hover:bg-stone-50 sm:gap-5 dark:hover:bg-stone-800/50 md:mx-0 md:rounded-none md:px-5"
               >
                 <div className="relative size-12 shrink-0 overflow-hidden rounded-full ring-1 ring-stone-200 dark:ring-stone-600 sm:size-14">
                   <Image

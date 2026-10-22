@@ -220,7 +220,7 @@ export function FaqContent() {
                 <AccordionItem
                   key={`${item.category}-${item.question}`}
                   value={`faq-${i}`}
-                  className="border rounded-xl px-4 bg-white dark:bg-stone-900/50 border-stone-200 dark:border-stone-700"
+                  className="border-b border-stone-200 px-0 last:border-b-0 dark:border-stone-700 md:rounded-xl md:border md:bg-white md:px-4 dark:md:bg-stone-900/50"
                 >
                   <AccordionTrigger className="text-left font-semibold text-text-main dark:text-white hover:no-underline py-6">
                     <div className="flex w-full items-center gap-3 mr-2">
@@ -255,7 +255,7 @@ export function FaqContent() {
 
         {/* Sidebar */}
         <aside className="lg:sticky lg:top-24 h-fit space-y-6">
-          <div className="rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 p-6 shadow-soft">
+          <div className="md:rounded-2xl md:border md:border-stone-200 md:bg-white md:p-6 md:shadow-soft dark:md:border-stone-700 dark:md:bg-stone-900/80">
             <div className="flex items-center gap-3 mb-4">
               <div>
                 <h3 className="font-bold text-text-main dark:text-white text-lg">

@@ -4,9 +4,9 @@ import { BlurFade } from "@/components/ui/blur-fade";
 
 export function CtaSection() {
   return (
-    <section className="w-full px-4 pb-16 sm:px-6 lg:px-8 lg:pb-24">
+    <section className="w-full pb-16 sm:px-6 lg:px-8 lg:pb-24">
       <BlurFade inView delay={0.06} offset={16} blur="0px">
-        <div className="relative mx-auto max-w-5xl overflow-hidden rounded-3xl bg-primary px-6 py-14 text-center shadow-card-hover sm:px-10 lg:px-16 lg:py-16">
+        <div className="relative mx-auto max-w-5xl overflow-hidden bg-primary px-4 py-14 text-center shadow-none sm:rounded-3xl sm:px-10 sm:shadow-card-hover lg:px-16 lg:py-16">
           <div
             className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_70%_at_50%_0%,rgba(255,255,255,0.22),transparent_58%)]"
             aria-hidden

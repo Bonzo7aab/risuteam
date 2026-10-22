@@ -78,9 +78,9 @@ export default function LokalizacjaPage() {
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark">
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
-        <div className="flex flex-col lg:flex-row w-full min-h-[calc(100vh-14rem)] rounded-2xl overflow-hidden border border-stone-200 dark:border-stone-700 shadow-soft bg-white dark:bg-stone-900/80">
+        <div className="flex w-full min-h-[calc(100vh-14rem)] flex-col overflow-hidden lg:flex-row lg:rounded-2xl lg:border lg:border-stone-200 lg:bg-white lg:shadow-soft dark:lg:border-stone-700 dark:lg:bg-stone-900/80">
           {/* Left sidebar */}
-          <aside className="w-full lg:w-[400px] lg:max-w-md shrink-0 flex flex-col border-r border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80">
+          <aside className="flex w-full shrink-0 flex-col border-b border-stone-200 bg-transparent dark:border-stone-700 lg:w-[400px] lg:max-w-md lg:border-b-0 lg:border-r lg:bg-white dark:lg:bg-stone-900/80">
             <div className="p-6 pb-4 border-b border-stone-200 dark:border-stone-700">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-100 dark:bg-orange-900/30 text-primary text-xs font-bold uppercase tracking-wider mb-3">
                 <Filter className="size-3.5" aria-hidden />
@@ -132,7 +132,7 @@ export default function LokalizacjaPage() {
                 return (
                   <article
                     key={place.id}
-                    className="rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 p-4 shadow-soft overflow-hidden transition-shadow hover:shadow-glow"
+                    className="overflow-hidden border-b border-stone-200 py-4 last:border-b-0 transition-shadow dark:border-stone-700 md:rounded-2xl md:border md:bg-white md:p-4 md:shadow-soft md:last:border hover:md:shadow-glow dark:md:border-stone-700 dark:md:bg-stone-900/80"
                   >
                     <div className="flex gap-4">
                       <div className="flex flex-col flex-1 min-w-0">

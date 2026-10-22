@@ -39,7 +39,8 @@ export function MembershipPlanCard({
   return (
     <div
       className={cn(
-        "risu-card risu-card-hover relative overflow-hidden rounded-2xl p-8 flex flex-col gap-6",
+        "relative flex flex-col gap-6 overflow-hidden py-2",
+        "md:risu-card md:risu-card-hover md:rounded-2xl md:p-8",
         className
       )}
     >

@@ -114,13 +114,17 @@ export function CampHero({
       : null;
 
     return (
-      <section className="px-4 pb-8 pt-4 sm:px-6 md:pb-12 md:pt-6 lg:px-8">
+      <section className="pb-8 pt-4 md:px-6 md:pb-12 md:pt-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
-          {backLink ? <SplitBackLink href={backLink.href} label={backLink.label} /> : null}
+          {backLink ? (
+            <div className="px-4 sm:px-6 md:px-0">
+              <SplitBackLink href={backLink.href} label={backLink.label} />
+            </div>
+          ) : null}
 
-          <div className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-soft dark:border-stone-700 dark:bg-stone-900/80 lg:rounded-3xl">
+          <div className="md:overflow-hidden md:rounded-2xl md:border md:border-stone-200 md:bg-white md:shadow-soft lg:rounded-3xl dark:md:border-stone-700 dark:md:bg-stone-900/80">
             <div className="grid lg:grid-cols-[minmax(16rem,22rem)_minmax(0,1fr)]">
-              <div className="relative aspect-[3/4] w-full bg-[#ece7df] dark:bg-[#1c1610] lg:aspect-auto lg:min-h-[26rem]">
+              <div className="relative aspect-[4/5] w-full bg-[#ece7df] dark:bg-[#1c1610] sm:aspect-[3/4] lg:aspect-auto lg:min-h-[26rem]">
                 <Image
                   src={image}
                   alt={imageAlt}
@@ -132,7 +136,7 @@ export function CampHero({
                 />
               </div>
 
-              <div className="flex flex-col justify-center px-5 py-6 sm:px-7 sm:py-8 lg:px-10 lg:py-10">
+              <div className="flex flex-col justify-center px-4 py-6 sm:px-6 sm:py-8 md:px-7 lg:px-10 lg:py-10">
                 <BadgeRow badge={badge} badgeSecondary={badgeSecondary} />
                 <h1 className="text-2xl font-bold tracking-tight text-stone-900 dark:text-white sm:text-3xl lg:text-[2.15rem] lg:leading-tight">
                   {displayTitle}
@@ -179,7 +183,7 @@ export function CampHero({
                     {registerHref ? (
                       <Button
                         asChild
-                        className="h-11 min-w-[11.5rem] rounded-xl px-6 text-sm font-bold"
+                        className="h-11 w-full min-w-[11.5rem] rounded-xl px-6 text-sm font-bold sm:w-auto"
                         disabled={isRegistrationClosed}
                       >
                         <Link

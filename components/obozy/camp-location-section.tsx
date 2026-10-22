@@ -41,7 +41,7 @@ export function CampLocationSection({
   return (
     <section
       className={cn(
-        "w-full overflow-hidden rounded-2xl border border-stone-200 dark:border-stone-700 shadow-soft bg-white dark:bg-stone-900/80",
+        "w-full overflow-hidden md:rounded-2xl md:border md:border-stone-200 md:bg-white md:shadow-soft dark:md:border-stone-700 dark:md:bg-stone-900/80",
         className
       )}
       aria-labelledby="camp-location-heading"

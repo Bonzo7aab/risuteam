@@ -106,7 +106,7 @@ export default function KontaktPage() {
     <div className="min-h-screen bg-background-light dark:bg-background-dark">
       <section className="px-4 sm:px-6 py-12 md:py-16">
         <div className="max-w-5xl mx-auto">
-          <div className="rounded-2xl bg-white dark:bg-stone-900/80 shadow-soft border border-stone-200 dark:border-stone-700 p-6 md:p-8 lg:p-10">
+          <div className="md:rounded-2xl md:border md:border-stone-200 md:bg-white md:p-8 md:shadow-soft lg:p-10 dark:md:border-stone-700 dark:md:bg-stone-900/80">
             <div className="grid md:grid-cols-[1fr_minmax(280px,340px)] gap-8 lg:gap-12">
               {/* Left column: form */}
               <div className="space-y-6">
@@ -245,7 +245,7 @@ export default function KontaktPage() {
                     className="w-full h-auto max-w-[240px] md:max-w-[280px] object-contain dark:invert"
                   />
                 </div>
-                <div className="rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800/50 p-4 flex gap-4 shadow-soft">
+                <div className="flex gap-4 py-1 md:rounded-xl md:border md:border-stone-200 md:bg-stone-50 md:p-4 md:shadow-soft dark:md:border-stone-700 dark:md:bg-stone-800/50">
                   <span className="material-symbols-outlined text-2xl text-primary shrink-0" aria-hidden>
                     call
                   </span>
@@ -259,7 +259,7 @@ export default function KontaktPage() {
                     </a>
                   </div>
                 </div>
-                <div className="rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800/50 p-4 flex gap-4 shadow-soft">
+                <div className="flex gap-4 py-1 md:rounded-xl md:border md:border-stone-200 md:bg-stone-50 md:p-4 md:shadow-soft dark:md:border-stone-700 dark:md:bg-stone-800/50">
                   <span className="material-symbols-outlined text-2xl text-primary shrink-0" aria-hidden>
                     mail
                   </span>

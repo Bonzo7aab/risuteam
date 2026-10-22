@@ -12,8 +12,10 @@ const formRowLogoCircle =
 
 export type RisuTeamLogoTitleMarkProps = {
   className?: string;
-  /** Default matches home hero; `formRow` is smaller for auth forms beside step indicators. */
+  /** Default matches home hero; `formRow` is smaller for auth forms. */
   variant?: "hero" | "formRow";
+  /** Use a crisp CSS underline instead of the hand-drawn highlighter (auth pages). */
+  underlineStyle?: "highlighter" | "solid";
   logoCircleClassName?: string;
   classNameImage?: string;
   titleClassName?: string;
@@ -23,6 +25,7 @@ export type RisuTeamLogoTitleMarkProps = {
 export function RisuTeamLogoTitleMark({
   className,
   variant = "hero",
+  underlineStyle = "highlighter",
   logoCircleClassName,
   classNameImage = "size-full object-contain",
   titleClassName,
@@ -34,8 +37,37 @@ export function RisuTeamLogoTitleMark({
       ? "text-2xl font-bold tracking-tight drop-shadow-xs"
       : "text-4xl font-bold tracking-tight drop-shadow-xs";
 
+  const title =
+    underlineStyle === "solid" ? (
+      <span
+        className={cn(
+          "relative inline-block",
+          titleSize,
+          titleClassName
+        )}
+      >
+        Risu Team
+        <span
+          className="absolute inset-x-0 -bottom-0.5 h-[2.5px] rounded-full bg-primary"
+          aria-hidden
+        />
+      </span>
+    ) : (
+      <Highlighter
+        action="underline"
+        color="hsl(30, 91%, 55%)"
+        strokeWidth={2}
+        multiline={false}
+        isView
+      >
+        <span className={cn(titleSize, titleClassName)}>Risu Team</span>
+      </Highlighter>
+    );
+
   return (
-    <div className={cn("flex flex-col items-center gap-2 text-center", className)}>
+    <div
+      className={cn("flex flex-col items-center gap-2 text-center", className)}
+    >
       <div className={cn(circle, logoCircleClassName)}>
         <Image
           src="/logoWithBorder.png"
@@ -46,15 +78,7 @@ export function RisuTeamLogoTitleMark({
           priority={priority}
         />
       </div>
-      <Highlighter
-        action="underline"
-        color="hsl(30, 91%, 55%)"
-        strokeWidth={2}
-        multiline={false}
-        isView
-      >
-        <span className={cn(titleSize, titleClassName)}>Risu Team</span>
-      </Highlighter>
+      {title}
     </div>
   );
 }

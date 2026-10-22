@@ -54,7 +54,7 @@ export function AccountMenu({
 
   const handleSignOut = async () => {
     await signOut();
-    router.push("/sign-in");
+    router.push("/logowanie");
   };
 
   return (
@@ -155,7 +155,7 @@ export function AccountMenu({
               Konto
             </p>
             <MenuItem
-              onClick={() => router.push("/sign-in")}
+              onClick={() => router.push("/logowanie")}
               className={itemClass}
             >
               <span className="risu-icon-well size-9" aria-hidden>
@@ -168,7 +168,7 @@ export function AccountMenu({
               </span>
             </MenuItem>
             <MenuItem
-              onClick={() => router.push("/sign-up")}
+              onClick={() => router.push("/rejestracja")}
               className={itemClass}
             >
               <span className="risu-icon-well size-9" aria-hidden>
