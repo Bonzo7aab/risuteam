@@ -69,8 +69,8 @@ const MD_BREAKPOINT = 768;
 
 const CARD_TINTS = [
   "",
-  "md:bg-primary/6! dark:md:bg-[#2a2015]!",
-  "md:bg-amber-50/80! dark:md:bg-[#2a2015]!",
+  "md:bg-primary/6! dark:md:bg-primary/12!",
+  "md:bg-amber-50/80! dark:md:bg-[#463628]!",
 ] as const;
 
 export function TestimonialsSection() {
@@ -111,7 +111,7 @@ export function TestimonialsSection() {
             {testimonials.slice(0, 3).map((t) => (
               <div
                 key={t.id}
-                className="relative w-8 h-8 rounded-full ring-2 ring-white shadow-xs dark:ring-stone-900 overflow-hidden bg-stone-200"
+                className="relative w-8 h-8 rounded-full ring-2 ring-white shadow-xs dark:ring-background-dark overflow-hidden bg-stone-200"
               >
                 <Image
                   src={t.avatar}
@@ -137,7 +137,7 @@ export function TestimonialsSection() {
             setStartIndex((i) => Math.max(0, i - 1));
           }}
           disabled={startIndex === 0}
-          className="flex size-10 items-center justify-center rounded-full bg-white text-text-main shadow-card ring-1 ring-black/4 transition-all duration-300 hover:-translate-y-0.5 hover:text-primary disabled:pointer-events-none disabled:opacity-50 motion-reduce:hover:translate-y-0 dark:bg-[#2a2015] dark:text-stone-300 dark:shadow-card-dark dark:ring-white/10"
+          className="flex size-10 items-center justify-center rounded-full bg-white text-text-main shadow-card ring-1 ring-black/4 transition-all duration-300 hover:-translate-y-0.5 hover:text-primary disabled:pointer-events-none disabled:opacity-50 motion-reduce:hover:translate-y-0 dark:bg-surface-dark dark:text-stone-200 dark:shadow-card-dark dark:ring-white/14"
           aria-label="Poprzednie opinie"
         >
           <ArrowLeftIcon className="text-[1.1em]" />
@@ -156,7 +156,7 @@ export function TestimonialsSection() {
         </button>
       </div>
 
-      <div className="mb-8 overflow-hidden">
+      <div className="mb-8 overflow-x-clip overflow-y-visible px-1 py-2 -mx-1">
         <AnimatePresence mode="wait" custom={direction} initial={false}>
           <motion.div
             key={`${startIndex}-${cardsPerView}`}
@@ -176,12 +176,18 @@ export function TestimonialsSection() {
               <article
                 key={t.id}
                 className={cn(
-                  "relative flex min-h-[240px] flex-col border-b border-stone-200 py-6 last:border-b-0 dark:border-stone-700 sm:min-h-[280px]",
+                  "group relative flex min-h-[240px] flex-col border-b border-stone-200 py-6 last:border-b-0 dark:border-white/10 sm:min-h-[280px]",
                   "md:risu-card md:risu-card-hover md:rounded-2xl md:border-0 md:p-7 md:last:border-0",
                   CARD_TINTS[variantIdx],
                 )}
               >
-                <div className="absolute right-4 top-4 text-primary/20 dark:text-primary/25">
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl"
+                >
+                  <span className="absolute inset-y-0 left-0 w-1/3 bg-linear-to-r from-transparent via-white/55 to-transparent opacity-0 group-hover:animate-shine group-hover:opacity-100 dark:via-white/12" />
+                </span>
+                <div className="absolute right-4 top-4 text-primary/20 transition-transform duration-300 group-hover:scale-110 group-hover:text-primary/35 dark:text-primary/30 motion-reduce:group-hover:scale-100">
                   <span className="material-symbols-outlined text-5xl">format_quote</span>
                 </div>
                 <StarRating />
@@ -189,7 +195,7 @@ export function TestimonialsSection() {
                   „{t.quote}"
                 </blockquote>
                 <footer className="mt-4 flex items-center gap-3">
-                  <div className="relative size-10 shrink-0 overflow-hidden rounded-full bg-stone-200 shadow-xs ring-2 ring-white dark:bg-stone-700 dark:ring-stone-800">
+                  <div className="relative size-10 shrink-0 overflow-hidden rounded-full bg-stone-200 shadow-xs ring-2 ring-white dark:bg-stone-700 dark:ring-white/20">
                     <Image
                       src={t.avatar}
                       alt=""

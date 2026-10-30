@@ -24,12 +24,12 @@ export function HomeSchedulePreview() {
   if (slots === undefined) {
     return (
       <section className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
-        <div className="mb-8 h-10 w-56 animate-pulse rounded-xl bg-stone-200/80 dark:bg-stone-800" />
+        <div className="mb-8 h-10 w-56 animate-pulse rounded-xl bg-stone-200/80 dark:bg-surface-dark" />
         <div className="space-y-2">
           {Array.from({ length: 5 }).map((_, index) => (
             <div
               key={index}
-              className="h-16 animate-pulse rounded-2xl bg-stone-200/70 dark:bg-stone-800"
+              className="h-16 animate-pulse rounded-2xl bg-stone-200/70 dark:bg-surface-dark"
             />
           ))}
         </div>
@@ -79,7 +79,7 @@ export function HomeSchedulePreview() {
         </Link>
       </div>
 
-      <ul className="divide-y divide-stone-100 overflow-hidden dark:divide-stone-800 md:rounded-2xl md:border md:border-stone-200/80 md:bg-white md:shadow-card dark:md:border-stone-800 dark:md:bg-[#2a2015] dark:md:shadow-card-dark md:divide-y-0">
+      <ul className="divide-y divide-stone-100 overflow-hidden dark:divide-white/8 md:rounded-2xl md:border md:border-stone-200/80 md:bg-white md:shadow-card dark:md:border-white/12 dark:md:bg-surface-dark dark:md:shadow-card-dark md:divide-y-0">
         {rows.map(({ day, primary, extra }) => {
           const age = primary.class?.ageGroup?.trim();
           const details = [
@@ -90,11 +90,11 @@ export function HomeSchedulePreview() {
           return (
             <li
               key={`${day}-${primary._id}`}
-              className="md:border-b md:border-stone-100 md:last:border-0 dark:md:border-stone-800"
+              className="md:border-b md:border-stone-100 md:last:border-0 dark:md:border-white/8"
             >
               <Link
                 href="/grafik"
-                className="grid grid-cols-[4.75rem_1fr] items-center gap-3 px-0 py-3.5 transition-colors hover:bg-stone-50 sm:grid-cols-[8.5rem_1fr_auto] md:px-5 dark:hover:bg-stone-800/40"
+                className="grid grid-cols-[4.75rem_1fr] items-center gap-3 px-0 py-3.5 transition-colors hover:bg-stone-50 sm:grid-cols-[8.5rem_1fr_auto] md:px-5 dark:hover:bg-white/6"
               >
                 <div>
                   <p className="text-[11px] font-bold uppercase tracking-wide text-primary">

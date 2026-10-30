@@ -10,6 +10,7 @@ import {
   isSeatHoldingStatus,
 } from "./billingHelpers";
 import { countActiveEnrollmentsForClass } from "./subscriptionCounts";
+import { assertClassesEnrollmentPaymentsEnabled } from "./siteSettings";
 
 const subscriptionStatus = v.union(
   v.literal("pending_payment"),
@@ -56,6 +57,7 @@ export const enrollInClass = mutation({
   returns: v.id("subscriptions"),
   handler: async (ctx, args) => {
     const userId = await requireAuthUserId(ctx);
+    await assertClassesEnrollmentPaymentsEnabled(ctx);
     await expirePaymentHolds(ctx);
 
     const cls = await ctx.db.get("classes", args.classId);
@@ -214,6 +216,7 @@ export const adminEnrollInClass = mutation({
   returns: v.id("subscriptions"),
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
+    await assertClassesEnrollmentPaymentsEnabled(ctx);
     await expirePaymentHolds(ctx);
     const cls = await ctx.db.get("classes", args.classId);
     if (!cls) throw new Error("Zajęcia nie istnieją.");

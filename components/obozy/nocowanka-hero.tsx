@@ -2,7 +2,8 @@
 
 import * as React from "react";
 import Image from "next/image";
-import Link from "next/link";
+import { SignupRequireChildLink } from "@/components/signup/signup-require-child-link";
+import { cn } from "@/lib/utils";
 import Autoplay from "embla-carousel-autoplay";
 import {
   Carousel,
@@ -19,7 +20,7 @@ export type NocowankaHeroProps = {
   titlePart2: string;
   description: string;
   meta: { icon: string; text: string }[];
-  ctaPrimary: { label: string; href: string };
+  ctaPrimary: { label: string; href: string; disabled?: boolean; enrolled?: boolean };
   image?: string;
   images?: string[];
   imageAlt?: string;
@@ -79,12 +80,20 @@ export function NocowankaHero({
                 </div>
               ))}
             </div>
-            <Link
+            <SignupRequireChildLink
               href={ctaPrimary.href}
-              className="inline-flex items-center justify-center rounded-xl bg-primary px-6 py-3 text-sm font-bold text-primary-foreground hover:bg-primary/90 transition-colors"
+              disabled={ctaPrimary.disabled}
+              className={cn(
+                "inline-flex items-center justify-center rounded-xl px-6 py-3 text-sm font-bold transition-colors",
+                ctaPrimary.enrolled
+                  ? "cursor-default border border-primary/50 bg-transparent text-primary"
+                  : ctaPrimary.disabled
+                    ? "cursor-not-allowed bg-stone-600 text-stone-300"
+                    : "bg-primary text-primary-foreground hover:bg-primary/90"
+              )}
             >
               {ctaPrimary.label}
-            </Link>
+            </SignupRequireChildLink>
           </div>
           <div className="relative flex justify-center lg:justify-end">
             <div className="w-full max-w-md aspect-square rounded-2xl bg-white dark:bg-stone-100 shadow-xl overflow-hidden flex items-center justify-center">

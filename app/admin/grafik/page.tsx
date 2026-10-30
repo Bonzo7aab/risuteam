@@ -122,6 +122,9 @@ function AdminGrafikPageInner() {
     api.subscriptions.adminRemoveEnrollment
   );
   const adminEnrollInClass = useMutation(api.subscriptions.adminEnrollInClass);
+  const siteSettings = useQuery(api.siteSettings.get);
+  const classesEnrollmentEnabled =
+    siteSettings?.classesRegistrationAndPaymentsEnabled ?? false;
 
   const [formName, setFormName] = useState("");
   const [formDiscipline, setFormDiscipline] = useState("");
@@ -1124,6 +1127,7 @@ function AdminGrafikPageInner() {
                         ))
                       )}
                     </ul>
+                    {classesEnrollmentEnabled ? (
                     <Popover open={addStudentOpen} onOpenChange={setAddStudentOpen}>
                       <PopoverTrigger asChild>
                         <Button
@@ -1179,6 +1183,7 @@ function AdminGrafikPageInner() {
                         </ul>
                       </PopoverContent>
                     </Popover>
+                    ) : null}
                   </CardContent>
                 </Card>
               </aside>

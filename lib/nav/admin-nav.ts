@@ -9,5 +9,6 @@ export const adminNavItems = [
   { label: "Trenerzy", href: "/admin/trenerzy", icon: "person" },
   { label: "Galeria", href: "/admin/galeria", icon: "photo_library" },
   { label: "Lokalizacje", href: "/admin/lokalizacje", icon: "location_on" },
+  { label: "Ustawienia", href: "/admin/ustawienia", icon: "settings" },
   { label: "Reset hasła", href: "/admin/reset-password", icon: "lock_reset" },
 ] as const;

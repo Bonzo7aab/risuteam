@@ -53,7 +53,7 @@ function IconWell({ icon }: { icon: string }) {
 function PhilosophyVisuals() {
   return (
     <div className="group/collage relative mx-auto w-full max-w-lg min-h-0 sm:min-h-[340px] lg:min-h-[400px] lg:max-w-none">
-      <div className="relative aspect-square w-full overflow-hidden rounded-3xl bg-stone-100 shadow-card ring-1 ring-black/5 transition-transform duration-500 ease-out group-hover/collage:-translate-y-0.5 motion-reduce:group-hover/collage:translate-y-0 dark:bg-stone-800 dark:shadow-card-dark dark:ring-white/10 sm:w-[64%] sm:max-w-[280px] lg:w-[62%] lg:max-w-[300px]">
+      <div className="relative aspect-square w-full overflow-hidden rounded-3xl bg-stone-100 shadow-card ring-1 ring-black/5 transition-transform duration-500 ease-out group-hover/collage:-translate-y-0.5 motion-reduce:group-hover/collage:translate-y-0 dark:bg-surface-dark dark:shadow-card-dark dark:ring-white/14 sm:w-[64%] sm:max-w-[280px] lg:w-[62%] lg:max-w-[300px]">
         <Image
           src={IMAGE_BACK}
           alt="Dzieci podczas zajęć Risu Team"
@@ -69,7 +69,7 @@ function PhilosophyVisuals() {
       </div>
       {/* Keep overlap from small screens up; hide on mobile. */}
       <div className="absolute right-0 top-[26%] hidden w-[44%] max-w-[158px] translate-x-0.5 rotate-2 transition-transform duration-500 ease-out group-hover/collage:-translate-y-1 group-hover/collage:rotate-0 sm:bottom-0 sm:block sm:w-[58%] sm:max-w-[248px] sm:translate-x-3 sm:translate-y-3 lg:w-[64%] lg:max-w-[288px] lg:translate-x-4 lg:translate-y-4">
-        <div className="relative aspect-4/5 overflow-hidden rounded-3xl bg-stone-100 shadow-card-hover ring-1 ring-black/6 dark:bg-stone-800 dark:shadow-card-dark-hover dark:ring-white/10">
+        <div className="relative aspect-4/5 overflow-hidden rounded-3xl bg-stone-100 shadow-card-hover ring-1 ring-black/6 dark:bg-surface-dark dark:shadow-card-dark-hover dark:ring-white/14">
           <Image
             src={IMAGE_FRONT}
             alt="Trening i bezpieczny ruch w Risu Team"
@@ -111,7 +111,7 @@ export function WhyKidsLove() {
               {philosophyItems.map((item, i) => (
                 <li key={item.title}>
                   <BlurFade inView delay={0.1 + i * 0.08} offset={10} blur="0px">
-                    <div className="group/item flex gap-4 rounded-2xl p-2 -mx-2 transition-colors duration-300 hover:bg-white/70 sm:gap-5 dark:hover:bg-white/4">
+                    <div className="group/item flex gap-4 rounded-2xl p-2 -mx-2 transition-colors duration-300 hover:bg-white/70 sm:gap-5 dark:hover:bg-surface-dark/70">
                       <div className="transition-transform duration-300 group-hover/item:scale-105 motion-reduce:group-hover/item:scale-100">
                         <IconWell icon={item.icon} />
                       </div>

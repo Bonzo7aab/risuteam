@@ -10,6 +10,10 @@ import {
   DailyProgram,
   WhatToBringPricing,
 } from "@/components/obozy";
+import { SignupRequireChildLink } from "@/components/signup/signup-require-child-link";
+import { useMyEventEnrollment } from "@/hooks/use-my-event-enrollment";
+import { eventSignupCta } from "@/lib/camp-registration-links";
+import { cn } from "@/lib/utils";
 import {
   NOCOWANKI_STATIC,
   NOCOWANKA_CONTACT,
@@ -173,6 +177,7 @@ export function NocowankaPublicView({ slug }: { slug: string }) {
     api.registrations.countNocowankaRegistrationsPublic,
     safeSlug ? { slug: safeSlug } : "skip"
   );
+  const { isEnrolledInNocowanka } = useMyEventEnrollment();
   const staticFallback = staticEntryForSlug(safeSlug);
 
   if (doc === undefined) {
@@ -220,6 +225,9 @@ export function NocowankaPublicView({ slug }: { slug: string }) {
   const availabilityLabel = hasSeatCapacity
     ? `Dostępność miejsc: ${availableSeats} wolnych / ${occupiedSeats} zajętych`
     : "Dostępność miejsc";
+  const signupCta = eventSignupCta({
+    isEnrolled: isEnrolledInNocowanka(safeSlug),
+  });
 
   return (
     <div className="min-h-screen bg-stone-50 dark:bg-stone-900/30">
@@ -241,7 +249,12 @@ export function NocowankaPublicView({ slug }: { slug: string }) {
                 },
               ]
         }
-        ctaPrimary={{ label: "Zapisz się", href: data.ctaHref }}
+        ctaPrimary={{
+          label: signupCta.label,
+          href: data.ctaHref,
+          disabled: signupCta.disabled,
+          enrolled: signupCta.isEnrolled,
+        }}
       />
 
       {data.stats.length > 0 ? (
@@ -303,12 +316,20 @@ export function NocowankaPublicView({ slug }: { slug: string }) {
           <p className="text-white/90 mb-10">
             Skontaktuj się z nami, aby zarezerwować miejsce lub zadać pytania.
           </p>
-          <Link
+          <SignupRequireChildLink
             href={data.ctaHref}
-            className="mb-8 inline-flex items-center justify-center rounded-xl bg-white px-6 py-3 text-sm font-bold text-primary hover:bg-white/90 transition-colors"
+            disabled={signupCta.disabled}
+            className={cn(
+              "mb-8 inline-flex items-center justify-center rounded-xl px-6 py-3 text-sm font-bold transition-colors",
+              signupCta.isEnrolled
+                ? "cursor-default border-2 border-white/70 bg-transparent text-white"
+                : signupCta.disabled
+                  ? "cursor-not-allowed bg-white/20 text-white/80"
+                  : "bg-white text-primary hover:bg-white/90"
+            )}
           >
-            Zapisz się
-          </Link>
+            {signupCta.label}
+          </SignupRequireChildLink>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <a
               href={`tel:${NOCOWANKA_CONTACT.phone.replace(/\s/g, "")}`}

@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 
-import { motion } from 'motion/react'
+import { motion, useReducedMotion } from 'motion/react'
 
 import { Carousel, CarouselNext, CarouselPrevious } from '@/components/ui/carousel'
 
@@ -52,8 +52,10 @@ export type RadialCarouselSlide = {
 
 const R = 240 // cylinder radius (px)
 const THETA = 35 // angular step between neighbours (degrees)
+const AUTOPLAY_MS = 4200
 
-const SPRING = { type: 'spring' as const, stiffness: 280, damping: 26, mass: 0.85 }
+const SPRING = { type: 'spring' as const, stiffness: 180, damping: 28, mass: 1 }
+const SPRING_FAST = { type: 'spring' as const, stiffness: 280, damping: 26, mass: 0.85 }
 
 function arcStyle(offset: number) {
   const rad = (offset * THETA * Math.PI) / 180
@@ -71,14 +73,38 @@ function arcStyle(offset: number) {
 const RadialCarousel = ({ slides = Images }: { slides?: RadialCarouselSlide[] }) => {
   const total = slides.length
   const [active, setActive] = React.useState(0)
+  const [paused, setPaused] = React.useState(false)
+  const [userDriven, setUserDriven] = React.useState(false)
+  const prefersReducedMotion = useReducedMotion()
 
-  const go = React.useCallback((dir: 1 | -1) => setActive(i => (i + dir + total) % total), [total])
+  const go = React.useCallback(
+    (dir: 1 | -1, fromUser = false) => {
+      if (fromUser) setUserDriven(true)
+      setActive(i => (i + dir + total) % total)
+    },
+    [total]
+  )
+
+  const goTo = React.useCallback((index: number) => {
+    setUserDriven(true)
+    setActive(index)
+  }, [])
+
+  // Slow continuous loop — pauses on hover / focus / reduced motion
+  React.useEffect(() => {
+    if (prefersReducedMotion || paused || total < 2) return
+    const id = window.setInterval(() => {
+      setUserDriven(false)
+      setActive(i => (i + 1) % total)
+    }, AUTOPLAY_MS)
+    return () => window.clearInterval(id)
+  }, [prefersReducedMotion, paused, total])
 
   // Keyboard navigation
   React.useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowLeft') go(-1)
-      else if (e.key === 'ArrowRight') go(1)
+      if (e.key === 'ArrowLeft') go(-1, true)
+      else if (e.key === 'ArrowRight') go(1, true)
     }
 
     window.addEventListener('keydown', handler)
@@ -86,9 +112,21 @@ const RadialCarousel = ({ slides = Images }: { slides?: RadialCarouselSlide[] })
     return () => window.removeEventListener('keydown', handler)
   }, [go])
 
+  const transition = userDriven ? SPRING_FAST : SPRING
+
   return (
-    <Carousel className='flex w-full flex-col items-center gap-8 py-8 select-none'>
-      <div className='relative h-75 w-full perspective-distant'>
+    <Carousel
+      className='flex w-full flex-col items-center gap-8 py-8 select-none'
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onFocusCapture={() => setPaused(true)}
+      onBlurCapture={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
+          setPaused(false)
+        }
+      }}
+    >
+      <div className='relative h-75 w-full perspective-distant' aria-live='polite'>
         {slides.map((slide, i) => {
           // Shortest signed offset around the loop
           const raw = (i - active + total) % total
@@ -101,9 +139,10 @@ const RadialCarousel = ({ slides = Images }: { slides?: RadialCarouselSlide[] })
               className='absolute top-0 left-1/2 cursor-pointer transform-3d'
               style={{ width: 200, height: 280, marginLeft: -100, zIndex }}
               animate={{ x, rotateY, scale, opacity }}
-              transition={SPRING}
-              onClick={() => setActive(i)}
+              transition={transition}
+              onClick={() => goTo(i)}
               aria-label={`View ${slide.title}`}
+              aria-current={offset === 0 ? 'true' : undefined}
             >
               <div className='relative size-full overflow-hidden rounded-2xl shadow-lg'>
                 {/* Image */}
@@ -144,7 +183,7 @@ const RadialCarousel = ({ slides = Images }: { slides?: RadialCarouselSlide[] })
           onClick={(event) => {
             event.preventDefault()
             event.stopPropagation()
-            go(-1)
+            go(-1, true)
           }}
           disabled={false}
         />
@@ -155,7 +194,7 @@ const RadialCarousel = ({ slides = Images }: { slides?: RadialCarouselSlide[] })
           onClick={(event) => {
             event.preventDefault()
             event.stopPropagation()
-            go(1)
+            go(1, true)
           }}
           disabled={false}
         />

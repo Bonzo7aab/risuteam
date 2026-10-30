@@ -19,6 +19,7 @@ import {
 import { CampRegistrationClosedBanner } from "@/components/obozy/camp-registration-closed-banner";
 import { BlurFade } from "@/components/ui/blur-fade";
 import { ImageZoom } from "@/components/ui/image-zoom";
+import { useMyEventEnrollment } from "@/hooks/use-my-event-enrollment";
 
 function getSlug(params: unknown): string {
   const p = params as { slug?: string | string[] } | null;
@@ -78,6 +79,7 @@ export default function CampBySlugPage() {
     slug ? { slugOrId: slug.trim() } : "skip"
   );
   const coaches = useQuery(api.coaches.listActive);
+  const { isEnrolledInCampSlug, isEnrolledInCampId } = useMyEventEnrollment();
 
   if (camp === undefined) {
     return (
@@ -111,6 +113,8 @@ export default function CampBySlugPage() {
     camp.heroImageUrl ??
     "https://images.pexels.com/photos/3764011/pexels-photo-3764011.jpeg?auto=compress&cs=tinysrgb&w=1200";
   const isRegistrationClosed = camp.isRegistrationOpen === false;
+  const isEnrolled =
+    isEnrolledInCampId(camp._id) || isEnrolledInCampSlug(camp.slug);
   const detailHref = `/obozy/${camp.slug}`;
   const registrationHref = `${detailHref}/rejestracja`;
 
@@ -179,6 +183,7 @@ export default function CampBySlugPage() {
         backLink={{ href: "/obozy", label: "Wszystkie obozy i nocowanki" }}
         registrationHref={registrationHref}
         isRegistrationClosed={isRegistrationClosed}
+        isEnrolled={isEnrolled}
         price={priceNum > 0 ? `${priceNum} PLN` : undefined}
         meta={[
           { icon: "calendar_today", label: "Termin", text: datesStr },
@@ -280,6 +285,7 @@ export default function CampBySlugPage() {
         installments={installments}
         registrationHref={registrationHref}
         isRegistrationClosed={isRegistrationClosed}
+        isEnrolled={isEnrolled}
       />
 
       <CampBringAndBaseSection
@@ -316,7 +322,7 @@ export default function CampBySlugPage() {
       <CampCtaBlock
         signUpHref={registrationHref}
         isRegistrationClosed={isRegistrationClosed}
-        signUpLabel={isRegistrationClosed ? "Rejestracja zakończona" : "Zapisz się teraz"}
+        isEnrolled={isEnrolled}
       />
     </div>
   );

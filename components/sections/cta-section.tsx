@@ -2,47 +2,87 @@ import Link from "next/link";
 import { ArrowRightIcon } from "@/components/icons/arrow-right";
 import { BlurFade } from "@/components/ui/blur-fade";
 
+const secondaryLinks = [
+  { href: "/grafik", label: "Grafik zajęć", icon: "calendar_month" },
+  { href: "/obozy", label: "Obozy i nocowanki", icon: "camping" },
+  { href: "/trenerzy", label: "Poznaj kadrę", icon: "groups" },
+] as const;
+
 export function CtaSection() {
   return (
-    <section className="w-full pb-16 sm:px-6 lg:px-8 lg:pb-24">
+    <section className="w-full px-4 pb-16 sm:px-6 lg:px-8 lg:pb-24">
       <BlurFade inView delay={0.06} offset={16} blur="0px">
-        <div className="relative mx-auto max-w-5xl overflow-hidden bg-primary px-4 py-14 text-center shadow-none sm:rounded-3xl sm:px-10 sm:shadow-card-hover lg:px-16 lg:py-16">
+        <div className="relative mx-auto max-w-6xl overflow-hidden rounded-3xl border border-stone-200/90 bg-white shadow-card dark:border-white/12 dark:bg-surface-dark dark:shadow-card-dark">
           <div
-            className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_70%_at_50%_0%,rgba(255,255,255,0.22),transparent_58%)]"
+            className="pointer-events-none absolute inset-y-0 left-0 w-1 bg-linear-to-b from-primary via-primary to-amber-300"
             aria-hidden
           />
           <div
-            className="pointer-events-none absolute -left-16 bottom-0 size-48 rounded-full bg-amber-200/30 blur-3xl motion-safe:animate-orb-drift"
+            className="pointer-events-none absolute -right-24 -top-24 size-72 rounded-full bg-primary/8 blur-3xl dark:bg-primary/12"
             aria-hidden
           />
           <div
-            className="pointer-events-none absolute -right-10 top-8 size-40 rounded-full bg-white/15 blur-2xl motion-safe:animate-orb-drift"
-            style={{ animationDelay: "-3.5s", animationDuration: "11s" }}
+            className="pointer-events-none absolute -bottom-28 left-1/3 size-64 rounded-full bg-sky-400/5 blur-3xl dark:bg-sky-400/8"
             aria-hidden
           />
-          <div className="relative">
-            <h2 className="text-3xl md:text-4xl font-black text-white mb-4 tracking-tight">
-              Gotowy dołączyć do drużyny?
-            </h2>
-            <p className="mx-auto mb-8 max-w-2xl text-lg font-medium text-white/92">
-              Pierwsze zajęcia są gratis! Przyjdź, poznaj Risu i trenerów — zobacz,
-              dlaczego dzieci kochają naszą salę.
-            </p>
-            <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Link
-                href="/dashboard/zapisy"
-                className="group inline-flex items-center justify-center gap-2 rounded-xl border-2 border-white/90 bg-transparent px-8 py-4 font-bold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.25)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/10 motion-reduce:hover:translate-y-0"
-              >
-                Zapisz się
-                <ArrowRightIcon className="text-[1.05em] transition-transform duration-300 group-hover:translate-x-1" />
-              </Link>
-              <Link
-                href="/kontakt"
-                className="group inline-flex items-center justify-center gap-2 rounded-xl bg-white px-8 py-4 font-bold text-primary shadow-card transition-all duration-300 hover:-translate-y-0.5 hover:bg-stone-50 motion-reduce:hover:translate-y-0"
-              >
-                Skontaktuj się
-                <ArrowRightIcon className="text-[1.05em] transition-transform duration-300 group-hover:translate-x-1" />
-              </Link>
+
+          <div className="relative grid gap-10 px-6 py-10 sm:px-10 sm:py-12 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] lg:items-center lg:gap-14 lg:px-14 lg:py-14">
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-primary">
+                Dołącz do Risu
+              </p>
+              <h2 className="mt-3 text-3xl font-black tracking-tight text-text-main dark:text-white md:text-4xl lg:text-[2.5rem] lg:leading-[1.12]">
+                Gotowy dołączyć do drużyny?
+              </h2>
+              <p className="mt-4 max-w-xl text-base leading-relaxed text-stone-600 dark:text-stone-300 sm:text-lg">
+                Napisz lub zadzwoń — pomożemy dobrać dyscyplinę, grupę wiekową
+                i dogodny termin. Pierwsze zajęcia konsultujemy indywidualnie.
+              </p>
+
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+                <Link
+                  href="/kontakt"
+                  className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-7 text-sm font-bold text-primary-foreground shadow-[0_8px_24px_-8px_rgba(244,157,37,0.55)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-primary-hover motion-reduce:hover:translate-y-0"
+                >
+                  Skontaktuj się
+                  <ArrowRightIcon className="text-[1.05em] transition-transform duration-300 group-hover:translate-x-1" />
+                </Link>
+                <a
+                  href="mailto:kontakt@risuteam.pl"
+                  className="inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-stone-200 bg-transparent px-5 text-sm font-semibold text-text-main transition-colors hover:border-primary/35 hover:bg-stone-50 dark:border-white/12 dark:text-stone-100 dark:hover:bg-white/5"
+                >
+                  <span className="material-symbols-outlined text-[18px] text-primary" aria-hidden>
+                    mail
+                  </span>
+                  kontakt@risuteam.pl
+                </a>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-stone-200/80 bg-stone-50/80 p-5 dark:border-white/10 dark:bg-black/20 sm:p-6">
+              <p className="text-xs font-bold uppercase tracking-[0.16em] text-stone-500 dark:text-stone-400">
+                Zobacz też
+              </p>
+              <ul className="mt-4 space-y-2">
+                {secondaryLinks.map((item) => (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      className="group flex items-center gap-3 rounded-xl px-3 py-3 transition-colors hover:bg-white dark:hover:bg-white/6"
+                    >
+                      <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary transition-transform duration-300 group-hover:scale-105 motion-reduce:group-hover:scale-100">
+                        <span className="material-symbols-outlined text-[20px]" aria-hidden>
+                          {item.icon}
+                        </span>
+                      </span>
+                      <span className="min-w-0 flex-1 text-sm font-semibold text-text-main dark:text-white">
+                        {item.label}
+                      </span>
+                      <ArrowRightIcon className="text-stone-400 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:text-primary" />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
         </div>

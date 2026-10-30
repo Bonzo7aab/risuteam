@@ -71,6 +71,9 @@ function StepsList({ steps }: { steps: Step[] }) {
 
 export function ZapisyContent({ steps }: { steps: Step[] }) {
   const currentUser = useQuery(api.authHelpers.getCurrentUser);
+  const siteSettings = useQuery(api.siteSettings.get);
+  const classesEnabled =
+    siteSettings?.classesRegistrationAndPaymentsEnabled ?? false;
   const classes = useQuery(api.classes.getClasses, { activeOnly: true });
   const allClasses = useQuery(
     api.classes.getClasses,
@@ -136,13 +139,15 @@ export function ZapisyContent({ steps }: { steps: Step[] }) {
                 Aktywne i oczekujące na płatność.
               </p>
             </div>
-            <Link
-              href="/grafik"
-              className="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl bg-primary px-4 text-sm font-bold text-primary-foreground shadow-sm transition-colors hover:bg-primary-hover"
-            >
-              Zapisz na zajęcia
-              <ArrowRightIcon className="text-[1em]" />
-            </Link>
+            {classesEnabled ? (
+              <Link
+                href="/grafik"
+                className="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl bg-primary px-4 text-sm font-bold text-primary-foreground shadow-sm transition-colors hover:bg-primary-hover"
+              >
+                Zapisz na zajęcia
+                <ArrowRightIcon className="text-[1em]" />
+              </Link>
+            ) : null}
           </div>
 
           {subscriptions === undefined ? (
@@ -150,15 +155,17 @@ export function ZapisyContent({ steps }: { steps: Step[] }) {
           ) : activeSubscriptions.length === 0 ? (
             <div className="rounded-xl border border-dashed border-stone-300 px-4 py-10 text-center dark:border-stone-600">
               <p className="text-sm text-stone-500 dark:text-stone-400">
-                Brak aktywnych zapisów. Wybierz grupę w grafiku.
+                Brak aktywnych zapisów.
               </p>
-              <Link
-                href="/grafik"
-                className="mt-4 inline-flex items-center gap-1.5 text-sm font-bold text-primary hover:text-primary-hover"
-              >
-                Otwórz grafik
-                <ArrowRightIcon className="text-[1em]" />
-              </Link>
+              {classesEnabled ? (
+                <Link
+                  href="/grafik"
+                  className="mt-4 inline-flex items-center gap-1.5 text-sm font-bold text-primary hover:text-primary-hover"
+                >
+                  Otwórz grafik
+                  <ArrowRightIcon className="text-[1em]" />
+                </Link>
+              ) : null}
             </div>
           ) : (
             <ul className="space-y-3">
@@ -228,6 +235,15 @@ export function ZapisyContent({ steps }: { steps: Step[] }) {
               schedule
             </span>
             Grafik zajęć
+          </Link>
+          <Link
+            href="/obozy"
+            className="inline-flex h-10 items-center gap-2 rounded-xl border border-stone-200 bg-white px-4 text-sm font-semibold text-stone-700 transition-colors hover:border-stone-300 hover:bg-stone-50 dark:border-stone-700 dark:bg-[#2a2015] dark:text-stone-200 dark:hover:bg-stone-900"
+          >
+            <span className="material-symbols-outlined text-[18px] text-primary" aria-hidden>
+              hiking
+            </span>
+            Obozy
           </Link>
         </div>
       </div>

@@ -32,6 +32,7 @@ import type * as paymentsInternal from "../paymentsInternal.js";
 import type * as registrationFormQuestions from "../registrationFormQuestions.js";
 import type * as registrations from "../registrations.js";
 import type * as seed from "../seed.js";
+import type * as siteSettings from "../siteSettings.js";
 import type * as subscriptionCounts from "../subscriptionCounts.js";
 import type * as subscriptions from "../subscriptions.js";
 import type * as trialSignups from "../trialSignups.js";
@@ -68,6 +69,7 @@ declare const fullApi: ApiFromModules<{
   registrationFormQuestions: typeof registrationFormQuestions;
   registrations: typeof registrations;
   seed: typeof seed;
+  siteSettings: typeof siteSettings;
   subscriptionCounts: typeof subscriptionCounts;
   subscriptions: typeof subscriptions;
   trialSignups: typeof trialSignups;

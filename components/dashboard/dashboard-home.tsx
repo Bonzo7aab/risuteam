@@ -1,26 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import type { Id } from "@/convex/_generated/dataModel";
-import { DashboardCampRegistrations } from "@/components/dashboard-camp-registrations";
+import type { Doc } from "@/convex/_generated/dataModel";
 import { cn } from "@/lib/utils";
 import { ArrowRightIcon } from "@/components/icons/arrow-right";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { getNocowankaDisplayName } from "@/lib/nocowanki";
 import { parentDashboardNavItems } from "@/lib/nav/parent-dashboard-nav";
 
 /** Sidebar links except home — four destinations for mobile quick cards */
 const dashboardMobilePanelLinks = parentDashboardNavItems.filter(
   (item) => item.href !== "/dashboard"
 );
+
+const DOW_PL = ["NDZ", "PN", "WT", "ŚR", "CZW", "PT", "SOB"] as const;
 
 function formatPln(grosze: number): string {
   return (grosze / 100).toFixed(2).replace(".", ",");
@@ -37,33 +32,44 @@ function formatChildDob(raw?: string): string | null {
   });
 }
 
+function formatRangePl(startMs: number, endMs?: number): string {
+  const start = new Date(startMs);
+  const end = endMs ? new Date(endMs) : null;
+  const startLabel = start.toLocaleDateString("pl-PL", {
+    day: "2-digit",
+    month: "short",
+  });
+  if (!end) return startLabel;
+  const endLabel = end.toLocaleDateString("pl-PL", {
+    day: "2-digit",
+    month: "short",
+  });
+  return `${startLabel}–${endLabel}`;
+}
+
 const enrolledAvatar =
   "bg-sky-100 text-sky-600 dark:bg-sky-900/40 dark:text-sky-300";
 const noEnrollmentAvatar =
   "bg-violet-100 text-violet-600 dark:bg-violet-900/40 dark:text-violet-300";
 
-const tintPill = {
-  orange: "bg-orange-500 text-white",
-  sky: "bg-sky-500 text-white",
-  violet: "bg-violet-500 text-white",
-} as const;
+type CampReg = Doc<"registrations"> & {
+  camp?: {
+    name: string;
+    slug: string;
+    startDate?: number;
+    endDate?: number;
+  } | null;
+};
 
-type DashboardUpcomingClassRow = {
-  classId: Id<"classes">;
+type UpcomingEventRow = {
+  key: string;
+  href: string;
+  title: string;
+  childLabel: string;
+  kindLabel: string;
   atMs: number;
-  className: string;
-  childFirstName: string;
-  discipline: string;
-  ageGroup?: string;
-  description?: string;
-  locationName: string;
-  locationDetail?: string;
-  schedulePending: boolean;
-  dowShort: string;
-  dayNum: number;
-  startTime: string;
-  endTime: string;
-  tint: "orange" | "sky" | "violet";
+  meta?: string;
+  statusLabel: string;
 };
 
 function SectionHeading({
@@ -129,8 +135,12 @@ export function DashboardHome() {
     asOfTimestamp: asOf,
   });
   const user = useQuery(api.authHelpers.getCurrentUser);
-  const [classDetail, setClassDetail] = useState<DashboardUpcomingClassRow | null>(
-    null
+  const campRegs = useQuery(api.registrations.listMyCampRegistrations, {}) as
+    | CampReg[]
+    | undefined;
+  const nocowankaRegs = useQuery(
+    api.registrations.listMyNocowankaRegistrations,
+    {}
   );
 
   const firstName = useMemo(() => {
@@ -140,7 +150,46 @@ export function DashboardHome() {
     return n.split(/\s+/)[0] ?? n;
   }, [user]);
 
-  if (home === undefined || user === undefined) {
+  const upcomingEvents = useMemo(() => {
+    if (campRegs === undefined || nocowankaRegs === undefined) return undefined;
+    const now = Date.now();
+    const rows: UpcomingEventRow[] = [];
+
+    for (const reg of campRegs) {
+      const atMs = reg.camp?.startDate ?? reg._creationTime;
+      if (reg.camp?.endDate != null && reg.camp.endDate < now) continue;
+      const slug = reg.camp?.slug?.trim();
+      rows.push({
+        key: `camp-${reg._id}`,
+        href: slug ? `/obozy/${encodeURIComponent(slug)}` : "/obozy",
+        title: reg.camp?.name ?? "Obóz",
+        childLabel: `${reg.childName} ${reg.childSurname}`.trim(),
+        kindLabel: "Obóz",
+        atMs,
+        meta: reg.camp?.startDate
+          ? formatRangePl(reg.camp.startDate, reg.camp.endDate)
+          : undefined,
+        statusLabel: reg.status === "new" ? "Nowa" : (reg.status ?? "—"),
+      });
+    }
+
+    for (const reg of nocowankaRegs) {
+      rows.push({
+        key: `nocowanka-${reg._id}`,
+        href: `/obozy/nocowanki/${encodeURIComponent(reg.slug)}`,
+        title: getNocowankaDisplayName(reg.slug),
+        childLabel: `${reg.childName} ${reg.childSurname}`.trim(),
+        kindLabel: "Nocowanka",
+        atMs: reg._creationTime,
+        statusLabel: reg.status === "new" ? "Nowa" : (reg.status ?? "—"),
+      });
+    }
+
+    rows.sort((a, b) => a.atMs - b.atMs);
+    return rows.slice(0, 8);
+  }, [campRegs, nocowankaRegs]);
+
+  if (home === undefined || user === undefined || upcomingEvents === undefined) {
     return (
       <div className="mx-auto max-w-6xl animate-pulse space-y-6">
         <div className="space-y-2">
@@ -259,79 +308,61 @@ export function DashboardHome() {
 
           <section>
             <SectionHeading
-              title="Nadchodzące zajęcia"
-              href="/grafik"
-              linkLabel="Grafik"
+              title="Nadchodzące wydarzenia"
+              href="/dashboard/zapisy"
+              linkLabel="Wszystkie"
             />
-            {home.upcoming.length === 0 ? (
+            {upcomingEvents.length === 0 ? (
               <EmptyPanel
                 icon="event"
                 actionHref="/dashboard/zapisy"
                 actionLabel="Przejdź do zapisów"
               >
-                Brak zaplanowanych zajęć — zapisz dziecko na grupę.
+                Brak nadchodzących obozów i nocowanek — zapisz dziecko na
+                wydarzenie.
               </EmptyPanel>
             ) : (
               <ul className="space-y-2.5">
-                {home.upcoming.map((row, i) => (
-                  <li key={`${row.classId}-${row.atMs}-${i}`}>
-                    <button
-                      type="button"
-                      onClick={() => setClassDetail(row)}
-                      aria-label={`Szczegóły zajęć: ${row.className}`}
-                      className="flex w-full cursor-pointer items-stretch gap-3.5 rounded-2xl border border-stone-200/80 bg-white p-3.5 text-left shadow-card transition-colors hover:border-primary/35 dark:border-stone-800 dark:bg-[#2a2015] dark:shadow-card-dark dark:hover:border-primary/40 sm:gap-4 sm:p-4"
-                    >
-                      <div
-                        className={cn(
-                          "flex w-14 shrink-0 flex-col items-center justify-center rounded-xl py-2 text-center font-bold",
-                          row.schedulePending
-                            ? "bg-stone-200 text-stone-600 dark:bg-stone-700 dark:text-stone-200"
-                            : tintPill[row.tint]
-                        )}
+                {upcomingEvents.map((row) => {
+                  const d = new Date(row.atMs);
+                  const dow = DOW_PL[d.getDay()] ?? "??";
+                  const dayNum = d.getDate();
+                  return (
+                    <li key={row.key}>
+                      <Link
+                        href={row.href}
+                        className="flex items-stretch gap-3.5 rounded-2xl border border-stone-200/80 bg-white p-3.5 shadow-card transition-colors hover:border-primary/35 dark:border-stone-800 dark:bg-[#2a2015] dark:shadow-card-dark dark:hover:border-primary/40 sm:gap-4 sm:p-4"
                       >
-                        <span className="text-[10px] uppercase leading-tight opacity-90">
-                          {row.schedulePending ? "grafik" : row.dowShort}
-                        </span>
-                        <span className="text-xl leading-none">
-                          {row.schedulePending ? "…" : row.dayNum}
-                        </span>
-                      </div>
-                      <div className="min-w-0 flex-1 py-0.5">
-                        <p className="truncate font-bold text-text-main dark:text-white">
-                          {row.className}
-                        </p>
-                        <p className="mt-0.5 text-sm text-stone-500 dark:text-stone-400">
-                          {row.childFirstName}
-                          {row.schedulePending ? (
-                            <> · Godziny w grafiku</>
-                          ) : (
-                            <>
-                              {" "}
-                              · {row.startTime}–{row.endTime}
-                            </>
-                          )}
-                        </p>
-                      </div>
-                      <div className="hidden max-w-[120px] shrink-0 items-center gap-1.5 text-sm text-stone-500 dark:text-stone-400 sm:flex">
-                        <span className="material-symbols-outlined shrink-0 text-lg">
-                          location_on
-                        </span>
-                        <span className="truncate">{row.locationName}</span>
-                      </div>
-                    </button>
-                  </li>
-                ))}
+                        <div className="flex w-14 shrink-0 flex-col items-center justify-center rounded-xl bg-primary py-2 text-center font-bold text-primary-foreground">
+                          <span className="text-[10px] uppercase leading-tight opacity-90">
+                            {dow}
+                          </span>
+                          <span className="text-xl leading-none">{dayNum}</span>
+                        </div>
+                        <div className="min-w-0 flex-1 py-0.5">
+                          <p className="truncate font-bold text-text-main dark:text-white">
+                            {row.title}
+                          </p>
+                          <p className="mt-0.5 text-sm text-stone-500 dark:text-stone-400">
+                            {row.kindLabel} · {row.childLabel}
+                          </p>
+                        </div>
+                        <div className="hidden shrink-0 flex-col items-end justify-center gap-1 sm:flex">
+                          {row.meta ? (
+                            <span className="text-sm text-stone-500 dark:text-stone-400">
+                              {row.meta}
+                            </span>
+                          ) : null}
+                          <span className="text-[11px] font-bold uppercase tracking-wide text-stone-400 dark:text-stone-500">
+                            {row.statusLabel}
+                          </span>
+                        </div>
+                      </Link>
+                    </li>
+                  );
+                })}
               </ul>
             )}
-          </section>
-
-          <section>
-            <SectionHeading
-              title="Nadchodzące obozy"
-              href="/dashboard/zapisy?tab=obozy"
-              linkLabel="Wszystkie"
-            />
-            <DashboardCampRegistrations variant="rows" />
           </section>
         </div>
 
@@ -449,93 +480,6 @@ export function DashboardHome() {
           </section>
         </div>
       </div>
-
-      <Dialog
-        open={classDetail !== null}
-        onOpenChange={(open) => !open && setClassDetail(null)}
-      >
-        <DialogContent className="max-h-[85vh] overflow-y-auto border-stone-200 dark:border-stone-700 sm:max-w-md">
-          {classDetail ? (
-            <>
-              <DialogHeader>
-                <DialogTitle className="text-left text-text-main dark:text-white">
-                  {classDetail.className}
-                </DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 text-sm text-stone-500 dark:text-stone-400">
-                <div>
-                  <p className="mb-1 text-[11px] font-bold uppercase tracking-[0.14em] text-stone-400">
-                    Dyscyplina
-                  </p>
-                  <p className="text-text-main dark:text-stone-200">
-                    {classDetail.discipline}
-                  </p>
-                </div>
-                {classDetail.ageGroup ? (
-                  <div>
-                    <p className="mb-1 text-[11px] font-bold uppercase tracking-[0.14em] text-stone-400">
-                      Grupa wiekowa
-                    </p>
-                    <p className="text-text-main dark:text-stone-200">
-                      {classDetail.ageGroup}
-                    </p>
-                  </div>
-                ) : null}
-                <div>
-                  <p className="mb-1 text-[11px] font-bold uppercase tracking-[0.14em] text-stone-400">
-                    Uczestnik
-                  </p>
-                  <p className="text-text-main dark:text-stone-200">
-                    {classDetail.childFirstName}
-                  </p>
-                </div>
-                <div>
-                  <p className="mb-1 text-[11px] font-bold uppercase tracking-[0.14em] text-stone-400">
-                    Najbliższy termin
-                  </p>
-                  <p className="text-text-main dark:text-stone-200">
-                    {classDetail.schedulePending
-                      ? "Godziny ustalane są w grafiku — zobacz pełny harmonogram."
-                      : `${new Date(classDetail.atMs).toLocaleString("pl-PL", {
-                          weekday: "long",
-                          day: "numeric",
-                          month: "long",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })} (${classDetail.startTime}–${classDetail.endTime})`}
-                  </p>
-                </div>
-                <div>
-                  <p className="mb-1 text-[11px] font-bold uppercase tracking-[0.14em] text-stone-400">
-                    Lokalizacja
-                  </p>
-                  <p className="text-text-main dark:text-stone-200">
-                    {classDetail.locationName}
-                  </p>
-                  {classDetail.locationDetail ? (
-                    <p className="mt-1">{classDetail.locationDetail}</p>
-                  ) : null}
-                </div>
-                {classDetail.description ? (
-                  <div>
-                    <p className="mb-1 text-[11px] font-bold uppercase tracking-[0.14em] text-stone-400">
-                      Opis
-                    </p>
-                    <p className="whitespace-pre-wrap leading-relaxed text-text-main dark:text-stone-300">
-                      {classDetail.description}
-                    </p>
-                  </div>
-                ) : null}
-              </div>
-              <Button asChild className="mt-2 h-11 w-full rounded-xl font-bold">
-                <Link href="/grafik" onClick={() => setClassDetail(null)}>
-                  Zobacz grafik zajęć
-                </Link>
-              </Button>
-            </>
-          ) : null}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

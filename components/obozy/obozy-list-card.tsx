@@ -1,6 +1,9 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRightIcon } from "@/components/icons/arrow-right";
+import { SignupRequireChildLink } from "@/components/signup/signup-require-child-link";
 import { cn } from "@/lib/utils";
 
 export type ObozyListCardMeta = {
@@ -24,6 +27,8 @@ type ObozyListCardProps = {
   statusBadge?: { label: string; tone: "danger" | "muted" | "primary" | "info" } | null;
   notice?: string | null;
   ctaDisabled?: boolean;
+  /** Outline “Zapisany” style when disabled due to enrollment */
+  ctaEnrolled?: boolean;
 };
 
 function statusBadgeClass(tone: NonNullable<ObozyListCardProps["statusBadge"]>["tone"]) {
@@ -55,6 +60,7 @@ export function ObozyListCard({
   statusBadge,
   notice,
   ctaDisabled = false,
+  ctaEnrolled = false,
 }: ObozyListCardProps) {
   return (
     <article className="group relative grid overflow-hidden border-b border-stone-200/80 pb-8 last:border-b-0 transition-[box-shadow,transform] duration-300 dark:border-stone-800 md:rounded-2xl md:border md:bg-white md:pb-0 md:shadow-card md:last:border hover:md:-translate-y-0.5 hover:md:shadow-card-hover motion-reduce:hover:md:translate-y-0 dark:md:bg-[#2a2015] dark:md:shadow-card-dark dark:hover:md:shadow-card-dark-hover lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1.15fr)]">
@@ -137,17 +143,24 @@ export function ObozyListCard({
           </div>
 
           {ctaDisabled ? (
-            <span className="inline-flex h-11 items-center justify-center rounded-xl bg-stone-200 px-5 text-sm font-semibold text-stone-500 dark:bg-stone-800 dark:text-stone-400">
+            <span
+              className={cn(
+                "inline-flex h-11 items-center justify-center rounded-xl px-5 text-sm font-semibold",
+                ctaEnrolled
+                  ? "border border-primary/40 bg-transparent text-primary"
+                  : "bg-stone-200 text-stone-500 dark:bg-stone-800 dark:text-stone-400"
+              )}
+            >
               {ctaLabel}
             </span>
           ) : (
-            <Link
+            <SignupRequireChildLink
               href={ctaHref}
               className="pointer-events-auto inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-sm transition-colors hover:bg-primary-hover"
             >
               {ctaLabel}
               <ArrowRightIcon className="text-[1em] transition-transform duration-300 group-hover:translate-x-0.5" />
-            </Link>
+            </SignupRequireChildLink>
           )}
         </div>
       </div>

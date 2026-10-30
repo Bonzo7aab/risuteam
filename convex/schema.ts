@@ -379,4 +379,12 @@ export default defineSchema({
     .index("by_email", ["emailNormalized"])
     .index("by_token", ["unsubscribeToken"])
     .index("by_subscribed", ["subscribed"]),
+
+  /** Singleton app settings (one doc with key "global"). */
+  siteSettings: defineTable({
+    key: v.literal("global"),
+    classesRegistrationAndPaymentsEnabled: v.boolean(),
+    updatedAt: v.number(),
+    updatedByUserId: v.optional(v.id("users")),
+  }).index("by_key", ["key"]),
 });

@@ -25,6 +25,7 @@ import {
   nocowankaDueAmountPln,
   recordPaymentLedger,
 } from "./billingHelpers";
+import { assertClassesEnrollmentPaymentsEnabled } from "./siteSettings";
 
 const BREVO_SMTP_URL = "https://api.brevo.com/v3/smtp/email";
 
@@ -310,6 +311,7 @@ export const setClassSubscriptionsPaymentStatusForAdmin = mutation({
   returns: v.null(),
   handler: async (ctx, args) => {
     const admin = await requireAdmin(ctx);
+    await assertClassesEnrollmentPaymentsEnabled(ctx);
     await expirePaymentHolds(ctx);
     const current = billingPeriodForDate();
 
@@ -398,6 +400,7 @@ export const setClassMonthPaymentStatusForAdmin = mutation({
   returns: v.null(),
   handler: async (ctx, args) => {
     const admin = await requireAdmin(ctx);
+    await assertClassesEnrollmentPaymentsEnabled(ctx);
     if (args.month < 1 || args.month > 12) {
       throw new Error("Nieprawidłowy miesiąc.");
     }
@@ -454,6 +457,153 @@ export const setClassMonthPaymentStatusForAdmin = mutation({
       });
     }
     return null;
+  },
+});
+
+/**
+ * Parent: camp + nocowanka payment rows (amounts in PLN, same as admin).
+ */
+export const listMyEventPayments = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await requireAuthUserId(ctx);
+    const user = await ctx.db.get("users", userId);
+    const email = user?.email ?? null;
+
+    const campByUser = await ctx.db
+      .query("registrations")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .collect();
+    const campByEmail = email
+      ? await ctx.db
+          .query("registrations")
+          .withIndex("by_parent_email", (q) => q.eq("parentEmail", email))
+          .collect()
+      : [];
+    const campSeen = new Set(campByUser.map((r) => r._id));
+    const campCombined = [...campByUser];
+    for (const r of campByEmail) {
+      if (!campSeen.has(r._id)) {
+        campSeen.add(r._id);
+        campCombined.push(r);
+      }
+    }
+    const campBest = new Map<string, (typeof campCombined)[number]>();
+    for (const r of campCombined) {
+      const key = `${r.campId}|${r.childName.trim().toLowerCase()}|${r.childSurname.trim().toLowerCase()}`;
+      const prev = campBest.get(key);
+      if (!prev || r._creationTime > prev._creationTime) campBest.set(key, r);
+    }
+    const campRegs = [...campBest.values()];
+
+    const nocByUser = await ctx.db
+      .query("nocowankaRegistrations")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .collect();
+    const nocByEmail = email
+      ? await ctx.db
+          .query("nocowankaRegistrations")
+          .withIndex("by_parent_email", (q) => q.eq("parentEmail", email))
+          .collect()
+      : [];
+    const nocSeen = new Set(nocByUser.map((r) => r._id));
+    const nocCombined = [...nocByUser];
+    for (const r of nocByEmail) {
+      if (!nocSeen.has(r._id)) {
+        nocSeen.add(r._id);
+        nocCombined.push(r);
+      }
+    }
+    const nocBest = new Map<string, (typeof nocCombined)[number]>();
+    for (const r of nocCombined) {
+      const key = `${r.slug.trim().toLowerCase()}|${r.childName.trim().toLowerCase()}|${r.childSurname.trim().toLowerCase()}`;
+      const prev = nocBest.get(key);
+      if (!prev || r._creationTime > prev._creationTime) nocBest.set(key, r);
+    }
+    const nocRegs = [...nocBest.values()];
+
+    const campIds = [...new Set(campRegs.map((r) => r.campId))];
+    const camps = await Promise.all(
+      campIds.map((id) => ctx.db.get("camps", id))
+    );
+    const campMap = new Map(
+      camps.filter(Boolean).map((c) => [c!._id, c!] as const)
+    );
+
+    const nocowanki = await ctx.db.query("nocowanki").collect();
+    const nocowankaMap = new Map(nocowanki.map((n) => [n.slug, n]));
+
+    type Row = {
+      id: string;
+      source: "camp" | "nocowanka";
+      eventName: string;
+      childName: string;
+      href: string;
+      paymentStatus: "paid" | "partial" | "unpaid";
+      amountPln: number;
+      amountPaidPln: number;
+      duePln: number;
+      date: number;
+    };
+
+    const rows: Row[] = [];
+
+    for (const r of campRegs) {
+      const camp = campMap.get(r.campId);
+      const amountPln = campDueAmountPln(camp);
+      const amountPaidPln = r.amountPaid ?? 0;
+      const paymentStatus = r.paymentStatus ?? "unpaid";
+      const duePln =
+        paymentStatus === "paid"
+          ? 0
+          : Math.max(0, amountPln - amountPaidPln);
+      const slug = camp?.slug?.trim();
+      rows.push({
+        id: `camp-${r._id}`,
+        source: "camp",
+        eventName: camp?.name ?? "Obóz",
+        childName: `${r.childName} ${r.childSurname}`.trim(),
+        href: slug ? `/obozy/${encodeURIComponent(slug)}` : "/obozy",
+        paymentStatus,
+        amountPln,
+        amountPaidPln,
+        duePln,
+        date: r._creationTime,
+      });
+    }
+
+    for (const r of nocRegs) {
+      const nocowanka = nocowankaMap.get(r.slug);
+      const amountPln = nocowankaDueAmountPln(nocowanka);
+      const amountPaidPln = r.amountPaid ?? 0;
+      const paymentStatus = r.paymentStatus ?? "unpaid";
+      const duePln =
+        paymentStatus === "paid"
+          ? 0
+          : Math.max(0, amountPln - amountPaidPln);
+      rows.push({
+        id: `nocowanka-${r._id}`,
+        source: "nocowanka",
+        eventName: nocowanka?.name ?? r.slug,
+        childName: `${r.childName} ${r.childSurname}`.trim(),
+        href: `/obozy/nocowanki/${encodeURIComponent(r.slug)}`,
+        paymentStatus,
+        amountPln,
+        amountPaidPln,
+        duePln,
+        date: r._creationTime,
+      });
+    }
+
+    rows.sort((a, b) => b.date - a.date);
+    const dueRows = rows.filter((r) => r.duePln > 0);
+    return {
+      rows,
+      dueRows,
+      pendingCount: dueRows.length,
+      pendingTotalPln: dueRows.reduce((sum, r) => sum + r.duePln, 0),
+      paidCount: rows.filter((r) => r.paymentStatus === "paid").length,
+    };
   },
 });
 
@@ -540,6 +690,7 @@ export const ensureClassInvoicesThroughCurrentMonth = mutation({
   returns: v.object({ subscriptionsProcessed: v.number(), invoicesCreated: v.number() }),
   handler: async (ctx) => {
     await requireAdmin(ctx);
+    await assertClassesEnrollmentPaymentsEnabled(ctx);
     return await ensureAllActiveSubscriptionInvoices(ctx);
   },
 });
@@ -576,6 +727,10 @@ export const sendClassPaymentReminderEmail = action({
     const me = await ctx.runQuery(api.authHelpers.getCurrentUser, {});
     if (!me || me.role !== "admin") {
       throw new Error("Brak uprawnień.");
+    }
+    const settings = await ctx.runQuery(api.siteSettings.get, {});
+    if (!settings.classesRegistrationAndPaymentsEnabled) {
+      throw new Error("Nie udało się wysłać przypomnienia.");
     }
     const contact = await ctx.runQuery(
       api.payments.getUserContactForClassReminder,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -12,11 +12,13 @@ import { DobPicker } from "@/components/ui/dob-picker";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ArrowRightIcon } from "@/components/icons/arrow-right";
+import { cn } from "@/lib/utils";
 
 function formatChildDob(raw?: string): string | null {
   if (!raw?.trim()) return null;
@@ -50,6 +52,58 @@ type ChildFormFieldsProps = {
   popoverContainer?: HTMLElement | null;
 };
 
+const fieldInputClassName =
+  "h-12 rounded-xl border-stone-200 bg-white px-4 text-sm shadow-none transition-colors placeholder:text-stone-400 focus-visible:border-primary/40 focus-visible:ring-primary/20 dark:border-stone-700 dark:bg-stone-950/50 dark:placeholder:text-stone-500";
+
+function FieldLabel({
+  htmlFor,
+  children,
+  required,
+}: {
+  htmlFor: string;
+  children: ReactNode;
+  required?: boolean;
+}) {
+  return (
+    <Label
+      htmlFor={htmlFor}
+      className="mb-0 block text-sm font-semibold leading-5 tracking-normal text-stone-700 dark:text-stone-200"
+    >
+      {children}
+      {required ? (
+        <span className="ml-1 font-semibold text-primary" aria-hidden>
+          *
+        </span>
+      ) : (
+        <span className="ml-1.5 text-xs font-medium text-stone-400 dark:text-stone-500">
+          opcjonalne
+        </span>
+      )}
+    </Label>
+  );
+}
+
+function FieldGroup({
+  htmlFor,
+  label,
+  required,
+  children,
+}: {
+  htmlFor: string;
+  label: string;
+  required?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <div className="flex flex-col gap-3">
+      <FieldLabel htmlFor={htmlFor} required={required}>
+        {label}
+      </FieldLabel>
+      {children}
+    </div>
+  );
+}
+
 function ChildFormFields({
   idPrefix,
   firstName,
@@ -65,66 +119,160 @@ function ChildFormFields({
   popoverContainer,
 }: ChildFormFieldsProps) {
   return (
-    <div className="space-y-4">
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor={`${idPrefix}-firstName`}>Imię *</Label>
-          <Input
-            id={`${idPrefix}-firstName`}
-            value={firstName}
-            onChange={(e) => onFirstName(e.target.value)}
-            placeholder="np. Anna"
+    <div className="space-y-8">
+      <section className="space-y-5">
+        <div className="space-y-1.5">
+          <h3 className="text-sm font-bold text-text-main dark:text-white">
+            Dane podstawowe
+          </h3>
+          <p className="text-sm leading-relaxed text-stone-500 dark:text-stone-400">
+            Imię i nazwisko są wymagane do utworzenia profilu.
+          </p>
+        </div>
+        <div className="grid gap-6 sm:grid-cols-2">
+          <FieldGroup
+            htmlFor={`${idPrefix}-firstName`}
+            label="Imię"
             required
-            className="h-11 rounded-xl"
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor={`${idPrefix}-lastName`}>Nazwisko *</Label>
-          <Input
-            id={`${idPrefix}-lastName`}
-            value={lastName}
-            onChange={(e) => onLastName(e.target.value)}
-            placeholder="np. Kowalska"
+          >
+            <Input
+              id={`${idPrefix}-firstName`}
+              value={firstName}
+              onChange={(e) => onFirstName(e.target.value)}
+              placeholder="np. Anna"
+              required
+              autoComplete="given-name"
+              className={fieldInputClassName}
+            />
+          </FieldGroup>
+          <FieldGroup
+            htmlFor={`${idPrefix}-lastName`}
+            label="Nazwisko"
             required
-            className="h-11 rounded-xl"
-          />
+          >
+            <Input
+              id={`${idPrefix}-lastName`}
+              value={lastName}
+              onChange={(e) => onLastName(e.target.value)}
+              placeholder="np. Kowalska"
+              required
+              autoComplete="family-name"
+              className={fieldInputClassName}
+            />
+          </FieldGroup>
         </div>
-      </div>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor={`${idPrefix}-dob`}>Data urodzenia</Label>
-          <DobPicker
-            id={`${idPrefix}-dob`}
-            valueYmd={dateOfBirth}
-            onChangeYmd={onDateOfBirth}
-            inDialog={inDialog}
-            popoverContainer={popoverContainer}
-          />
+      </section>
+
+      <section className="space-y-5 border-t border-stone-100 pt-8 dark:border-stone-800">
+        <div className="space-y-1.5">
+          <h3 className="text-sm font-bold text-text-main dark:text-white">
+            Dane dodatkowe
+          </h3>
+          <p className="text-sm leading-relaxed text-stone-500 dark:text-stone-400">
+            Ułatwiają dopasowanie grupy i formalności przy zapisach.
+          </p>
         </div>
-        <div className="space-y-2">
-          <Label htmlFor={`${idPrefix}-pesel`}>PESEL</Label>
-          <Input
-            id={`${idPrefix}-pesel`}
-            value={pesel}
-            onChange={(e) => onPesel(e.target.value)}
-            placeholder="11 cyfr"
-            inputMode="numeric"
-            className="h-11 rounded-xl"
-          />
+        <div className="grid gap-6 sm:grid-cols-2">
+          <FieldGroup htmlFor={`${idPrefix}-dob`} label="Data urodzenia">
+            <DobPicker
+              id={`${idPrefix}-dob`}
+              valueYmd={dateOfBirth}
+              onChangeYmd={onDateOfBirth}
+              inDialog={inDialog}
+              popoverContainer={popoverContainer}
+              className={cn(
+                fieldInputClassName,
+                "font-normal hover:bg-white dark:hover:bg-stone-950/50"
+              )}
+            />
+          </FieldGroup>
+          <FieldGroup htmlFor={`${idPrefix}-pesel`} label="PESEL">
+            <Input
+              id={`${idPrefix}-pesel`}
+              value={pesel}
+              onChange={(e) => onPesel(e.target.value)}
+              placeholder="11 cyfr"
+              inputMode="numeric"
+              autoComplete="off"
+              className={fieldInputClassName}
+            />
+          </FieldGroup>
         </div>
-      </div>
+        <p className="flex items-start gap-3 rounded-xl border border-stone-200/80 bg-stone-50/80 px-4 py-3.5 text-xs leading-relaxed text-stone-500 dark:border-stone-800 dark:bg-stone-950/40 dark:text-stone-400">
+          <span
+            className="material-symbols-outlined mt-0.5 text-[18px] text-primary/80"
+            aria-hidden
+          >
+            lock
+          </span>
+          <span>
+            PESEL jest przechowywany bezpiecznie i wykorzystywany wyłącznie do
+            organizacji zajęć oraz wyjazdów.
+          </span>
+        </p>
+      </section>
+
       {error ? (
         <div
           role="alert"
-          className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-3.5 py-3 text-sm text-red-800 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-200"
+          className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3.5 text-sm text-red-800 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-200"
         >
-          <span className="material-symbols-outlined mt-0.5 text-[18px]" aria-hidden>
+          <span className="material-symbols-outlined mt-0.5 text-[20px]" aria-hidden>
             error
           </span>
-          <span>{error}</span>
+          <span className="leading-relaxed">{error}</span>
         </div>
       ) : null}
     </div>
+  );
+}
+
+function ChildDialogShell({
+  mode,
+  children,
+  footer,
+}: {
+  mode: "add" | "edit";
+  children: ReactNode;
+  footer: ReactNode;
+}) {
+  const isAdd = mode === "add";
+  return (
+    <>
+      <DialogHeader className="space-y-0 border-b border-stone-100 pb-7 text-left dark:border-stone-800">
+        <div className="flex items-start gap-4">
+          <span
+            className={cn(
+              "flex size-11 shrink-0 items-center justify-center rounded-xl",
+              isAdd
+                ? "bg-primary/12 text-primary"
+                : "bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-300"
+            )}
+          >
+            <span className="material-symbols-outlined text-[22px]" aria-hidden>
+              {isAdd ? "person_add" : "edit"}
+            </span>
+          </span>
+          <div className="min-w-0 space-y-2.5 pt-0.5">
+            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-primary">
+              Moje dzieci
+            </p>
+            <DialogTitle className="text-xl font-black leading-snug tracking-tight text-text-main dark:text-white sm:text-2xl">
+              {isAdd ? "Dodaj dziecko" : "Edytuj dane dziecka"}
+            </DialogTitle>
+            <DialogDescription className="max-w-md text-sm leading-relaxed text-stone-500 dark:text-stone-400">
+              {isAdd
+                ? "Utwórz profil dziecka — dane wykorzystamy przy zapisach na obozy i nocowanki."
+                : "Zaktualizuj dane profilu. Zmiany będą widoczne przy kolejnych zapisach."}
+            </DialogDescription>
+          </div>
+        </div>
+      </DialogHeader>
+      <div className="py-8 sm:py-9">{children}</div>
+      <DialogFooter className="gap-3 border-t border-stone-100 pt-6 dark:border-stone-800 sm:justify-end sm:gap-3">
+        {footer}
+      </DialogFooter>
+    </>
   );
 }
 
@@ -392,15 +540,41 @@ export default function DzieciPage() {
       >
         <DialogContent
           ref={setAddDialogSurface}
-          className="overflow-visible border-stone-200 dark:border-stone-700 sm:max-w-lg"
+          className="gap-0 overflow-visible rounded-2xl border-stone-200/90 p-0 shadow-card dark:border-stone-800 dark:bg-[#2a2015] dark:shadow-card-dark sm:max-w-[34rem]"
         >
-          <form onSubmit={handleAddSubmit}>
-            <DialogHeader>
-              <DialogTitle className="text-text-main dark:text-white">
-                Dodaj dziecko
-              </DialogTitle>
-            </DialogHeader>
-            <div className="py-2">
+          <form
+            onSubmit={handleAddSubmit}
+            className="space-y-0 px-6 py-7 sm:px-8 sm:py-8"
+          >
+            <ChildDialogShell
+              mode="add"
+              footer={
+                <>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="h-11 min-w-[7rem] rounded-xl border-stone-200 font-semibold dark:border-stone-700"
+                    onClick={closeAddDialog}
+                    disabled={pending}
+                  >
+                    Anuluj
+                  </Button>
+                  <Button
+                    type="submit"
+                    className="h-11 min-w-[9.5rem] rounded-xl px-5 font-bold"
+                    disabled={pending}
+                  >
+                    <span
+                      className="material-symbols-outlined mr-2 text-[20px]"
+                      aria-hidden
+                    >
+                      {pending ? "progress_activity" : "person_add"}
+                    </span>
+                    {pending ? "Dodawanie…" : "Dodaj dziecko"}
+                  </Button>
+                </>
+              }
+            >
               <ChildFormFields
                 idPrefix="add"
                 firstName={firstName}
@@ -415,21 +589,7 @@ export default function DzieciPage() {
                 inDialog
                 popoverContainer={addDialogSurface}
               />
-            </div>
-            <DialogFooter className="gap-2 sm:gap-0">
-              <Button
-                type="button"
-                variant="outline"
-                className="rounded-xl"
-                onClick={closeAddDialog}
-                disabled={pending}
-              >
-                Anuluj
-              </Button>
-              <Button type="submit" className="rounded-xl font-bold" disabled={pending}>
-                {pending ? "Dodawanie…" : "Dodaj dziecko"}
-              </Button>
-            </DialogFooter>
+            </ChildDialogShell>
           </form>
         </DialogContent>
       </Dialog>
@@ -437,15 +597,35 @@ export default function DzieciPage() {
       <Dialog open={editOpen} onOpenChange={(o) => !o && closeEditDialog()}>
         <DialogContent
           ref={setEditDialogSurface}
-          className="overflow-visible border-stone-200 dark:border-stone-700 sm:max-w-lg"
+          className="gap-0 overflow-visible rounded-2xl border-stone-200/90 p-0 shadow-card dark:border-stone-800 dark:bg-[#2a2015] dark:shadow-card-dark sm:max-w-[34rem]"
         >
-          <form onSubmit={handleEditSubmit}>
-            <DialogHeader>
-              <DialogTitle className="text-text-main dark:text-white">
-                Edytuj dane dziecka
-              </DialogTitle>
-            </DialogHeader>
-            <div className="py-2">
+          <form
+            onSubmit={handleEditSubmit}
+            className="space-y-0 px-6 py-7 sm:px-8 sm:py-8"
+          >
+            <ChildDialogShell
+              mode="edit"
+              footer={
+                <>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="h-11 min-w-[7rem] rounded-xl border-stone-200 font-semibold dark:border-stone-700"
+                    onClick={closeEditDialog}
+                    disabled={editPending}
+                  >
+                    Anuluj
+                  </Button>
+                  <Button
+                    type="submit"
+                    className="h-11 min-w-[9.5rem] rounded-xl px-5 font-bold"
+                    disabled={editPending}
+                  >
+                    {editPending ? "Zapisywanie…" : "Zapisz zmiany"}
+                  </Button>
+                </>
+              }
+            >
               <ChildFormFields
                 idPrefix="edit"
                 firstName={editFirstName}
@@ -460,25 +640,7 @@ export default function DzieciPage() {
                 inDialog
                 popoverContainer={editDialogSurface}
               />
-            </div>
-            <DialogFooter className="gap-2 sm:gap-0">
-              <Button
-                type="button"
-                variant="outline"
-                className="rounded-xl"
-                onClick={closeEditDialog}
-                disabled={editPending}
-              >
-                Anuluj
-              </Button>
-              <Button
-                type="submit"
-                className="rounded-xl font-bold"
-                disabled={editPending}
-              >
-                {editPending ? "Zapisywanie…" : "Zapisz zmiany"}
-              </Button>
-            </DialogFooter>
+            </ChildDialogShell>
           </form>
         </DialogContent>
       </Dialog>

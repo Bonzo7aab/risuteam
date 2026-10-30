@@ -2,8 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { campRegistrationCtaHref } from "@/lib/camp-registration-links";
-import { Button } from "@/components/ui/button";
+import {
+  campRegistrationCtaHref,
+  eventSignupCta,
+} from "@/lib/camp-registration-links";
+import { SignupRequireChildLink } from "@/components/signup/signup-require-child-link";
+import { cn } from "@/lib/utils";
 
 export type CampHeroProps = {
   badge: string;
@@ -25,6 +29,8 @@ export type CampHeroProps = {
   /** Rejestracja — primary CTA */
   registrationHref?: string;
   isRegistrationClosed?: boolean;
+  /** Parent already has an active registration for this event */
+  isEnrolled?: boolean;
   /** Optional price shown in the split info panel */
   price?: string;
   /** Explicit layout; defaults to fullBleed when no `title`, or when layout="fullBleed" */
@@ -99,6 +105,7 @@ export function CampHero({
   backLink,
   registrationHref,
   isRegistrationClosed = false,
+  isEnrolled = false,
   price,
   layout,
   ctaPrimary,
@@ -107,6 +114,12 @@ export function CampHero({
   const useCardLayout = layout === "card" || (layout == null && title != null);
   const displayTitle =
     title ?? ([titlePart1, titlePart2].filter(Boolean).join(" ").trim() || "Obóz");
+  const signupCta = eventSignupCta({ isRegistrationClosed, isEnrolled });
+  const signupCtaNow = eventSignupCta({
+    isRegistrationClosed,
+    isEnrolled,
+    openLabel: "Zapisz się teraz",
+  });
 
   if (layout === "split") {
     const registerHref = registrationHref
@@ -181,26 +194,20 @@ export function CampHero({
                 {registerHref || secondaryLink ? (
                   <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
                     {registerHref ? (
-                      <Button
-                        asChild
-                        className="h-11 w-full min-w-[11.5rem] rounded-xl px-6 text-sm font-bold sm:w-auto"
-                        disabled={isRegistrationClosed}
+                      <SignupRequireChildLink
+                        href={registerHref}
+                        disabled={signupCta.disabled}
+                        className={cn(
+                          "inline-flex h-11 w-full min-w-[11.5rem] items-center justify-center rounded-xl px-6 text-sm font-bold shadow-sm transition-colors sm:w-auto",
+                          signupCta.isEnrolled
+                            ? "border border-primary/40 bg-transparent text-primary"
+                            : signupCta.disabled
+                              ? "cursor-not-allowed bg-stone-200 text-stone-500 dark:bg-stone-800 dark:text-stone-400"
+                              : "bg-primary text-primary-foreground hover:bg-primary-hover"
+                        )}
                       >
-                        <Link
-                          href={registerHref}
-                          onClick={(e) => {
-                            if (isRegistrationClosed) e.preventDefault();
-                          }}
-                          aria-disabled={isRegistrationClosed}
-                          className={
-                            isRegistrationClosed
-                              ? "pointer-events-none cursor-not-allowed opacity-70"
-                              : ""
-                          }
-                        >
-                          {isRegistrationClosed ? "Rejestracja zakończona" : "Zapisz się"}
-                        </Link>
-                      </Button>
+                        {signupCta.label}
+                      </SignupRequireChildLink>
                     ) : null}
                     {secondaryLink ? (
                       <Link
@@ -224,12 +231,13 @@ export function CampHero({
     const primaryCta =
       registrationHref != null
         ? {
-            label: isRegistrationClosed ? "Rejestracja zakończona" : "Zapisz się teraz",
+            label: signupCtaNow.label,
             href: campRegistrationCtaHref(registrationHref, isRegistrationClosed),
-            disabled: isRegistrationClosed,
+            disabled: signupCtaNow.disabled,
+            isEnrolled: signupCtaNow.isEnrolled,
           }
         : ctaPrimary
-          ? { ...ctaPrimary, disabled: false }
+          ? { ...ctaPrimary, disabled: false, isEnrolled: false }
           : null;
 
     return (
@@ -281,20 +289,20 @@ export function CampHero({
             </ul>
             <div className="flex flex-wrap gap-3">
               {primaryCta ? (
-                <Link
+                <SignupRequireChildLink
                   href={primaryCta.href}
-                  onClick={(e) => {
-                    if (primaryCta.disabled) e.preventDefault();
-                  }}
-                  className={`inline-flex items-center justify-center rounded-xl px-6 py-3 text-sm font-bold transition-colors ${
-                    primaryCta.disabled
-                      ? "cursor-not-allowed bg-white/25 text-white/80"
-                      : "bg-primary text-primary-foreground hover:bg-primary/90"
-                  }`}
-                  aria-disabled={primaryCta.disabled}
+                  disabled={primaryCta.disabled}
+                  className={cn(
+                    "inline-flex items-center justify-center rounded-xl px-6 py-3 text-sm font-bold transition-colors",
+                    primaryCta.isEnrolled
+                      ? "cursor-default border border-white/50 bg-transparent text-white"
+                      : primaryCta.disabled
+                        ? "cursor-not-allowed bg-white/25 text-white/80"
+                        : "bg-primary text-primary-foreground hover:bg-primary/90"
+                  )}
                 >
                   {primaryCta.label}
-                </Link>
+                </SignupRequireChildLink>
               ) : null}
               {ctaSecondary ? (
                 <Link
@@ -341,20 +349,20 @@ export function CampHero({
             {registrationHref ? (
               <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 bg-linear-to-t from-black/65 via-black/25 to-transparent pt-16 pb-4 px-4">
                 <div className="pointer-events-auto mx-auto w-full max-w-md">
-                  <Link
+                  <SignupRequireChildLink
                     href={campRegistrationCtaHref(registrationHref, isRegistrationClosed)}
-                    onClick={(e) => {
-                      if (isRegistrationClosed) e.preventDefault();
-                    }}
-                    className={`flex w-full items-center justify-center rounded-xl px-5 py-3 text-sm font-bold shadow-lg transition-colors ${
-                      isRegistrationClosed
-                        ? "cursor-not-allowed bg-white/25 text-white/80"
-                        : "bg-primary text-primary-foreground hover:bg-primary/90"
-                    }`}
-                    aria-disabled={isRegistrationClosed}
+                    disabled={signupCta.disabled}
+                    className={cn(
+                      "flex w-full items-center justify-center rounded-xl px-5 py-3 text-sm font-bold shadow-lg transition-colors",
+                      signupCta.isEnrolled
+                        ? "cursor-default border border-white/50 bg-transparent text-white"
+                        : signupCta.disabled
+                          ? "cursor-not-allowed bg-white/25 text-white/80"
+                          : "bg-primary text-primary-foreground hover:bg-primary/90"
+                    )}
                   >
-                    {isRegistrationClosed ? "Rejestracja zakończona" : "Zapisz się"}
-                  </Link>
+                    {signupCta.label}
+                  </SignupRequireChildLink>
                 </div>
               </div>
             ) : null}
@@ -425,20 +433,20 @@ export function CampHero({
           {registrationHref || secondaryLink ? (
             <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
               {registrationHref ? (
-                <Link
+                <SignupRequireChildLink
                   href={campRegistrationCtaHref(registrationHref, isRegistrationClosed)}
-                  onClick={(e) => {
-                    if (isRegistrationClosed) e.preventDefault();
-                  }}
-                  className={`inline-flex w-full items-center justify-center rounded-xl px-6 py-3 text-sm font-bold shadow-md transition-colors sm:w-auto ${
-                    isRegistrationClosed
-                      ? "cursor-not-allowed bg-white/20 text-white/75"
-                      : "bg-primary text-primary-foreground hover:bg-primary/90"
-                  }`}
-                  aria-disabled={isRegistrationClosed}
+                  disabled={signupCta.disabled}
+                  className={cn(
+                    "inline-flex w-full items-center justify-center rounded-xl px-6 py-3 text-sm font-bold shadow-md transition-colors sm:w-auto",
+                    signupCta.isEnrolled
+                      ? "cursor-default border border-white/50 bg-transparent text-white"
+                      : signupCta.disabled
+                        ? "cursor-not-allowed bg-white/20 text-white/75"
+                        : "bg-primary text-primary-foreground hover:bg-primary/90"
+                  )}
                 >
-                  {isRegistrationClosed ? "Rejestracja zakończona" : "Zapisz się"}
-                </Link>
+                  {signupCta.label}
+                </SignupRequireChildLink>
               ) : null}
               {secondaryLink ? (
                 <a

@@ -239,6 +239,7 @@ function ClassCard({
   onAdminEdit,
   activeClassId,
   onHoverClassId,
+  enrollmentEnabled = true,
 }: {
   slot: ScheduleSlot;
   /** All weekly occurrences of the same class (payment bundle). */
@@ -266,6 +267,8 @@ function ClassCard({
   /** Hover/focus synchronization across all occurrences of same class. */
   activeClassId?: Id<"classes"> | null;
   onHoverClassId?: (classId: Id<"classes"> | null) => void;
+  /** When false, hide new-enroll CTAs (class signups globally disabled). */
+  enrollmentEnabled?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [enrollPending, setEnrollPending] = useState(false);
@@ -482,17 +485,19 @@ function ClassCard({
           <Button
             type="button"
             size="sm"
-            variant={isEnrolled ? "outline" : "default"}
+            variant={isEnrolled || !enrollmentEnabled ? "outline" : "default"}
             className={cn(
               "h-7 shrink-0 rounded-lg px-2.5 text-[11px] font-bold",
-              !isEnrolled && "bg-primary hover:bg-primary-hover"
+              !isEnrolled &&
+                enrollmentEnabled &&
+                "bg-primary hover:bg-primary-hover"
             )}
             onClick={(e) => {
               e.stopPropagation();
               handlePrimaryOpen();
             }}
           >
-            {isEnrolled ? "Szczegóły" : "Zapisz"}
+            {isEnrolled || !enrollmentEnabled ? "Szczegóły" : "Zapisz"}
           </Button>
         )}
       </div>
@@ -563,7 +568,7 @@ function ClassCard({
 
   const detailsActions = (
     <div className="space-y-3">
-      {!isLoggedIn && (
+      {enrollmentEnabled && !isLoggedIn && (
         <Link
           href={`/logowanie?redirect=${encodeURIComponent(signInRedirectPath)}`}
           className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary text-sm font-bold text-primary-foreground shadow-sm transition-colors hover:bg-primary-hover"
@@ -649,7 +654,7 @@ function ClassCard({
         </div>
       )}
 
-      {isLoggedIn && !hasChildren && (
+      {enrollmentEnabled && isLoggedIn && !hasChildren && (
         <div className="space-y-3 rounded-xl border border-stone-200/80 bg-orange-50/70 p-3.5 dark:border-stone-800 dark:bg-primary/10">
           <p className="text-sm leading-relaxed text-stone-600 dark:text-stone-300">
             Dodaj profil dziecka, aby zapisać je na te zajęcia.
@@ -663,7 +668,10 @@ function ClassCard({
         </div>
       )}
 
-      {isLoggedIn && hasChildren && !allChildrenEnrolled && (
+      {enrollmentEnabled &&
+        isLoggedIn &&
+        hasChildren &&
+        !allChildrenEnrolled && (
         <div className="space-y-3">
           <div className="space-y-2">
             <label
@@ -918,6 +926,13 @@ export function ScheduleView({
   );
   const enrollInClass = useMutation(api.subscriptions.enrollInClass);
   const cancelEnrollment = useMutation(api.subscriptions.cancelEnrollment);
+  const siteSettings = useQuery(
+    api.siteSettings.get,
+    isAdminMode ? "skip" : {}
+  );
+  const enrollmentEnabled =
+    isAdminMode ||
+    (siteSettings?.classesRegistrationAndPaymentsEnabled ?? false);
 
   const { byKey, times } = useMemo(() => {
     if (!schedule)
@@ -1088,7 +1103,7 @@ export function ScheduleView({
   const headingTitle = pageTitle ?? "Grafik zajęć";
   const headingDescription =
     pageDescription ??
-    "Wybierz dyscyplinę i grupę wiekową. Kliknij na zajęcia, aby zobaczyć szczegóły i zapisać się.";
+    "Wybierz dyscyplinę i grupę wiekową. Kliknij na zajęcia, aby zobaczyć szczegóły.";
 
   const visibleDays = useMemo(
     () =>
@@ -1366,6 +1381,7 @@ export function ScheduleView({
                                   ? onAdminSelectClass
                                   : undefined
                               }
+                              enrollmentEnabled={enrollmentEnabled}
                             />
                           ))}
                         </div>
@@ -1463,6 +1479,7 @@ export function ScheduleView({
                                         ? onAdminSelectClass
                                         : undefined
                                     }
+                                    enrollmentEnabled={enrollmentEnabled}
                                   />
                                 ))}
                               </div>
@@ -1482,6 +1499,7 @@ export function ScheduleView({
       )}
 
       {!isAdminMode &&
+        enrollmentEnabled &&
         isLoggedIn &&
         !hasChildren &&
         schedule !== undefined &&

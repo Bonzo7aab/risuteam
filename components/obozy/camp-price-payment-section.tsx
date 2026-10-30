@@ -1,7 +1,9 @@
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { campRegistrationCtaHref } from "@/lib/camp-registration-links";
-import { sectionSurfaceSoft } from "@/lib/utils";
+import {
+  campRegistrationCtaHref,
+  eventSignupCta,
+} from "@/lib/camp-registration-links";
+import { SignupRequireChildLink } from "@/components/signup/signup-require-child-link";
+import { cn, sectionSurfaceSoft } from "@/lib/utils";
 
 export type InstallmentRow = {
   label: string;
@@ -17,6 +19,7 @@ export type CampPricePaymentSectionProps = {
   installments: InstallmentRow[];
   registrationHref: string;
   isRegistrationClosed: boolean;
+  isEnrolled?: boolean;
 };
 
 export function CampPricePaymentSection({
@@ -26,11 +29,13 @@ export function CampPricePaymentSection({
   installments,
   registrationHref,
   isRegistrationClosed,
+  isEnrolled = false,
 }: CampPricePaymentSectionProps) {
   const registerHref = campRegistrationCtaHref(
     registrationHref,
     isRegistrationClosed,
   );
+  const cta = eventSignupCta({ isRegistrationClosed, isEnrolled });
 
   return (
     <section
@@ -77,26 +82,20 @@ export function CampPricePaymentSection({
               ) : null}
 
               <div className="mt-auto pt-6">
-                <Button
-                  asChild
-                  className="h-11 w-full rounded-xl px-6 text-sm font-bold sm:w-auto"
-                  disabled={isRegistrationClosed}
+                <SignupRequireChildLink
+                  href={registerHref}
+                  disabled={cta.disabled}
+                  className={cn(
+                    "inline-flex h-11 w-full items-center justify-center rounded-xl px-6 text-sm font-bold shadow-sm transition-colors sm:w-auto",
+                    cta.isEnrolled
+                      ? "border border-primary/40 bg-transparent text-primary"
+                      : cta.disabled
+                        ? "cursor-not-allowed bg-stone-200 text-stone-500 dark:bg-stone-800 dark:text-stone-400"
+                        : "bg-primary text-primary-foreground hover:bg-primary-hover"
+                  )}
                 >
-                  <Link
-                    href={registerHref}
-                    onClick={(e) => {
-                      if (isRegistrationClosed) e.preventDefault();
-                    }}
-                    aria-disabled={isRegistrationClosed}
-                    className={
-                      isRegistrationClosed
-                        ? "pointer-events-none cursor-not-allowed opacity-70"
-                        : ""
-                    }
-                  >
-                    {isRegistrationClosed ? "Rejestracja zakończona" : "Zapisz się"}
-                  </Link>
-                </Button>
+                  {cta.label}
+                </SignupRequireChildLink>
               </div>
             </div>
 

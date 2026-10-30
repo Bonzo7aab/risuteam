@@ -98,7 +98,7 @@ export function HomeFeaturedOffer() {
   if (camps === undefined || nocowanki === undefined) {
     return (
       <section className="mx-auto w-full max-w-7xl px-4 pb-4 pt-2 sm:px-6 lg:px-8 lg:pb-6">
-        <div className="h-44 animate-pulse rounded-2xl bg-stone-200/70 dark:bg-stone-800 sm:h-52" />
+        <div className="h-44 animate-pulse rounded-2xl bg-stone-200/70 dark:bg-surface-dark sm:h-52" />
       </section>
     );
   }
@@ -166,7 +166,7 @@ export function HomeFeaturedOffer() {
     >
       <Link
         href={offer.href}
-        className="group relative grid overflow-hidden transition-[box-shadow,transform] duration-300 dark:border-stone-800 md:rounded-2xl md:border md:border-stone-200/80 md:bg-white md:shadow-card hover:md:-translate-y-0.5 hover:md:shadow-card-hover motion-reduce:hover:md:translate-y-0 dark:md:bg-[#2a2015] dark:md:shadow-card-dark dark:hover:md:shadow-card-dark-hover lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]"
+        className="group relative grid overflow-hidden transition-[box-shadow,transform] duration-300 dark:border-white/12 md:rounded-2xl md:border md:border-stone-200/80 md:bg-white md:shadow-card hover:md:-translate-y-0.5 hover:md:shadow-card-hover motion-reduce:hover:md:translate-y-0 dark:md:bg-surface-dark dark:md:shadow-card-dark dark:hover:md:shadow-card-dark-hover lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]"
       >
         <span
           className={`absolute right-3 top-3 z-10 inline-flex max-w-[min(100%-1.5rem,16rem)] items-center gap-1.5 truncate rounded-full px-3 py-1.5 text-xs font-bold tracking-wide ${badgeTone(badge.urgent)}`}
@@ -177,7 +177,7 @@ export function HomeFeaturedOffer() {
           {badge.label}
         </span>
 
-        <div className="relative aspect-16/10 min-h-44 bg-stone-100 dark:bg-stone-800 lg:aspect-auto lg:min-h-56">
+        <div className="relative aspect-16/10 min-h-44 bg-stone-100 dark:bg-surface-dark-muted lg:aspect-auto lg:min-h-56">
           {offer.image ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img

@@ -1,7 +1,10 @@
+import React from "react";
 import { NextRequest, NextResponse } from "next/server";
 import { campRegistrationApiSchema } from "@/lib/schemas";
 import { parseBody } from "@/lib/validation";
 import { sendBrevoEmail } from "@/lib/brevo";
+import { renderEmailToHtml } from "@/lib/email-render";
+import { EventRegistrationEmail } from "@/app/emails/event-registration";
 
 export async function POST(req: NextRequest) {
   try {
@@ -9,35 +12,83 @@ export async function POST(req: NextRequest) {
     if ("error" in result) return result.error;
 
     const data = result.data;
-    const to = process.env.CONTACT_EMAIL || "kontakt@risuteam.pl";
+    const eventType =
+      data.eventType ??
+      (data.nocowankaSlug?.trim() ? "nocowanka" : "camp");
+    const eventSlug =
+      (eventType === "nocowanka"
+        ? data.nocowankaSlug?.trim()
+        : data.campSlug?.trim()) || undefined;
+    const eventName = data.eventName?.trim() || undefined;
+    const eventLabel =
+      eventName ||
+      eventSlug ||
+      (eventType === "camp" ? "obóz" : "nocowanka");
+    const contactTo = process.env.CONTACT_EMAIL || "kontakt@risuteam.pl";
+    const baseUrl =
+      process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ||
+      "https://risuteam.pl";
 
-    if (process.env.BREVO_API_KEY) {
-      await sendBrevoEmail({
-        to: { email: to },
-        subject: `Rejestracja na obóz: ${data.childName} ${data.childSurname}`,
-        htmlContent: `
-          <h2>Nowa rejestracja na obóz (${data.campSlug?.trim() || "obóz"})</h2>
-          <h3>Dane dziecka</h3>
-          <p><strong>Imię i nazwisko:</strong> ${data.childName} ${data.childSurname}</p>
-          <p><strong>Data urodzenia:</strong> ${data.childDob ?? "—"}</p>
-          <p><strong>PESEL:</strong> ${data.childPesel ?? "—"}</p>
-          <h3>Zdrowie</h3>
-          <p><strong>Dieta:</strong> ${data.dietary ?? "—"}</p>
-          <p><strong>Alergie:</strong> ${data.allergies ?? "—"}</p>
-          <p><strong>Uwagi medyczne:</strong> ${data.medicalNotes ?? "—"}</p>
-          <h3>Opiekun</h3>
-          <p><strong>Imię i nazwisko:</strong> ${data.parentName}</p>
-          <p><strong>Email:</strong> ${data.parentEmail}</p>
-          <p><strong>Telefon:</strong> ${data.parentPhone ?? "—"}</p>
-        `,
-        sender: {
-          name: "Risu Team Obozy",
-          email: process.env.CONTACT_EMAIL || "kontakt@risuteam.pl",
-        },
-      });
-    } else {
-      console.warn("Missing BREVO_API_KEY – camp registration email not sent");
+    if (!process.env.BREVO_API_KEY) {
+      console.warn("Missing BREVO_API_KEY – registration emails not sent");
+      return NextResponse.json({ ok: true });
     }
+
+    const sharedProps = {
+      eventType: eventType as "camp" | "nocowanka",
+      eventName,
+      eventSlug,
+      childName: data.childName,
+      childSurname: data.childSurname,
+      childDob: data.childDob,
+      childPesel: data.childPesel,
+      dietary: data.dietary,
+      allergies: data.allergies,
+      medicalNotes: data.medicalNotes,
+      parentName: data.parentName,
+      parentEmail: data.parentEmail,
+      parentPhone: data.parentPhone,
+      baseUrl,
+    };
+
+    const parentHtml = await renderEmailToHtml(
+      React.createElement(EventRegistrationEmail, {
+        ...sharedProps,
+        variant: "parent",
+      })
+    );
+
+    const adminHtml = await renderEmailToHtml(
+      React.createElement(EventRegistrationEmail, {
+        ...sharedProps,
+        variant: "admin",
+      })
+    );
+
+    const sender = {
+      name: "Risu Team",
+      email: contactTo,
+    };
+
+    const childFull = `${data.childName} ${data.childSurname}`.trim();
+
+    await Promise.all([
+      sendBrevoEmail({
+        to: { email: data.parentEmail, name: data.parentName },
+        subject:
+          eventType === "camp"
+            ? `Potwierdzenie rejestracji na obóz — ${eventLabel}`
+            : `Potwierdzenie rejestracji na nocowankę — ${eventLabel}`,
+        htmlContent: parentHtml,
+        sender,
+      }),
+      sendBrevoEmail({
+        to: { email: contactTo },
+        subject: `Nowa rejestracja: ${childFull} — ${eventLabel}`,
+        htmlContent: adminHtml,
+        sender,
+      }),
+    ]);
 
     return NextResponse.json({ ok: true });
   } catch (error) {

@@ -1,19 +1,27 @@
 "use client";
 
 import Link from "next/link";
-import { campRegistrationCtaHref } from "@/lib/camp-registration-links";
+import {
+  campRegistrationCtaHref,
+  eventSignupCta,
+} from "@/lib/camp-registration-links";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
+import { SignupRequireChildLink } from "@/components/signup/signup-require-child-link";
+import { cn } from "@/lib/utils";
 
 export type CampDetailHeaderProps = {
   registrationHref: string;
   isRegistrationClosed: boolean;
+  isEnrolled?: boolean;
 };
 
 export function CampDetailHeader({
   registrationHref,
   isRegistrationClosed,
+  isEnrolled = false,
 }: CampDetailHeaderProps) {
+  const cta = eventSignupCta({ isRegistrationClosed, isEnrolled });
+
   const handleShare = () => {
     if (typeof navigator !== "undefined" && navigator.share) {
       navigator.share({
@@ -76,15 +84,20 @@ export function CampDetailHeader({
           >
             <span className="material-symbols-outlined text-xl">share</span>
           </button>
-          <Button asChild size="sm" className="rounded-xl font-bold">
-            <Link
-              href={campRegistrationCtaHref(registrationHref, isRegistrationClosed)}
-              aria-disabled={isRegistrationClosed}
-              className={isRegistrationClosed ? "pointer-events-none opacity-70" : ""}
-            >
-              Zapisz się
-            </Link>
-          </Button>
+          <SignupRequireChildLink
+            href={campRegistrationCtaHref(registrationHref, isRegistrationClosed)}
+            disabled={cta.disabled}
+            className={cn(
+              "inline-flex h-8 items-center justify-center rounded-xl px-3 text-sm font-bold shadow-sm transition-colors",
+              cta.isEnrolled
+                ? "border border-primary/40 bg-transparent text-primary"
+                : cta.disabled
+                  ? "cursor-not-allowed bg-stone-200 text-stone-500"
+                  : "bg-primary text-primary-foreground hover:bg-primary-hover"
+            )}
+          >
+            {cta.label}
+          </SignupRequireChildLink>
         </nav>
       </div>
     </header>

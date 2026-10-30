@@ -6,6 +6,7 @@ import {
   expirePaymentHolds,
   isSeatHoldingStatus,
 } from "./billingHelpers";
+import { getClassesRegistrationAndPaymentsEnabled } from "./siteSettings";
 
 export const expirePaymentHoldsInternal = internalMutation({
   args: {},
@@ -24,6 +25,10 @@ export const ensureMonthlyInvoicesInternal = internalMutation({
     invoicesCreated: v.number(),
   }),
   handler: async (ctx) => {
+    const enabled = await getClassesRegistrationAndPaymentsEnabled(ctx);
+    if (!enabled) {
+      return { subscriptionsProcessed: 0, invoicesCreated: 0 };
+    }
     const now = Date.now();
     const subs = await ctx.db.query("subscriptions").collect();
     let subscriptionsProcessed = 0;

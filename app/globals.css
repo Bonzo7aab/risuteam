@@ -32,6 +32,9 @@
   --color-primary-hover: #e38b14;
   --color-background-light: #f8f7f5;
   --color-background-dark: #221a10;
+  /* Elevated surfaces on dark pages — must sit clearly above background-dark */
+  --color-surface-dark: #3a2e22;
+  --color-surface-dark-muted: #32271c;
   --color-text-main: #1c160d;
   --color-text-light: #9c7a49;
   --color-border: hsl(var(--border));
@@ -241,7 +244,7 @@
 }
 
 @utility risu-card {
-  @apply relative bg-white ring-1 ring-black/5 dark:bg-[#2a2015] dark:ring-white/10;
+  @apply relative bg-white ring-1 ring-black/5 dark:bg-surface-dark dark:ring-white/14;
   transition-property:
     box-shadow, transform, background-color, color, border-color;
   transition-duration: 300ms;
@@ -253,9 +256,10 @@
 
   .dark & {
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.08),
-      0 1px 2px rgba(0, 0, 0, 0.35),
-      0 16px 36px -10px rgba(0, 0, 0, 0.55);
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      0 0 0 1px rgba(255, 255, 255, 0.06),
+      0 1px 2px rgba(0, 0, 0, 0.4),
+      0 18px 40px -12px rgba(0, 0, 0, 0.65);
   }
 }
 
@@ -263,18 +267,26 @@
   @apply will-change-transform;
 
   &:hover {
-    @apply -translate-y-1;
+    transform: translateY(-0.35rem) scale(1.015);
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.7),
       0 2px 4px rgba(28, 22, 13, 0.06),
-      0 16px 40px -12px rgba(28, 22, 13, 0.18);
+      0 18px 44px -12px rgba(28, 22, 13, 0.2);
   }
 
   .dark &:hover {
+    transform: translateY(-0.35rem) scale(1.015);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.08),
-      0 2px 6px rgba(0, 0, 0, 0.3),
-      0 20px 48px -12px rgba(0, 0, 0, 0.55);
+      inset 0 1px 0 rgba(255, 255, 255, 0.12),
+      0 0 0 1px rgba(255, 255, 255, 0.1),
+      0 2px 6px rgba(0, 0, 0, 0.35),
+      0 24px 56px -12px rgba(0, 0, 0, 0.72);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &:hover {
+      transform: none;
+    }
   }
 }
 
@@ -386,6 +398,13 @@
     radial-gradient(circle at 10% 20%, rgba(244, 157, 37, 0.05) 0%, transparent 40%),
     radial-gradient(circle at 90% 80%, rgba(74, 144, 226, 0.05) 0%, transparent 40%),
     radial-gradient(circle at 50% 50%, rgba(248, 231, 28, 0.05) 0%, transparent 50%);
+}
+
+.dark .blob-bg {
+  background-image:
+    radial-gradient(circle at 12% 18%, rgba(244, 157, 37, 0.09) 0%, transparent 42%),
+    radial-gradient(circle at 88% 78%, rgba(74, 144, 226, 0.06) 0%, transparent 40%),
+    radial-gradient(circle at 50% 55%, rgba(255, 255, 255, 0.02) 0%, transparent 48%);
 }
 
 @media (prefers-reduced-motion: reduce) {

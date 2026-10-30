@@ -93,7 +93,7 @@ function HeroCtaButtons({ className }: { className?: string }) {
 
 function HeroTrustRow() {
   return (
-    <ul className="mt-8 flex flex-wrap items-center justify-center gap-x-8 gap-y-4 border-t border-stone-200/80 pt-6 dark:border-stone-700/60 lg:justify-start">
+    <ul className="mt-8 flex flex-wrap items-center justify-center gap-x-8 gap-y-4 border-t border-stone-200/80 pt-6 dark:border-white/12 lg:justify-start">
       <li className="text-left">
         <p className="text-lg font-black tracking-tight text-text-main dark:text-white">
           <AnimatedCounter value={500} suffix="+" />

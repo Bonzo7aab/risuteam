@@ -40,17 +40,13 @@ const steps = [
 export default function ZapisyPage() {
   return (
     <div className="mx-auto max-w-5xl">
-      <header className="mb-8 max-w-2xl sm:mb-10">
+      <header className="mb-2 max-w-2xl">
         <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
           Panel rodzica
         </p>
         <h1 className="mt-2 text-3xl font-black tracking-tight text-text-main dark:text-white md:text-4xl">
           Zapisy
         </h1>
-        <p className="mt-2 text-sm leading-relaxed text-stone-500 dark:text-stone-400 sm:text-base">
-          Zajęcia abonamentowe, obozy i nocowanki — zarządzaj zapisami w jednym
-          miejscu.
-        </p>
       </header>
 
       <ZapisyPageContent steps={steps} />

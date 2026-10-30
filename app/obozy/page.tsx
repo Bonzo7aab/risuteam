@@ -3,9 +3,12 @@
 import { useState, useEffect, Suspense, useMemo, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useQuery } from "convex/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { api } from "@/convex/_generated/api";
 import { cn } from "@/lib/utils";
 import { ObozyListCard } from "@/components/obozy/obozy-list-card";
+import { useMyEventEnrollment } from "@/hooks/use-my-event-enrollment";
+import { eventSignupCta } from "@/lib/camp-registration-links";
 
 type Tab = "letnie" | "zimowe" | "polkolonie" | "nocowanki";
 
@@ -74,7 +77,27 @@ function ListState({ children }: { children: React.ReactNode }) {
 function ObozyContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const reduceMotion = useReducedMotion();
   const [tab, setTab] = useState<Tab>("letnie");
+  const { isEnrolledInCampSlug, isEnrolledInNocowanka } = useMyEventEnrollment();
+
+  const listItemMotion = useMemo(
+    () =>
+      reduceMotion
+        ? {
+            initial: { opacity: 1, y: 0 },
+            animate: { opacity: 1, y: 0 },
+            exit: { opacity: 1, y: 0 },
+            transition: { duration: 0 },
+          }
+        : {
+            initial: { opacity: 0, y: 10 },
+            animate: { opacity: 1, y: 0 },
+            exit: { opacity: 0, y: -6 },
+            transition: { duration: 0.28, ease: [0.22, 1, 0.36, 1] as const },
+          },
+    [reduceMotion]
+  );
 
   const setTabWithUrl = useCallback(
     (newTab: Tab) => {
@@ -247,119 +270,163 @@ function ObozyContent() {
             })}
           </div>
 
-          {(tab === "letnie" || tab === "zimowe" || tab === "polkolonie") && (
-            <div
-              id="obozy-panel"
-              role="tabpanel"
-              aria-labelledby={`${tab}-tab`}
-              className="space-y-5"
-            >
-              {convexCamps === undefined ? (
-                <ListState>Ładowanie ofert…</ListState>
-              ) : filteredCamps.length === 0 ? (
-                <ListState>Brak obozów w tej kategorii w tym momencie.</ListState>
-              ) : (
-                filteredCamps.map((c) => {
-                  const registrationClosed = registrationClosedBySlug[c.slug];
-                  const statusBadge = registrationClosed
-                    ? { label: "Rejestracja zamknięta", tone: "muted" as const }
-                    : c.badge === "OSTATNIE MIEJSCA"
-                      ? { label: "Ostatnie miejsca", tone: "danger" as const }
-                      : c.earlyBirdDiscountPercent != null &&
-                          c.earlyBirdDiscountPercent > 0
-                        ? {
-                            label: `Rabat −${c.earlyBirdDiscountPercent}%`,
-                            tone: "primary" as const,
-                          }
-                        : c.badge === "Nowość"
-                          ? { label: "Nowość", tone: "info" as const }
-                          : null;
-
-                  const meta = [
-                    { icon: "calendar_month", label: c.dates },
-                    { icon: "location_on", label: c.location },
-                    { icon: "child_care", label: c.age },
-                  ];
-                  if (c.maxParticipants != null) {
-                    meta.push({
-                      icon: "group",
-                      label: `Do ${c.maxParticipants} miejsc`,
+          <AnimatePresence mode="wait" initial={false}>
+            {(tab === "letnie" || tab === "zimowe" || tab === "polkolonie") && (
+              <motion.div
+                key={`obozy-${tab}`}
+                id="obozy-panel"
+                role="tabpanel"
+                aria-labelledby={`${tab}-tab`}
+                className="space-y-5"
+                initial={reduceMotion ? false : { opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={reduceMotion ? undefined : { opacity: 0 }}
+                transition={{ duration: reduceMotion ? 0 : 0.18 }}
+              >
+                {convexCamps === undefined ? (
+                  <ListState>Ładowanie ofert…</ListState>
+                ) : filteredCamps.length === 0 ? (
+                  <ListState>Brak obozów w tej kategorii w tym momencie.</ListState>
+                ) : (
+                  filteredCamps.map((c, index) => {
+                    const registrationClosed = registrationClosedBySlug[c.slug];
+                    const enrolled = isEnrolledInCampSlug(c.slug);
+                    const cta = eventSignupCta({
+                      isRegistrationClosed: Boolean(registrationClosed),
+                      isEnrolled: enrolled,
                     });
-                  }
+                    const statusBadge = registrationClosed
+                      ? { label: "Rejestracja zamknięta", tone: "muted" as const }
+                      : c.badge === "OSTATNIE MIEJSCA"
+                        ? { label: "Ostatnie miejsca", tone: "danger" as const }
+                        : c.earlyBirdDiscountPercent != null &&
+                            c.earlyBirdDiscountPercent > 0
+                          ? {
+                              label: `Rabat −${c.earlyBirdDiscountPercent}%`,
+                              tone: "primary" as const,
+                            }
+                          : c.badge === "Nowość"
+                            ? { label: "Nowość", tone: "info" as const }
+                            : null;
 
-                  return (
-                    <ObozyListCard
-                      key={c.id}
-                      href={c.href}
-                      title={c.title}
-                      description={c.description}
-                      eyebrow={TAB_EYEBROW[tab]}
-                      image={c.image}
-                      meta={meta}
-                      priceLabel={c.priceLabel}
-                      price={c.price}
-                      statusBadge={statusBadge}
-                      notice={
-                        registrationClosed
-                          ? "Na ten obóz nie przyjmujemy już zapisów."
-                          : null
-                      }
-                      ctaHref={`${c.href}/rejestracja`}
-                      ctaLabel={
-                        registrationClosed ? "Rejestracja zakończona" : "Zapisz się"
-                      }
-                      ctaDisabled={Boolean(registrationClosed)}
-                    />
-                  );
-                })
-              )}
-            </div>
-          )}
+                    const meta = [
+                      { icon: "calendar_month", label: c.dates },
+                      { icon: "location_on", label: c.location },
+                      { icon: "child_care", label: c.age },
+                    ];
+                    if (c.maxParticipants != null) {
+                      meta.push({
+                        icon: "group",
+                        label: `Do ${c.maxParticipants} miejsc`,
+                      });
+                    }
 
-          {tab === "nocowanki" && (
-            <div
-              id="nocowanki-panel"
-              role="tabpanel"
-              aria-labelledby="nocowanki-tab"
-              className="space-y-5"
-            >
-              <div className="mb-1">
-                <h2 className="text-lg font-bold tracking-tight text-text-main dark:text-white">
-                  Nadchodzące nocowanki
-                </h2>
-                <p className="mt-1 text-sm text-stone-500 dark:text-stone-400">
-                  Krótkie wyjazdy z noclegiem — szczegóły i zapisy w kartach poniżej.
-                </p>
-              </div>
+                    return (
+                      <motion.div
+                        key={c.id}
+                        initial={listItemMotion.initial}
+                        animate={listItemMotion.animate}
+                        exit={listItemMotion.exit}
+                        transition={{
+                          ...listItemMotion.transition,
+                          delay: reduceMotion ? 0 : Math.min(index, 6) * 0.04,
+                        }}
+                      >
+                        <ObozyListCard
+                          href={c.href}
+                          title={c.title}
+                          description={c.description}
+                          eyebrow={TAB_EYEBROW[tab]}
+                          image={c.image}
+                          meta={meta}
+                          priceLabel={c.priceLabel}
+                          price={c.price}
+                          statusBadge={statusBadge}
+                          notice={
+                            registrationClosed
+                              ? "Na ten obóz nie przyjmujemy już zapisów."
+                              : null
+                          }
+                          ctaHref={`${c.href}/rejestracja`}
+                          ctaLabel={cta.label}
+                          ctaDisabled={cta.disabled}
+                          ctaEnrolled={cta.isEnrolled}
+                        />
+                      </motion.div>
+                    );
+                  })
+                )}
+              </motion.div>
+            )}
 
-              {convexNocowanki === undefined ? (
-                <ListState>Ładowanie ofert…</ListState>
-              ) : nocowankiCards.length === 0 ? (
-                <ListState>
-                  Wkrótce pojawią się tu nocowanki — zajrzyj ponownie później.
-                </ListState>
-              ) : (
-                nocowankiCards.map((n) => (
-                  <ObozyListCard
-                    key={n.id}
-                    href={n.href}
-                    title={n.title}
-                    description={n.description}
-                    eyebrow="Nocowanka"
-                    placeholderIcon="nights_stay"
-                    meta={[
-                      { icon: "calendar_month", label: n.dates },
-                      { icon: "location_on", label: n.location },
-                    ]}
-                    priceLabel={n.priceLabel}
-                    price={n.price}
-                    ctaHref={`${n.href}#rejestracja`}
-                    ctaLabel="Szczegóły i zapisy"
-                  />
-                ))
-              )}
-            </div>
-          )}
+            {tab === "nocowanki" && (
+              <motion.div
+                key="nocowanki"
+                id="nocowanki-panel"
+                role="tabpanel"
+                aria-labelledby="nocowanki-tab"
+                className="space-y-5"
+                initial={reduceMotion ? false : { opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={reduceMotion ? undefined : { opacity: 0 }}
+                transition={{ duration: reduceMotion ? 0 : 0.18 }}
+              >
+                <div className="mb-1">
+                  <h2 className="text-lg font-bold tracking-tight text-text-main dark:text-white">
+                    Nadchodzące nocowanki
+                  </h2>
+                  <p className="mt-1 text-sm text-stone-500 dark:text-stone-400">
+                    Krótkie wyjazdy z noclegiem — szczegóły i zapisy w kartach poniżej.
+                  </p>
+                </div>
+
+                {convexNocowanki === undefined ? (
+                  <ListState>Ładowanie ofert…</ListState>
+                ) : nocowankiCards.length === 0 ? (
+                  <ListState>
+                    Wkrótce pojawią się tu nocowanki — zajrzyj ponownie później.
+                  </ListState>
+                ) : (
+                  nocowankiCards.map((n, index) => {
+                    const cta = eventSignupCta({
+                      isEnrolled: isEnrolledInNocowanka(n.slug),
+                      openLabel: "Szczegóły i zapisy",
+                    });
+                    return (
+                      <motion.div
+                        key={n.id}
+                        initial={listItemMotion.initial}
+                        animate={listItemMotion.animate}
+                        exit={listItemMotion.exit}
+                        transition={{
+                          ...listItemMotion.transition,
+                          delay: reduceMotion ? 0 : Math.min(index, 6) * 0.04,
+                        }}
+                      >
+                        <ObozyListCard
+                          href={n.href}
+                          title={n.title}
+                          description={n.description}
+                          eyebrow="Nocowanka"
+                          placeholderIcon="nights_stay"
+                          meta={[
+                            { icon: "calendar_month", label: n.dates },
+                            { icon: "location_on", label: n.location },
+                          ]}
+                          priceLabel={n.priceLabel}
+                          price={n.price}
+                          ctaHref={`${n.href}#rejestracja`}
+                          ctaLabel={cta.label}
+                          ctaDisabled={cta.disabled}
+                          ctaEnrolled={cta.isEnrolled}
+                        />
+                      </motion.div>
+                    );
+                  })
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </section>
     </div>

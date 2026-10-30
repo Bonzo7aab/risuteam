@@ -48,11 +48,18 @@ export function DisciplinesGrid() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
         {disciplines.map((d, i) => (
-          <BlurFade key={d.title} inView delay={0.08 + i * 0.08} offset={16} blur="0px">
+          <BlurFade
+            key={d.title}
+            inView
+            delay={0.08 + i * 0.08}
+            offset={16}
+            blur="0px"
+            className="h-full"
+          >
             <Link
               href={d.href}
               className={cn(
-                "group relative flex h-full flex-col gap-3 overflow-hidden border-b border-stone-200 py-6 last:border-b-0 dark:border-stone-700",
+                "group relative flex h-full flex-col gap-3 overflow-hidden border-b border-stone-200 py-6 last:border-b-0 dark:border-white/10",
                 "md:risu-card md:risu-card-hover md:rounded-2xl md:border-0 md:p-6 md:last:border-0",
               )}
             >

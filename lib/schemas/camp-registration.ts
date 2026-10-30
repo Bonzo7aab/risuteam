@@ -42,6 +42,9 @@ export const campRegistrationStep1Schema = z.object({
 /** API body: same shape but consent not required (optional for backward compatibility) */
 export const campRegistrationApiSchema = z.object({
   campSlug: z.string().optional(),
+  nocowankaSlug: z.string().optional(),
+  eventType: z.enum(["camp", "nocowanka"]).optional(),
+  eventName: optionalString,
   childName: z.string().trim().min(1, "Wypełnij wymagane pola"),
   childSurname: z.string().trim().min(1, "Wypełnij wymagane pola"),
   childDob: optionalString,
