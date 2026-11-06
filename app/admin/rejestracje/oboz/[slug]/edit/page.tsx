@@ -643,7 +643,7 @@ export default function AdminEditCampPage() {
       )}
 
       <form id="camp-edit-form" onSubmit={handleSubmit} className="space-y-6">
-        <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-soft dark:border-stone-700 dark:bg-stone-900/80 sm:p-6">
+        <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-soft dark:border-white/12 dark:bg-surface-dark sm:p-6">
           <h2 className="text-base font-bold text-stone-900 dark:text-white mb-4">
             Obraz główny (hero)
           </h2>
@@ -707,7 +707,7 @@ export default function AdminEditCampPage() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-soft dark:border-stone-700 dark:bg-stone-900/80 sm:p-6">
+        <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-soft dark:border-white/12 dark:bg-surface-dark sm:p-6">
           <h2 className="text-base font-bold text-stone-900 dark:text-white mb-4">
             Baner promocyjny (opcjonalny)
           </h2>
@@ -771,7 +771,7 @@ export default function AdminEditCampPage() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-soft dark:border-stone-700 dark:bg-stone-900/80 sm:p-6">
+        <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-soft dark:border-white/12 dark:bg-surface-dark sm:p-6">
           <h2 className="text-base font-bold text-stone-900 dark:text-white mb-4">
             Podstawowe dane
           </h2>
@@ -895,7 +895,7 @@ export default function AdminEditCampPage() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-soft dark:border-stone-700 dark:bg-stone-900/80 sm:p-6">
+        <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-soft dark:border-white/12 dark:bg-surface-dark sm:p-6">
           <h2 className="text-base font-bold text-stone-900 dark:text-white mb-4">
             Trenerzy
           </h2>
@@ -944,7 +944,7 @@ export default function AdminEditCampPage() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-soft dark:border-stone-700 dark:bg-stone-900/80 sm:p-6">
+        <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-soft dark:border-white/12 dark:bg-surface-dark sm:p-6">
           <h2 className="text-base font-bold text-stone-900 dark:text-white mb-4">
             Media i opis
           </h2>
@@ -1047,7 +1047,7 @@ export default function AdminEditCampPage() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-soft dark:border-stone-700 dark:bg-stone-900/80 sm:p-6">
+        <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-soft dark:border-white/12 dark:bg-surface-dark sm:p-6">
           <h2 className="text-base font-bold text-stone-900 dark:text-white mb-4">
             Cena i liczba miejsc
           </h2>
@@ -1094,7 +1094,7 @@ export default function AdminEditCampPage() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-soft dark:border-stone-700 dark:bg-stone-900/80 sm:p-6">
+        <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-soft dark:border-white/12 dark:bg-surface-dark sm:p-6">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-base font-bold text-stone-900 dark:text-white">
               Program dnia
@@ -1187,7 +1187,7 @@ export default function AdminEditCampPage() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-soft dark:border-stone-700 dark:bg-stone-900/80 sm:p-6">
+        <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-soft dark:border-white/12 dark:bg-surface-dark sm:p-6">
           <h2 className="text-base font-bold text-stone-900 dark:text-white mb-4">
             Atrakcje ogólne
           </h2>
@@ -1263,7 +1263,7 @@ export default function AdminEditCampPage() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-soft dark:border-stone-700 dark:bg-stone-900/80 sm:p-6">
+        <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-soft dark:border-white/12 dark:bg-surface-dark sm:p-6">
           <h2 className="text-base font-bold text-stone-900 dark:text-white mb-4">
             Co w cenie
           </h2>

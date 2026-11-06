@@ -41,14 +41,14 @@ export function CampLocationSection({
   return (
     <section
       className={cn(
-        "w-full overflow-hidden md:rounded-2xl md:border md:border-stone-200 md:bg-white md:shadow-soft dark:md:border-stone-700 dark:md:bg-stone-900/80",
+        "w-full overflow-hidden md:rounded-2xl md:border md:border-stone-200 md:bg-white md:shadow-card dark:md:border-white/12 dark:md:bg-surface-dark dark:md:shadow-card-dark",
         className
       )}
       aria-labelledby="camp-location-heading"
     >
       <div className="flex flex-col lg:flex-row min-h-[400px] lg:min-h-[420px]">
         {/* Left sidebar – same structure and styling as /lokalizacja */}
-        <aside className="w-full lg:w-[380px] lg:max-w-md shrink-0 flex flex-col border-b lg:border-b-0 lg:border-r border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80">
+        <aside className="w-full lg:w-[380px] lg:max-w-md shrink-0 flex flex-col border-b lg:border-b-0 lg:border-r border-stone-200 dark:border-stone-700 bg-white dark:bg-surface-dark">
           <div className="p-6 pb-4 border-b border-stone-200 dark:border-stone-700">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-100 dark:bg-orange-900/30 text-primary text-xs font-bold uppercase tracking-wider mb-3">
               <MapPin className="size-3.5" aria-hidden />

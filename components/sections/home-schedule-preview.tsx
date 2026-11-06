@@ -79,7 +79,7 @@ export function HomeSchedulePreview() {
         </Link>
       </div>
 
-      <ul className="divide-y divide-stone-100 overflow-hidden dark:divide-white/8 md:rounded-2xl md:border md:border-stone-200/80 md:bg-white md:shadow-card dark:md:border-white/12 dark:md:bg-surface-dark dark:md:shadow-card-dark md:divide-y-0">
+      <ul className="divide-y divide-stone-100 overflow-hidden dark:divide-white/8 md:rounded-2xl md:border md:border-stone-200/80 md:bg-white md:shadow-card dark:md:border-white/12 dark:md:bg-surface-dark dark:md:border-white/12 dark:md:shadow-card-dark md:divide-y-0">
         {rows.map(({ day, primary, extra }) => {
           const age = primary.class?.ageGroup?.trim();
           const details = [

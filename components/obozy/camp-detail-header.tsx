@@ -35,7 +35,7 @@ export function CampDetailHeader({
 
   return (
     <header className="sticky top-2 z-40 mx-auto w-full max-w-7xl px-3 sm:px-4 lg:px-6">
-      <div className="rounded-xl bg-white/90 dark:bg-[#2a2015]/90 backdrop-blur-md shadow-soft border border-stone-100 dark:border-stone-800 px-4 py-2.5 flex items-center justify-between transition-all duration-300">
+      <div className="rounded-xl bg-white/90 dark:bg-surface-dark/90 backdrop-blur-md shadow-soft border border-stone-100 dark:border-stone-800 px-4 py-2.5 flex items-center justify-between transition-all duration-300">
         <Link href="/obozy" className="flex items-center gap-2">
           <Image
             src="/logoWithBorder.png"

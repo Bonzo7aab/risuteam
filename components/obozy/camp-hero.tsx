@@ -135,7 +135,7 @@ export function CampHero({
             </div>
           ) : null}
 
-          <div className="md:overflow-hidden md:rounded-2xl md:border md:border-stone-200 md:bg-white md:shadow-soft lg:rounded-3xl dark:md:border-stone-700 dark:md:bg-stone-900/80">
+          <div className="md:overflow-hidden md:rounded-2xl md:border md:border-stone-200 md:bg-white md:shadow-soft lg:rounded-3xl dark:md:border-white/12 dark:md:bg-surface-dark">
             <div className="grid lg:grid-cols-[minmax(16rem,22rem)_minmax(0,1fr)]">
               <div className="relative aspect-[4/5] w-full bg-[#ece7df] dark:bg-[#1c1610] sm:aspect-[3/4] lg:aspect-auto lg:min-h-[26rem]">
                 <Image

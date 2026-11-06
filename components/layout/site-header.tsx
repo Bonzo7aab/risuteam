@@ -46,7 +46,7 @@ const navItemClass = (active: boolean) =>
   );
 
 const oNasPanelClass =
-  "risu-card min-w-70 overflow-hidden rounded-2xl border-0 p-1.5 shadow-card ring-1 ring-black/5 dark:bg-[#2a2015] dark:shadow-card-dark dark:ring-white/10";
+  "risu-card min-w-70 overflow-hidden rounded-2xl border-0 p-1.5 shadow-card ring-1 ring-black/5 dark:bg-surface-dark dark:shadow-card-dark dark:ring-white/10";
 
 export function SiteHeader() {
   const pathname = usePathname();
@@ -56,7 +56,7 @@ export function SiteHeader() {
 
   return (
     <header className="md:sticky md:top-2 z-50 mx-auto w-full max-w-7xl px-3 sm:px-4 lg:px-6">
-      <div className="hidden md:flex items-center justify-between rounded-2xl border-0 bg-white/90 px-3 py-2 shadow-card ring-1 ring-black/4 backdrop-blur-md transition-all duration-300 dark:bg-[#2a2015]/90 dark:shadow-card-dark dark:ring-white/10 lg:px-4">
+      <div className="hidden md:flex items-center justify-between rounded-2xl border-0 bg-white/90 px-3 py-2 shadow-card ring-1 ring-black/4 backdrop-blur-md transition-all duration-300 dark:bg-surface-dark/90 dark:shadow-card-dark dark:ring-white/10 lg:px-4">
         <Link href="/" className="flex items-center gap-2 rounded-xl pr-2">
           <Image
             src="/logoWithBorder.png"

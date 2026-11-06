@@ -46,7 +46,7 @@ const gallery = [
 
 export function HistoriaParentsTrust() {
   return (
-    <section className="md:rounded-[2rem] md:border md:border-stone-200 md:bg-white md:p-12 md:shadow-soft lg:p-14 dark:md:border-stone-700 dark:md:bg-stone-900/80">
+    <section className="md:rounded-[2rem] md:border md:border-stone-200 md:bg-white md:p-12 md:shadow-soft lg:p-14 dark:md:border-white/12 dark:md:bg-surface-dark">
       <div className="grid gap-10 lg:gap-14 lg:grid-cols-2 lg:items-center">
         <div className="space-y-6">
           <span className="inline-flex items-center gap-2 rounded-full bg-stone-100 dark:bg-stone-800 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-text-main dark:text-stone-300">

@@ -255,7 +255,7 @@ export function FaqContent() {
 
         {/* Sidebar */}
         <aside className="lg:sticky lg:top-24 h-fit space-y-6">
-          <div className="md:rounded-2xl md:border md:border-stone-200 md:bg-white md:p-6 md:shadow-soft dark:md:border-stone-700 dark:md:bg-stone-900/80">
+          <div className="md:rounded-2xl md:border md:border-stone-200 md:bg-white md:p-6 md:shadow-card dark:md:border-white/12 dark:md:bg-surface-dark dark:md:shadow-card-dark">
             <div className="flex items-center gap-3 mb-4">
               <div>
                 <h3 className="font-bold text-text-main dark:text-white text-lg">

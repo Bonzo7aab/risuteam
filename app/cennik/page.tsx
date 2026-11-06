@@ -78,17 +78,21 @@ const billingFaq = [
 function CopyField({
   label,
   value,
+  icon,
   mono = false,
 }: {
   label: string;
   value: string;
+  icon: string;
   mono?: boolean;
 }) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(value);
+      await navigator.clipboard.writeText(
+        mono ? value.replace(/\s/g, "") : value
+      );
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1600);
     } catch {
@@ -97,30 +101,39 @@ function CopyField({
   };
 
   return (
-    <div className="flex items-start justify-between gap-3 border-b border-stone-200/80 py-4 last:border-b-0 dark:border-stone-800 md:rounded-xl md:border md:border-stone-200/80 md:bg-stone-50/80 md:px-4 md:py-3 md:last:border dark:md:border-stone-800 dark:md:bg-stone-950/40">
-      <div className="min-w-0">
-        <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-stone-500 dark:text-stone-400">
-          {label}
-        </p>
-        <p
-          className={cn(
-            "mt-1.5 text-sm font-semibold leading-snug text-text-main dark:text-stone-100 sm:text-base",
-            mono && "break-all font-mono tracking-tight"
-          )}
+    <div className="flex flex-col gap-3 rounded-2xl border border-stone-200/90 bg-stone-50/90 p-4 dark:border-white/12 dark:bg-black/20 sm:p-5">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex min-w-0 items-start gap-3">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+            <span className="material-symbols-outlined text-[20px]" aria-hidden>
+              {icon}
+            </span>
+          </span>
+          <div className="min-w-0">
+            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-stone-500 dark:text-stone-400">
+              {label}
+            </p>
+            <p
+              className={cn(
+                "mt-1.5 text-sm font-bold leading-snug text-text-main dark:text-white sm:text-[15px]",
+                mono && "break-all font-mono tracking-[0.04em]"
+              )}
+            >
+              {value}
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={handleCopy}
+          className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-primary/25 bg-primary/10 px-3 text-xs font-bold text-primary transition-colors hover:bg-primary/15 dark:border-primary/30 dark:bg-primary/15"
         >
-          {value}
-        </p>
+          <span className="material-symbols-outlined text-[16px]" aria-hidden>
+            {copied ? "check" : "content_copy"}
+          </span>
+          {copied ? "Skopiowano" : "Kopiuj"}
+        </button>
       </div>
-      <button
-        type="button"
-        onClick={handleCopy}
-        className="inline-flex shrink-0 items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-primary transition-colors hover:bg-primary/10"
-      >
-        <span className="material-symbols-outlined text-[16px]" aria-hidden>
-          {copied ? "check" : "content_copy"}
-        </span>
-        {copied ? "OK" : "Kopiuj"}
-      </button>
     </div>
   );
 }
@@ -161,64 +174,64 @@ export default function CennikPage() {
           {/* Plan + CTA block */}
           <section className="mb-12 md:mb-16">
             <div className="grid items-stretch gap-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:gap-8">
-              <div className="relative md:risu-card md:rounded-2xl md:p-8">
-                <div
-                  className="absolute inset-x-0 top-0 hidden h-1 bg-linear-to-r from-primary via-primary to-amber-300 md:block"
-                  aria-hidden
-                />
-                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
-                  Abonament miesięczny
-                </p>
-                <div className="mt-3 flex items-baseline gap-2">
-                  <span className="text-5xl font-black tracking-tight text-primary tabular-nums md:text-4xl">
-                    {price}
-                  </span>
-                  <span className="text-sm font-semibold text-stone-500 dark:text-stone-400">
-                    / miesiąc
-                  </span>
-                </div>
-                <p className="mt-2 text-sm text-stone-500 dark:text-stone-400 md:hidden">
-                  Pełny pakiet treningów w wybranej dyscyplinie.
-                </p>
+              <div className="relative overflow-hidden md:risu-card md:rounded-2xl md:p-8">
+                <div className="pointer-events-none absolute -right-10 -top-10 hidden size-36 rounded-full bg-primary/10 blur-2xl md:block" aria-hidden />
+                <div className="relative">
+                  <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.16em] text-primary">
+                    <span className="size-1.5 rounded-full bg-primary" aria-hidden />
+                    Abonament miesięczny
+                  </div>
+                  <div className="mt-4 flex items-baseline gap-2">
+                    <span className="text-5xl font-black tracking-tight text-primary tabular-nums md:text-4xl">
+                      {price}
+                    </span>
+                    <span className="text-sm font-semibold text-stone-500 dark:text-stone-400">
+                      / miesiąc
+                    </span>
+                  </div>
+                  <p className="mt-2 text-sm text-stone-500 dark:text-stone-400 md:hidden">
+                    Pełny pakiet treningów w wybranej dyscyplinie.
+                  </p>
 
-                <ul className="mt-7 space-y-0 divide-y divide-stone-200/80 dark:divide-stone-800 md:mt-6 md:space-y-3 md:divide-y-0">
-                  {planFeatures.map((f) => (
-                    <li
-                      key={f}
-                      className="flex items-start gap-3 py-3.5 first:pt-0 last:pb-0 md:py-0"
-                    >
-                      <span
-                        className="material-symbols-outlined mt-0.5 text-[20px] text-primary"
-                        aria-hidden
+                  <ul className="mt-7 space-y-0 divide-y divide-stone-200/80 dark:divide-white/8 md:mt-6 md:space-y-3 md:divide-y-0">
+                    {planFeatures.map((f) => (
+                      <li
+                        key={f}
+                        className="flex items-start gap-3 py-3.5 first:pt-0 last:pb-0 md:py-0"
                       >
-                        check_circle
-                      </span>
-                      <span className="text-[15px] font-medium leading-snug text-text-main dark:text-stone-200 md:text-sm md:font-normal md:text-stone-700 dark:md:text-stone-300">
-                        {f}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
+                        <span
+                          className="material-symbols-outlined mt-0.5 text-[20px] text-primary"
+                          aria-hidden
+                        >
+                          check_circle
+                        </span>
+                        <span className="text-[15px] font-medium leading-snug text-text-main dark:text-stone-200 md:text-sm md:font-normal md:text-stone-700 dark:md:text-stone-300">
+                          {f}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
 
-                <div className="mt-8 hidden gap-3 md:flex">
-                  <Link
-                    href={SIGNUP_HREF}
-                    className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-sm transition-colors hover:bg-primary-hover"
-                  >
-                    Przejdź do zapisów
-                    <ArrowRightIcon className="text-[1em]" />
-                  </Link>
-                  <Link
-                    href="/kontakt"
-                    className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-stone-200 bg-white px-5 text-sm font-bold text-text-main transition-colors hover:border-stone-300 hover:bg-stone-50 dark:border-stone-700 dark:bg-stone-950/40 dark:text-white dark:hover:bg-stone-900"
-                  >
-                    Zapytaj o ofertę
-                  </Link>
+                  <div className="mt-8 hidden gap-3 md:flex">
+                    <Link
+                      href={SIGNUP_HREF}
+                      className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-sm transition-colors hover:bg-primary-hover"
+                    >
+                      Przejdź do zapisów
+                      <ArrowRightIcon className="text-[1em]" />
+                    </Link>
+                    <Link
+                      href="/kontakt"
+                      className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-stone-200 bg-white px-5 text-sm font-bold text-text-main transition-colors hover:border-stone-300 hover:bg-stone-50 dark:border-white/14 dark:bg-transparent dark:text-white dark:hover:bg-white/5"
+                    >
+                      Zapytaj o ofertę
+                    </Link>
+                  </div>
                 </div>
               </div>
 
               {/* How to start — desktop sidebar / mobile section */}
-              <div className="border-t border-stone-200/90 pt-10 dark:border-stone-800 md:flex md:flex-col md:justify-between md:gap-6 md:rounded-2xl md:border md:border-stone-200/80 md:bg-white md:p-8 md:pt-8 md:shadow-card dark:md:border-stone-800 dark:md:bg-[#2a2015] dark:md:shadow-card-dark">
+              <div className="border-t border-stone-200/90 pt-10 dark:border-white/10 md:flex md:flex-col md:justify-between md:gap-6 md:rounded-2xl md:border md:border-stone-200/80 md:bg-white md:p-8 md:pt-8 md:shadow-card dark:md:border-white/12 dark:md:bg-surface-dark dark:md:shadow-card-dark">
                 <div>
                   <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
                     Jak zacząć
@@ -230,11 +243,11 @@ export default function CennikPage() {
                     {startSteps.map((step, index) => (
                       <li
                         key={step}
-                        className="relative flex gap-4 border-b border-stone-200/80 py-4 last:border-b-0 dark:border-stone-800 md:border-0 md:py-0"
+                        className="relative flex gap-4 border-b border-stone-200/80 py-4 last:border-b-0 dark:border-white/8 md:border-0 md:py-0"
                       >
                         {index < startSteps.length - 1 ? (
                           <span
-                            className="absolute left-[13px] top-11 hidden h-[calc(100%-0.5rem)] w-px bg-stone-200 dark:bg-stone-700 md:block"
+                            className="absolute left-[13px] top-11 hidden h-[calc(100%-0.5rem)] w-px bg-stone-200 dark:bg-white/12 md:block"
                             aria-hidden
                           />
                         ) : null}
@@ -251,9 +264,10 @@ export default function CennikPage() {
 
                 <Link
                   href="/kontakt"
-                  className="mt-8 hidden h-11 w-full items-center justify-center gap-2 rounded-xl border border-stone-200 bg-transparent px-5 text-sm font-bold text-text-main transition-colors hover:bg-stone-50 dark:border-stone-700 dark:text-white dark:hover:bg-stone-900 md:inline-flex"
+                  className="mt-8 hidden h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-sm transition-colors hover:bg-primary-hover md:inline-flex"
                 >
                   Zapytaj o ofertę
+                  <ArrowRightIcon className="text-[1em]" />
                 </Link>
               </div>
             </div>
@@ -268,7 +282,7 @@ export default function CennikPage() {
               {highlights.map((item) => (
                 <div
                   key={item.title}
-                  className="flex gap-3.5 border-b border-stone-200/80 py-4 last:border-b-0 dark:border-stone-800 sm:flex-col sm:border-0 sm:py-0 md:rounded-2xl md:border md:border-stone-200/80 md:bg-white/90 md:p-5 md:shadow-card dark:md:border-stone-800 dark:md:bg-[#2a2015]/90 dark:md:shadow-card-dark"
+                  className="flex gap-3.5 border-b border-stone-200/80 py-4 last:border-b-0 dark:border-stone-800 sm:flex-col sm:border-0 sm:py-0 md:rounded-2xl md:border md:border-stone-200/80 md:bg-white/90 md:p-5 md:shadow-card dark:md:border-white/12 dark:md:bg-surface-dark/90 dark:md:shadow-card-dark"
                 >
                   <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                     <span
@@ -292,8 +306,8 @@ export default function CennikPage() {
           </section>
 
           {/* Bank transfer */}
-          <section className="mb-12 border-t border-stone-200/90 pt-10 dark:border-stone-800 md:mb-16 md:rounded-2xl md:border md:border-stone-200/80 md:bg-white md:pt-0 md:shadow-card dark:md:border-stone-800 dark:md:bg-[#2a2015] dark:md:shadow-card-dark">
-            <div className="md:border-b md:border-stone-100 md:px-8 md:py-5 dark:md:border-stone-800">
+          <section className="mb-12 border-t border-stone-200/90 pt-10 dark:border-white/10 md:mb-16 md:rounded-2xl md:border md:border-stone-200/80 md:bg-white md:pt-0 md:shadow-card dark:md:border-white/12 dark:md:bg-surface-dark dark:md:shadow-card-dark">
+            <div className="md:border-b md:border-stone-100 md:px-8 md:py-5 dark:md:border-white/10">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
@@ -306,28 +320,34 @@ export default function CennikPage() {
                     Płatności wyłącznie przelewem bankowym.
                   </p>
                 </div>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1.5 text-xs font-bold text-primary">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-stone-200/80 bg-stone-50 px-3 py-1.5 text-xs font-bold text-stone-600 dark:border-white/12 dark:bg-black/20 dark:text-stone-300">
                   <span
-                    className="material-symbols-outlined text-[16px]"
+                    className="material-symbols-outlined text-[16px] text-primary"
                     aria-hidden
                   >
-                    account_balance
+                    lock
                   </span>
-                  Przelew
+                  Przelew tradycyjny
                 </span>
               </div>
             </div>
 
-            <div className="mt-2 md:mt-0 md:grid md:grid-cols-3 md:gap-3 md:p-8">
-              <CopyField label="Nazwa banku" value={bankDetails.bankName} />
+            <div className="mt-5 grid gap-3 md:mt-0 md:grid-cols-3 md:gap-4 md:p-8">
+              <CopyField
+                label="Nazwa banku"
+                value={bankDetails.bankName}
+                icon="account_balance"
+              />
               <CopyField
                 label="Numer konta"
                 value={bankDetails.accountNumber}
+                icon="credit_card"
                 mono
               />
               <CopyField
                 label="Tytuł przelewu"
                 value={bankDetails.transferTitle}
+                icon="edit_note"
               />
             </div>
           </section>
@@ -354,7 +374,7 @@ export default function CennikPage() {
                   className={cn(
                     "border-b border-stone-200/80 px-0 last:border-b-0 dark:border-stone-800",
                     "md:mb-3 md:overflow-hidden md:rounded-2xl md:border md:border-stone-200/80 md:bg-white md:px-5 md:shadow-card md:last:mb-0 md:last:border",
-                    "dark:md:border-stone-800 dark:md:bg-[#2a2015] dark:md:shadow-card-dark"
+                    "dark:md:border-white/12 dark:md:bg-surface-dark dark:md:shadow-card-dark"
                   )}
                 >
                   <AccordionTrigger className="py-4 text-left text-[15px] font-bold leading-snug text-text-main hover:no-underline dark:text-white md:py-5 md:text-base">
@@ -385,7 +405,7 @@ export default function CennikPage() {
           </Link>
           <Link
             href="/kontakt"
-            className="inline-flex h-12 items-center justify-center rounded-xl border border-stone-200 bg-white px-4 text-sm font-bold text-text-main dark:border-stone-700 dark:bg-[#2a2015] dark:text-white"
+            className="inline-flex h-12 items-center justify-center rounded-xl border border-stone-200 bg-white px-4 text-sm font-bold text-text-main dark:border-white/12 dark:bg-surface-dark dark:text-white"
           >
             Kontakt
           </Link>

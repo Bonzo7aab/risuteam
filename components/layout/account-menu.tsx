@@ -33,7 +33,7 @@ function getInitials(user: AccountUser): string {
 }
 
 const panelClass =
-  "risu-card min-w-64 overflow-hidden rounded-2xl border-0 p-1.5 shadow-card ring-1 ring-black/5 dark:bg-[#2a2015] dark:shadow-card-dark dark:ring-white/10";
+  "risu-card min-w-64 overflow-hidden rounded-2xl border-0 p-1.5 shadow-card ring-1 ring-black/5 dark:bg-surface-dark dark:shadow-card-dark dark:ring-white/10";
 
 const itemClass =
   "cursor-pointer gap-3 rounded-xl px-2.5 py-2";

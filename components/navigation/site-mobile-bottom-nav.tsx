@@ -216,7 +216,7 @@ export function SiteMobileBottomNav() {
   return (
     <div className="md:hidden">
       <nav
-        className="fixed inset-x-0 bottom-0 z-50 border-t border-stone-200/80 bg-white/95 px-1.5 pb-[max(0.65rem,calc(env(safe-area-inset-bottom,0px)+0.45rem))] pt-1.5 backdrop-blur-sm dark:border-stone-700/80 dark:bg-[#2a2015]/95"
+        className="fixed inset-x-0 bottom-0 z-50 border-t border-stone-200/80 bg-white/95 px-1.5 pb-[max(0.65rem,calc(env(safe-area-inset-bottom,0px)+0.45rem))] pt-1.5 backdrop-blur-sm dark:border-stone-700/80 dark:bg-surface-dark/95"
         aria-label="Nawigacja mobilna"
       >
         <div className="mx-auto flex w-full min-w-0 max-w-3xl items-stretch gap-1 px-0.5">

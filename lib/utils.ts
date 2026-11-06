@@ -11,4 +11,4 @@ export const sectionSurface =
 
 /** Softer stone variant used on older public sections. */
 export const sectionSurfaceSoft =
-  "md:overflow-hidden md:rounded-2xl md:border md:border-stone-200 md:bg-white md:shadow-soft dark:md:border-white/12 dark:md:bg-surface-dark";
+  "md:overflow-hidden md:rounded-2xl md:border md:border-stone-200 md:bg-white md:shadow-card dark:md:border-white/12 dark:md:bg-surface-dark dark:md:shadow-card-dark";

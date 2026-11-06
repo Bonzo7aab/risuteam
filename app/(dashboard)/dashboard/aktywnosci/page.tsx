@@ -82,7 +82,13 @@ function eventPaymentTone(status: "paid" | "partial" | "unpaid"): string {
   }
 }
 
-function CopyAccountButton({ value }: { value: string }) {
+function CopyAccountButton({
+  value,
+  className,
+}: {
+  value: string;
+  className?: string;
+}) {
   const [copied, setCopied] = useState(false);
 
   return (
@@ -90,19 +96,22 @@ function CopyAccountButton({ value }: { value: string }) {
       type="button"
       onClick={async () => {
         try {
-          await navigator.clipboard.writeText(value);
+          await navigator.clipboard.writeText(value.replace(/\s/g, ""));
           setCopied(true);
           window.setTimeout(() => setCopied(false), 1600);
         } catch {
           // ignore
         }
       }}
-      className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold text-primary transition-colors hover:bg-primary/10"
+      className={cn(
+        "inline-flex h-9 items-center gap-1.5 rounded-lg border border-primary/25 bg-primary/10 px-3 text-xs font-bold text-primary transition-colors hover:bg-primary/15 dark:border-primary/30 dark:bg-primary/15",
+        className
+      )}
     >
       <span className="material-symbols-outlined text-[16px]" aria-hidden>
         {copied ? "check" : "content_copy"}
       </span>
-      {copied ? "Skopiowano" : "Kopiuj"}
+      {copied ? "Skopiowano" : "Kopiuj numer"}
     </button>
   );
 }
@@ -165,8 +174,8 @@ function PaymentSummaryCard({
   footer: ReactNode;
 }) {
   return (
-    <section className="mb-8 overflow-hidden rounded-2xl border border-stone-200/80 bg-white shadow-card dark:border-stone-800 dark:bg-[#2a2015] dark:shadow-card-dark">
-      <div className="border-b border-stone-100 px-5 py-5 dark:border-stone-800 sm:px-6">
+    <section className="mb-8 overflow-hidden rounded-2xl border border-stone-200/80 bg-white shadow-card dark:border-white/12 dark:bg-surface-dark dark:shadow-card-dark">
+      <div className="border-b border-stone-100 px-5 py-5 dark:border-white/10 sm:px-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-primary">
@@ -179,7 +188,7 @@ function PaymentSummaryCard({
               {transferHint}
             </p>
           </div>
-          <div className="rounded-xl bg-stone-50 px-4 py-3 text-right dark:bg-stone-950/40">
+          <div className="rounded-xl border border-stone-200/80 bg-stone-50 px-4 py-3 text-right dark:border-white/10 dark:bg-black/25">
             <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-stone-400">
               {pendingTotalLabel}
             </p>
@@ -210,29 +219,62 @@ function PaymentSummaryCard({
         </div>
       </div>
 
-      <div className="grid gap-3 p-5 sm:grid-cols-2 sm:p-6">
-        <div className="rounded-xl border border-stone-200/80 bg-stone-50/80 px-4 py-3 dark:border-stone-800 dark:bg-stone-950/40">
-          <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-stone-500 dark:text-stone-400">
-            Bank
+      <div className="p-5 sm:p-6">
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-stone-500 dark:text-stone-400">
+            Dane do przelewu
           </p>
-          <p className="mt-1 text-sm font-semibold text-text-main dark:text-stone-100">
-            {BANK_NAME}
-          </p>
+          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-stone-400 dark:text-stone-500">
+            <span className="material-symbols-outlined text-[14px]" aria-hidden>
+              lock
+            </span>
+            Przelew tradycyjny
+          </span>
         </div>
-        <div className="rounded-xl border border-stone-200/80 bg-stone-50/80 px-4 py-3 dark:border-stone-800 dark:bg-stone-950/40">
-          <div className="mb-1 flex items-center justify-between gap-2">
-            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-stone-500 dark:text-stone-400">
-              Numer konta
-            </p>
-            <CopyAccountButton value={BANK_ACCOUNT} />
+
+        <div className="overflow-hidden rounded-2xl border border-stone-200/90 bg-stone-50/90 dark:border-white/12 dark:bg-black/20">
+          <div className="grid sm:grid-cols-[minmax(0,0.9fr)_minmax(0,1.35fr)]">
+            <div className="flex gap-3 border-b border-stone-200/80 p-4 sm:border-b-0 sm:border-r dark:border-white/10 sm:p-5">
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <span className="material-symbols-outlined text-[22px]" aria-hidden>
+                  account_balance
+                </span>
+              </span>
+              <div className="min-w-0">
+                <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-stone-500 dark:text-stone-400">
+                  Bank
+                </p>
+                <p className="mt-1 text-sm font-bold leading-snug text-text-main dark:text-white">
+                  {BANK_NAME}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-3 p-4 sm:p-5">
+              <div className="flex flex-wrap items-start justify-between gap-2">
+                <div className="flex min-w-0 items-start gap-3">
+                  <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                    <span className="material-symbols-outlined text-[22px]" aria-hidden>
+                      credit_card
+                    </span>
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-stone-500 dark:text-stone-400">
+                      Numer konta
+                    </p>
+                    <p className="mt-1 break-all font-mono text-[13px] font-bold tracking-[0.04em] text-text-main dark:text-white sm:text-sm">
+                      {BANK_ACCOUNT}
+                    </p>
+                  </div>
+                </div>
+                <CopyAccountButton value={BANK_ACCOUNT} className="shrink-0" />
+              </div>
+            </div>
           </div>
-          <p className="font-mono text-sm font-semibold tracking-tight text-text-main dark:text-stone-100">
-            {BANK_ACCOUNT}
-          </p>
         </div>
       </div>
 
-      <div className="border-t border-stone-100 px-5 py-4 dark:border-stone-800 sm:px-6">
+      <div className="border-t border-stone-100 px-5 py-4 dark:border-white/10 sm:px-6">
         {footer}
       </div>
     </section>
@@ -441,7 +483,7 @@ function AktywnosciPageInner() {
             </div>
             <Link
               href="/dashboard/zapisy"
-              className="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl border border-stone-200 bg-white px-4 text-sm font-semibold text-stone-700 transition-colors hover:border-stone-300 hover:bg-stone-50 dark:border-stone-700 dark:bg-[#2a2015] dark:text-stone-200 dark:hover:bg-stone-900"
+              className="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl border border-stone-200 bg-white px-4 text-sm font-semibold text-stone-700 transition-colors hover:border-stone-300 hover:bg-stone-50 dark:border-white/12 dark:bg-surface-dark dark:text-stone-200 dark:hover:bg-stone-900"
             >
               Zapisy
               <ArrowRightIcon className="text-[1em]" />
@@ -453,7 +495,7 @@ function AktywnosciPageInner() {
             role="tablist"
             aria-label="Status zapisów"
           >
-            <div className="inline-flex min-w-full gap-1 rounded-2xl border border-stone-200/80 bg-white/90 p-1.5 shadow-card dark:border-stone-800 dark:bg-[#2a2015]/90 dark:shadow-card-dark sm:min-w-0">
+            <div className="inline-flex min-w-full gap-1 rounded-2xl border border-stone-200/80 bg-white/90 p-1.5 shadow-card dark:border-white/12 dark:bg-surface-dark/90 dark:shadow-card-dark sm:min-w-0">
               {CLASS_TABS.map((t) => {
                 const selected = classTab === t.id;
                 const count =
@@ -505,7 +547,7 @@ function AktywnosciPageInner() {
           {subscriptions === undefined ? (
             <ListSkeleton />
           ) : subscriptions.length === 0 ? (
-            <div className="rounded-2xl border border-stone-200/80 bg-white px-6 py-14 text-center shadow-card dark:border-stone-800 dark:bg-[#2a2015] dark:shadow-card-dark">
+            <div className="rounded-2xl border border-stone-200/80 bg-white px-6 py-14 text-center shadow-card dark:border-white/12 dark:bg-surface-dark dark:shadow-card-dark">
               <span className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
                 <span className="material-symbols-outlined text-3xl" aria-hidden>
                   fitness_center
@@ -537,7 +579,7 @@ function AktywnosciPageInner() {
                 {dueBillingItems.map((item) => (
                   <li
                     key={item.key}
-                    className="flex flex-col gap-3 rounded-2xl border border-stone-200/80 bg-white p-5 shadow-card dark:border-stone-800 dark:bg-[#2a2015] dark:shadow-card-dark sm:flex-row sm:items-center sm:justify-between"
+                    className="flex flex-col gap-3 rounded-2xl border border-stone-200/80 bg-white p-5 shadow-card dark:border-white/12 dark:bg-surface-dark dark:shadow-card-dark sm:flex-row sm:items-center sm:justify-between"
                   >
                     <div className="flex min-w-0 items-start gap-3.5">
                       <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-200">
@@ -594,7 +636,7 @@ function AktywnosciPageInner() {
                 return (
                   <li
                     key={s._id}
-                    className="flex flex-col gap-4 rounded-2xl border border-stone-200/80 bg-white p-5 shadow-card dark:border-stone-800 dark:bg-[#2a2015] dark:shadow-card-dark sm:flex-row sm:items-center sm:justify-between sm:p-5"
+                    className="flex flex-col gap-4 rounded-2xl border border-stone-200/80 bg-white p-5 shadow-card dark:border-white/12 dark:bg-surface-dark dark:shadow-card-dark sm:flex-row sm:items-center sm:justify-between sm:p-5"
                   >
                     <div className="flex min-w-0 items-start gap-3.5">
                       <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
@@ -711,7 +753,7 @@ function AktywnosciPageInner() {
             </div>
             <Link
               href="/dashboard/zapisy"
-              className="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl border border-stone-200 bg-white px-4 text-sm font-semibold text-stone-700 transition-colors hover:border-stone-300 hover:bg-stone-50 dark:border-stone-700 dark:bg-[#2a2015] dark:text-stone-200 dark:hover:bg-stone-900"
+              className="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl border border-stone-200 bg-white px-4 text-sm font-semibold text-stone-700 transition-colors hover:border-stone-300 hover:bg-stone-50 dark:border-white/12 dark:bg-surface-dark dark:text-stone-200 dark:hover:bg-stone-900"
             >
               Zapisy
               <ArrowRightIcon className="text-[1em]" />
@@ -723,7 +765,7 @@ function AktywnosciPageInner() {
             role="tablist"
             aria-label="Rodzaj płatności"
           >
-            <div className="inline-flex min-w-full gap-1 rounded-2xl border border-stone-200/80 bg-white/90 p-1.5 shadow-card dark:border-stone-800 dark:bg-[#2a2015]/90 dark:shadow-card-dark sm:min-w-0">
+            <div className="inline-flex min-w-full gap-1 rounded-2xl border border-stone-200/80 bg-white/90 p-1.5 shadow-card dark:border-white/12 dark:bg-surface-dark/90 dark:shadow-card-dark sm:min-w-0">
               {EVENT_TABS.map((t) => {
                 const selected = eventTab === t.id;
                 const count =
@@ -778,7 +820,7 @@ function AktywnosciPageInner() {
           {eventPayments === undefined ? (
             <ListSkeleton />
           ) : eventRows.length === 0 ? (
-            <div className="rounded-2xl border border-stone-200/80 bg-white px-6 py-14 text-center shadow-card dark:border-stone-800 dark:bg-[#2a2015] dark:shadow-card-dark">
+            <div className="rounded-2xl border border-stone-200/80 bg-white px-6 py-14 text-center shadow-card dark:border-white/12 dark:bg-surface-dark dark:shadow-card-dark">
               <span className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
                 <span className="material-symbols-outlined text-3xl" aria-hidden>
                   camping
@@ -813,7 +855,7 @@ function AktywnosciPageInner() {
                 <li key={item.id}>
                   <Link
                     href={item.href}
-                    className="flex flex-col gap-3 rounded-2xl border border-stone-200/80 bg-white p-5 shadow-card transition-colors hover:border-primary/30 dark:border-stone-800 dark:bg-[#2a2015] dark:shadow-card-dark sm:flex-row sm:items-center sm:justify-between"
+                    className="flex flex-col gap-3 rounded-2xl border border-stone-200/80 bg-white p-5 shadow-card transition-colors hover:border-primary/30 dark:border-white/12 dark:bg-surface-dark dark:shadow-card-dark sm:flex-row sm:items-center sm:justify-between"
                   >
                     <div className="flex min-w-0 items-start gap-3.5">
                       <span

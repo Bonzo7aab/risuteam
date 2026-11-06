@@ -426,7 +426,7 @@ export default function DzieciPage() {
           ))}
         </div>
       ) : children.length === 0 ? (
-        <div className="rounded-2xl border border-stone-200/80 bg-white px-6 py-14 text-center shadow-card dark:border-stone-800 dark:bg-[#2a2015] dark:shadow-card-dark sm:px-10">
+        <div className="rounded-2xl border border-stone-200/80 bg-white px-6 py-14 text-center shadow-card dark:border-white/12 dark:bg-surface-dark dark:shadow-card-dark sm:px-10">
           <span className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
             <span className="material-symbols-outlined text-3xl" aria-hidden>
               family_restroom
@@ -464,7 +464,7 @@ export default function DzieciPage() {
               const hasPesel = Boolean(ch.pesel?.trim());
               return (
                 <li key={ch._id}>
-                  <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-stone-200/80 bg-white shadow-card transition-[box-shadow,transform] duration-300 hover:-translate-y-0.5 hover:shadow-card-hover motion-reduce:hover:translate-y-0 dark:border-stone-800 dark:bg-[#2a2015] dark:shadow-card-dark dark:hover:shadow-card-dark-hover">
+                  <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-stone-200/80 bg-white shadow-card transition-[box-shadow,transform] duration-300 hover:-translate-y-0.5 hover:shadow-card-hover motion-reduce:hover:translate-y-0 dark:border-white/12 dark:bg-surface-dark dark:shadow-card-dark dark:hover:shadow-card-dark-hover">
                     <div className="flex flex-1 flex-col gap-4 p-5 sm:p-6">
                       <div className="flex items-start gap-4">
                         <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-sm font-black tracking-wide text-primary">
@@ -540,7 +540,7 @@ export default function DzieciPage() {
       >
         <DialogContent
           ref={setAddDialogSurface}
-          className="gap-0 overflow-visible rounded-2xl border-stone-200/90 p-0 shadow-card dark:border-stone-800 dark:bg-[#2a2015] dark:shadow-card-dark sm:max-w-[34rem]"
+          className="gap-0 overflow-visible rounded-2xl border-stone-200/90 p-0 shadow-card dark:border-white/12 dark:bg-surface-dark dark:shadow-card-dark sm:max-w-[34rem]"
         >
           <form
             onSubmit={handleAddSubmit}
@@ -597,7 +597,7 @@ export default function DzieciPage() {
       <Dialog open={editOpen} onOpenChange={(o) => !o && closeEditDialog()}>
         <DialogContent
           ref={setEditDialogSurface}
-          className="gap-0 overflow-visible rounded-2xl border-stone-200/90 p-0 shadow-card dark:border-stone-800 dark:bg-[#2a2015] dark:shadow-card-dark sm:max-w-[34rem]"
+          className="gap-0 overflow-visible rounded-2xl border-stone-200/90 p-0 shadow-card dark:border-white/12 dark:bg-surface-dark dark:shadow-card-dark sm:max-w-[34rem]"
         >
           <form
             onSubmit={handleEditSubmit}

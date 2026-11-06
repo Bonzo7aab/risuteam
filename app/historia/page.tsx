@@ -73,7 +73,7 @@ export default function HistoriaPage() {
             {pillars.map((p) => (
               <div
                 key={p.title}
-                className="py-2 text-center md:rounded-2xl md:border md:border-stone-200 md:bg-white md:p-8 dark:md:border-stone-700 dark:md:bg-stone-900/80"
+                className="py-2 text-center md:rounded-2xl md:border md:border-stone-200 md:bg-white md:p-8 dark:md:border-white/12 dark:md:bg-surface-dark"
               >
                 <span className="material-symbols-outlined text-5xl text-primary mb-4 block">
                   {p.icon}

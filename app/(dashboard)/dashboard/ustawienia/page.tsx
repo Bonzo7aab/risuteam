@@ -36,7 +36,7 @@ function SettingsCard({
       className={
         tone === "danger"
           ? "rounded-2xl border border-red-200/90 bg-red-50/70 p-5 shadow-card dark:border-red-900/50 dark:bg-red-950/20 dark:shadow-card-dark sm:p-6"
-          : "rounded-2xl border border-stone-200/80 bg-white p-5 shadow-card dark:border-stone-800 dark:bg-[#2a2015] dark:shadow-card-dark sm:p-6"
+          : "rounded-2xl border border-stone-200/80 bg-white p-5 shadow-card dark:border-white/12 dark:bg-surface-dark dark:shadow-card-dark sm:p-6"
       }
     >
       <div className="mb-5">

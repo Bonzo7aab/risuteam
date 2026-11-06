@@ -176,7 +176,7 @@ export function AuthPageShell({ children, mobileEyebrow }: AuthPageShellProps) {
             </div>
 
             <div className="mx-auto w-full max-w-md">
-              <div className="rounded-2xl border border-stone-200/80 bg-white/95 p-6 shadow-[0_20px_50px_-24px_rgba(28,22,13,0.28)] backdrop-blur-sm dark:border-white/10 dark:bg-[#2a2015]/92 dark:shadow-[0_20px_50px_-24px_rgba(0,0,0,0.55)] sm:p-8">
+              <div className="rounded-2xl border border-stone-200/80 bg-white/95 p-6 shadow-[0_20px_50px_-24px_rgba(28,22,13,0.28)] backdrop-blur-sm dark:border-white/10 dark:bg-surface-dark/92 dark:shadow-[0_20px_50px_-24px_rgba(0,0,0,0.55)] sm:p-8">
                 {children}
               </div>
             </div>

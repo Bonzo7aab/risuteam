@@ -17,7 +17,7 @@ export default async function ChildProfilePage({
         <ArrowLeftIcon className="text-[1.1em]" />
         Moje dzieci
       </Link>
-      <div className="rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 p-6 mb-8">
+      <div className="rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-surface-dark p-6 mb-8">
         <h1 className="text-2xl font-bold text-text-main dark:text-white mb-2">
           Profil dziecka
         </h1>
@@ -35,7 +35,7 @@ export default async function ChildProfilePage({
           </button>
         ))}
       </div>
-      <div className="rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 p-6">
+      <div className="rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-surface-dark p-6">
         <h2 className="text-lg font-bold text-text-main dark:text-white mb-4">
           Dane medyczne
         </h2>

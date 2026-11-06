@@ -111,7 +111,7 @@ function FormSection({
   children: ReactNode;
 }) {
   return (
-    <section className="rounded-2xl border border-stone-200/80 bg-white p-6 shadow-card dark:border-stone-800 dark:bg-[#2a2015] dark:shadow-card-dark sm:p-8">
+    <section className="rounded-2xl border border-stone-200/80 bg-white p-6 shadow-card dark:border-white/12 dark:bg-surface-dark dark:shadow-card-dark sm:p-8">
       <div className="mb-6 space-y-1.5 border-b border-stone-100 pb-5 dark:border-stone-800">
         <h2 className="text-lg font-black tracking-tight text-text-main dark:text-white">
           {title}
@@ -279,6 +279,8 @@ export function CampRegistrationForm({
           parentName: valid.parentName,
           parentPhone: valid.parentPhone || undefined,
           parentEmail: valid.parentEmail,
+          consent: true,
+          medicalFormStatus: "complete",
           customAnswers: Object.keys(customAnswers).length
             ? customAnswers
             : undefined,
@@ -296,6 +298,8 @@ export function CampRegistrationForm({
           parentName: valid.parentName,
           parentPhone: valid.parentPhone || undefined,
           parentEmail: valid.parentEmail,
+          consent: true,
+          medicalFormStatus: "complete",
           customAnswers: Object.keys(customAnswers).length
             ? customAnswers
             : undefined,
@@ -333,7 +337,7 @@ export function CampRegistrationForm({
 
   if (sent) {
     return (
-      <div className="rounded-2xl border border-stone-200/80 bg-white px-6 py-12 text-center shadow-card dark:border-stone-800 dark:bg-[#2a2015] dark:shadow-card-dark sm:px-10 sm:py-14">
+      <div className="rounded-2xl border border-stone-200/80 bg-white px-6 py-12 text-center shadow-card dark:border-white/12 dark:bg-surface-dark dark:shadow-card-dark sm:px-10 sm:py-14">
         <span className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-300">
           <span className="material-symbols-outlined text-3xl" aria-hidden>
             check_circle
@@ -366,7 +370,7 @@ export function CampRegistrationForm({
 
   if (alreadyEnrolled) {
     return (
-      <div className="rounded-2xl border border-stone-200/80 bg-white px-6 py-12 text-center shadow-card dark:border-stone-800 dark:bg-[#2a2015] dark:shadow-card-dark sm:px-10 sm:py-14">
+      <div className="rounded-2xl border border-stone-200/80 bg-white px-6 py-12 text-center shadow-card dark:border-white/12 dark:bg-surface-dark dark:shadow-card-dark sm:px-10 sm:py-14">
         <span className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
           <span className="material-symbols-outlined text-3xl" aria-hidden>
             how_to_reg
@@ -399,7 +403,7 @@ export function CampRegistrationForm({
 
   if (!hasSavedChildren) {
     return (
-      <div className="rounded-2xl border border-stone-200/80 bg-white px-6 py-12 text-center shadow-card dark:border-stone-800 dark:bg-[#2a2015] dark:shadow-card-dark sm:px-10 sm:py-14">
+      <div className="rounded-2xl border border-stone-200/80 bg-white px-6 py-12 text-center shadow-card dark:border-white/12 dark:bg-surface-dark dark:shadow-card-dark sm:px-10 sm:py-14">
         <span className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
           <span className="material-symbols-outlined text-3xl" aria-hidden>
             child_care

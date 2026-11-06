@@ -32,7 +32,7 @@ export function AdminMobileMenuCards() {
               "flex min-h-[4.5rem] flex-col items-center justify-center gap-1.5 rounded-xl border px-2 py-2.5 text-center transition-colors active:scale-[0.98]",
               active
                 ? "border-primary/40 bg-primary/10 text-primary"
-                : "border-stone-200/80 bg-white text-text-main shadow-card hover:border-primary/30 dark:border-stone-800 dark:bg-[#2a2015] dark:text-stone-100"
+                : "border-stone-200/80 bg-white text-text-main shadow-card hover:border-primary/30 dark:border-white/12 dark:bg-surface-dark dark:text-stone-100"
             )}
           >
             <span

@@ -12,9 +12,9 @@ export const parentDashboardNavItems = [
     driverStepId: "nav-dzieci",
   },
   {
-    label: "Zajęcia",
+    label: "Zapisy",
     href: "/dashboard/zapisy",
-    icon: "fitness_center",
+    icon: "edit_calendar",
     driverStepId: "nav-zajecia",
   },
   {

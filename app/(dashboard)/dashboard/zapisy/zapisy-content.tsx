@@ -40,7 +40,7 @@ function StepsList({ steps }: { steps: Step[] }) {
         <li key={s.step}>
           <Link
             href={s.href}
-            className="group flex flex-col gap-4 rounded-2xl border border-stone-200/80 bg-white p-5 shadow-card transition-[box-shadow,transform,border-color] duration-300 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-card-hover motion-reduce:hover:translate-y-0 dark:border-stone-800 dark:bg-[#2a2015] dark:shadow-card-dark dark:hover:shadow-card-dark-hover sm:flex-row sm:items-center sm:p-6"
+            className="group flex flex-col gap-4 rounded-2xl border border-stone-200/80 bg-white p-5 shadow-card transition-[box-shadow,transform,border-color] duration-300 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-card-hover motion-reduce:hover:translate-y-0 dark:border-white/12 dark:bg-surface-dark dark:shadow-card-dark dark:hover:shadow-card-dark-hover sm:flex-row sm:items-center sm:p-6"
           >
             <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
               <span className="material-symbols-outlined text-2xl" aria-hidden>
@@ -129,7 +129,7 @@ export function ZapisyContent({ steps }: { steps: Step[] }) {
   if (isLoggedIn && hasChildren && (classes?.length ?? 0) > 0) {
     return (
       <div className="space-y-5">
-        <section className="rounded-2xl border border-stone-200/80 bg-white p-5 shadow-card dark:border-stone-800 dark:bg-[#2a2015] dark:shadow-card-dark sm:p-6">
+        <section className="rounded-2xl border border-stone-200/80 bg-white p-5 shadow-card dark:border-white/12 dark:bg-surface-dark dark:shadow-card-dark sm:p-6">
           <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <h2 className="text-lg font-black tracking-tight text-text-main dark:text-white">
@@ -220,7 +220,7 @@ export function ZapisyContent({ steps }: { steps: Step[] }) {
         <div className="flex flex-wrap gap-3">
           <Link
             href="/cennik"
-            className="inline-flex h-10 items-center gap-2 rounded-xl border border-stone-200 bg-white px-4 text-sm font-semibold text-stone-700 transition-colors hover:border-stone-300 hover:bg-stone-50 dark:border-stone-700 dark:bg-[#2a2015] dark:text-stone-200 dark:hover:bg-stone-900"
+            className="inline-flex h-10 items-center gap-2 rounded-xl border border-stone-200 bg-white px-4 text-sm font-semibold text-stone-700 transition-colors hover:border-stone-300 hover:bg-stone-50 dark:border-white/12 dark:bg-surface-dark dark:text-stone-200 dark:hover:bg-stone-900"
           >
             <span className="material-symbols-outlined text-[18px] text-primary" aria-hidden>
               payments
@@ -229,7 +229,7 @@ export function ZapisyContent({ steps }: { steps: Step[] }) {
           </Link>
           <Link
             href="/grafik"
-            className="inline-flex h-10 items-center gap-2 rounded-xl border border-stone-200 bg-white px-4 text-sm font-semibold text-stone-700 transition-colors hover:border-stone-300 hover:bg-stone-50 dark:border-stone-700 dark:bg-[#2a2015] dark:text-stone-200 dark:hover:bg-stone-900"
+            className="inline-flex h-10 items-center gap-2 rounded-xl border border-stone-200 bg-white px-4 text-sm font-semibold text-stone-700 transition-colors hover:border-stone-300 hover:bg-stone-50 dark:border-white/12 dark:bg-surface-dark dark:text-stone-200 dark:hover:bg-stone-900"
           >
             <span className="material-symbols-outlined text-[18px] text-primary" aria-hidden>
               schedule
@@ -238,7 +238,7 @@ export function ZapisyContent({ steps }: { steps: Step[] }) {
           </Link>
           <Link
             href="/obozy"
-            className="inline-flex h-10 items-center gap-2 rounded-xl border border-stone-200 bg-white px-4 text-sm font-semibold text-stone-700 transition-colors hover:border-stone-300 hover:bg-stone-50 dark:border-stone-700 dark:bg-[#2a2015] dark:text-stone-200 dark:hover:bg-stone-900"
+            className="inline-flex h-10 items-center gap-2 rounded-xl border border-stone-200 bg-white px-4 text-sm font-semibold text-stone-700 transition-colors hover:border-stone-300 hover:bg-stone-50 dark:border-white/12 dark:bg-surface-dark dark:text-stone-200 dark:hover:bg-stone-900"
           >
             <span className="material-symbols-outlined text-[18px] text-primary" aria-hidden>
               hiking
@@ -280,7 +280,7 @@ export function ZapisyContent({ steps }: { steps: Step[] }) {
 
   return (
     <div className="space-y-5">
-      <div className="rounded-2xl border border-stone-200/80 bg-white p-5 text-center shadow-card dark:border-stone-800 dark:bg-[#2a2015] dark:shadow-card-dark sm:p-6">
+      <div className="rounded-2xl border border-stone-200/80 bg-white p-5 text-center shadow-card dark:border-white/12 dark:bg-surface-dark dark:shadow-card-dark sm:p-6">
         <p className="text-sm text-stone-600 dark:text-stone-300">
           Zaloguj się, aby zapisać dziecko i zarządzać aktywnością.
         </p>

@@ -110,7 +110,7 @@ function EmptyPanel({
   actionLabel?: string;
 }) {
   return (
-    <div className="rounded-2xl border border-dashed border-stone-300/90 bg-white/70 px-5 py-8 text-center dark:border-stone-700 dark:bg-[#2a2015]/50">
+    <div className="rounded-2xl border border-dashed border-stone-300/90 bg-white/70 px-5 py-8 text-center dark:border-white/12 dark:bg-surface-dark/50">
       <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-primary/12 text-primary">
         <span className="material-symbols-outlined text-[22px]" aria-hidden>
           {icon}
@@ -233,7 +233,7 @@ export function DashboardHome() {
           <Link
             key={item.href}
             href={item.href}
-            className="flex flex-col items-center gap-2 rounded-2xl border border-stone-200/80 bg-white px-2 py-3.5 shadow-card transition-all active:scale-[0.98] dark:border-stone-800 dark:bg-[#2a2015] dark:shadow-card-dark"
+            className="flex flex-col items-center gap-2 rounded-2xl border border-stone-200/80 bg-white px-2 py-3.5 shadow-card transition-all active:scale-[0.98] dark:border-white/12 dark:bg-surface-dark dark:shadow-card-dark"
           >
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/12">
               <span className="material-symbols-outlined text-[22px] text-primary">
@@ -270,7 +270,7 @@ export function DashboardHome() {
                   return (
                     <div
                       key={ch.childId}
-                      className="min-w-[260px] max-w-md flex-1 rounded-2xl border border-stone-200/80 bg-white p-4 shadow-card dark:border-stone-800 dark:bg-[#2a2015] dark:shadow-card-dark"
+                      className="min-w-[260px] max-w-md flex-1 rounded-2xl border border-stone-200/80 bg-white p-4 shadow-card dark:border-white/12 dark:bg-surface-dark dark:shadow-card-dark"
                     >
                       <div className="flex gap-3.5">
                         <div
@@ -331,7 +331,7 @@ export function DashboardHome() {
                     <li key={row.key}>
                       <Link
                         href={row.href}
-                        className="flex items-stretch gap-3.5 rounded-2xl border border-stone-200/80 bg-white p-3.5 shadow-card transition-colors hover:border-primary/35 dark:border-stone-800 dark:bg-[#2a2015] dark:shadow-card-dark dark:hover:border-primary/40 sm:gap-4 sm:p-4"
+                        className="flex items-stretch gap-3.5 rounded-2xl border border-stone-200/80 bg-white p-3.5 shadow-card transition-colors hover:border-primary/35 dark:border-white/12 dark:bg-surface-dark dark:shadow-card-dark dark:hover:border-primary/40 sm:gap-4 sm:p-4"
                       >
                         <div className="flex w-14 shrink-0 flex-col items-center justify-center rounded-xl bg-primary py-2 text-center font-bold text-primary-foreground">
                           <span className="text-[10px] uppercase leading-tight opacity-90">
@@ -369,7 +369,7 @@ export function DashboardHome() {
         <div className="space-y-6">
           <section>
             <SectionHeading title="Płatności" />
-            <div className="rounded-2xl border border-stone-200/80 bg-white p-5 shadow-card dark:border-stone-800 dark:bg-[#2a2015] dark:shadow-card-dark">
+            <div className="rounded-2xl border border-stone-200/80 bg-white p-5 shadow-card dark:border-white/12 dark:bg-surface-dark dark:shadow-card-dark">
               <div className="mb-1 flex items-start justify-between gap-2">
                 <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-stone-400">
                   Do zapłaty
@@ -458,7 +458,7 @@ export function DashboardHome() {
                 <li key={a.href}>
                   <Link
                     href={a.href}
-                    className="flex gap-3.5 rounded-2xl border border-stone-200/80 bg-white p-3.5 shadow-card transition-colors hover:border-primary/35 dark:border-stone-800 dark:bg-[#2a2015] dark:shadow-card-dark dark:hover:border-primary/40"
+                    className="flex gap-3.5 rounded-2xl border border-stone-200/80 bg-white p-3.5 shadow-card transition-colors hover:border-primary/35 dark:border-white/12 dark:bg-surface-dark dark:shadow-card-dark dark:hover:border-primary/40"
                   >
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/12">
                       <span className="material-symbols-outlined text-xl text-primary">

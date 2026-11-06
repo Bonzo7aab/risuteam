@@ -46,7 +46,7 @@ export default function AdminUstawieniaPage() {
       <section
         className={cn(
           "rounded-2xl border border-stone-200/80 bg-white p-5 shadow-card",
-          "dark:border-stone-800 dark:bg-[#2a2015]"
+          "dark:border-white/12 dark:bg-surface-dark"
         )}
       >
         <div className="flex items-start justify-between gap-4">

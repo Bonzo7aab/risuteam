@@ -16,9 +16,9 @@ const STEPS = [
     driverStepId: "nav-dzieci",
   },
   {
-    title: "Zajęcia",
+    title: "Zapisy",
     description:
-      "Zapisuj dzieci na zajęcia i obozy oraz sprawdzaj listę aktywnych zgłoszeń.",
+      "Zapisuj dzieci na obozy i nocowanki oraz sprawdzaj listę aktywnych zgłoszeń.",
     driverStepId: "nav-zajecia",
   },
   {

@@ -156,11 +156,11 @@ export default function AdminWydarzeniaPage() {
           {campsLoading ? (
             <p className="text-sm text-stone-500 dark:text-stone-400">Ładowanie…</p>
           ) : !camps?.length ? (
-            <div className="rounded-2xl border border-stone-200 bg-white px-6 py-10 text-center text-sm text-stone-500 dark:border-stone-700 dark:bg-stone-900/80 dark:text-stone-400">
+            <div className="rounded-2xl border border-stone-200 bg-white px-6 py-10 text-center text-sm text-stone-500 dark:border-white/12 dark:bg-surface-dark dark:text-stone-400">
               Brak obozów w systemie.
             </div>
           ) : (
-            <ul className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-soft dark:border-stone-700 dark:bg-stone-900/80">
+            <ul className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-soft dark:border-white/12 dark:bg-surface-dark">
               {camps.map((camp) => {
                 const regCount = campCounts?.[camp._id] ?? 0;
                 const isOpen = camp.isRegistrationOpen !== false;
@@ -230,11 +230,11 @@ export default function AdminWydarzeniaPage() {
           {nocowankiLoading ? (
             <p className="text-sm text-stone-500 dark:text-stone-400">Ładowanie…</p>
           ) : nocowankaListWithFallback.length === 0 ? (
-            <div className="rounded-2xl border border-stone-200 bg-white px-6 py-10 text-center text-sm text-stone-500 dark:border-stone-700 dark:bg-stone-900/80 dark:text-stone-400">
+            <div className="rounded-2xl border border-stone-200 bg-white px-6 py-10 text-center text-sm text-stone-500 dark:border-white/12 dark:bg-surface-dark dark:text-stone-400">
               Brak nocowanek. Dodaj nocowankę powyżej.
             </div>
           ) : (
-            <ul className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-soft dark:border-stone-700 dark:bg-stone-900/80">
+            <ul className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-soft dark:border-white/12 dark:bg-surface-dark">
               {nocowankaListWithFallback.map((item) => {
                 const regCount = nocowankaCounts?.[item.slug] ?? 0;
                 const nocowankaDoc = nocowankaInDb.get(item.slug);

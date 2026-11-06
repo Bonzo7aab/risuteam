@@ -5,7 +5,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 
 const sidebarPanelClasses =
-  "rounded-r-2xl border border-stone-100 dark:border-stone-800 border-l-0 shadow-soft bg-white/95 dark:bg-[#2a2015]/95 backdrop-blur-md";
+  "rounded-r-2xl border border-stone-100 dark:border-stone-800 border-l-0 shadow-soft bg-white/95 dark:bg-surface-dark/95 backdrop-blur-md";
 
 const navLinkBaseParent =
   "flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-colors text-stone-500 dark:text-stone-400";

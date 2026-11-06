@@ -58,9 +58,9 @@ function OfferRow({
   ctaEnrolled?: boolean;
 }) {
   const className = cn(
-    "group flex flex-col gap-4 rounded-2xl border border-stone-200/80 bg-white p-5 shadow-card dark:border-stone-800 dark:bg-[#2a2015] dark:shadow-card-dark sm:flex-row sm:items-center sm:justify-between sm:p-6",
+    "group flex flex-col gap-4 rounded-2xl border border-stone-200/90 bg-white p-5 shadow-card dark:border-white/14 dark:bg-surface-dark dark:shadow-card-dark sm:flex-row sm:items-center sm:justify-between sm:p-6",
     !ctaDisabled &&
-      "transition-[box-shadow,transform,border-color] duration-300 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-card-hover motion-reduce:hover:translate-y-0 dark:hover:shadow-card-dark-hover"
+      "transition-[box-shadow,transform,border-color] duration-300 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-card-hover motion-reduce:hover:translate-y-0 dark:hover:border-primary/40 dark:hover:shadow-card-dark-hover"
   );
   const ctaClass = cn(
     "inline-flex h-10 shrink-0 items-center justify-center gap-1.5 rounded-xl px-4 text-sm font-bold shadow-sm",
@@ -130,7 +130,7 @@ function SectionCard({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-2xl border border-stone-200/80 bg-white p-5 shadow-card dark:border-stone-800 dark:bg-[#2a2015] dark:shadow-card-dark sm:p-6">
+    <section className="rounded-2xl border border-stone-200/80 bg-stone-50/80 p-5 shadow-card dark:border-white/10 dark:bg-black/25 dark:shadow-card-dark sm:p-6">
       <div className="mb-5">
         <h2 className="text-lg font-black tracking-tight text-text-main dark:text-white">
           {title}
@@ -215,7 +215,7 @@ export function ZapisyPageContent({ steps }: { steps: Step[] }) {
         role="tablist"
         aria-label="Rodzaj zapisu"
       >
-        <div className="inline-flex min-w-full gap-1 rounded-2xl border border-stone-200/80 bg-white/90 p-1.5 shadow-card dark:border-stone-800 dark:bg-[#2a2015]/90 dark:shadow-card-dark sm:min-w-0">
+        <div className="inline-flex min-w-full gap-1 rounded-2xl border border-stone-200/80 bg-white/90 p-1.5 shadow-card dark:border-white/12 dark:bg-surface-dark/90 dark:shadow-card-dark sm:min-w-0">
           {tabs.map((item) => {
             const selected = tab === item.id;
             return (

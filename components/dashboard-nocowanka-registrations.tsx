@@ -97,7 +97,7 @@ export function DashboardNocowankaRegistrations({
 
         return (
           <li key={reg._id}>
-            <div className="flex gap-3 items-stretch rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/80 p-4 shadow-xs">
+            <div className="flex gap-3 items-stretch rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-surface-dark p-4 shadow-xs">
               <Link
                 href={href}
                 className="flex min-w-0 flex-1 gap-4 items-stretch hover:opacity-90 transition-opacity"

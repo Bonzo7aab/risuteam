@@ -22,7 +22,7 @@ export function AddChildRequiredDialog({
 }: AddChildRequiredDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md rounded-2xl border-0 p-6 shadow-card dark:bg-[#2a2015]">
+      <DialogContent className="max-w-md rounded-2xl border-0 p-6 shadow-card dark:bg-surface-dark">
         <DialogHeader>
           <DialogTitle className="text-xl font-black tracking-tight text-text-main dark:text-white">
             Najpierw dodaj dziecko

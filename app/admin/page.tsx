@@ -28,7 +28,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const panel =
-  "flex h-full flex-col overflow-hidden rounded-2xl border border-stone-200/80 bg-white shadow-card dark:border-stone-800 dark:bg-[#2a2015] dark:shadow-card-dark";
+  "flex h-full flex-col overflow-hidden rounded-2xl border border-stone-200/80 bg-white shadow-card dark:border-white/12 dark:bg-surface-dark dark:shadow-card-dark";
 
 function capitalize(value: string): string {
   if (!value) return value;
@@ -237,13 +237,13 @@ function MetricCell({
   );
 
   if (!href) {
-    return <div className="bg-white px-4 py-4 dark:bg-[#2a2015] sm:px-5">{body}</div>;
+    return <div className="bg-white px-4 py-4 dark:bg-surface-dark sm:px-5">{body}</div>;
   }
 
   return (
     <Link
       href={href}
-      className="group bg-white px-4 py-4 transition-colors hover:bg-stone-50 dark:bg-[#2a2015] dark:hover:bg-stone-800/40 sm:px-5"
+      className="group bg-white px-4 py-4 transition-colors hover:bg-stone-50 dark:bg-surface-dark dark:hover:bg-stone-800/40 sm:px-5"
     >
       {body}
     </Link>
@@ -371,7 +371,7 @@ export default function AdminPulpitPage() {
             Array.from({ length: 6 }).map((_, index) => (
               <div
                 key={index}
-                className="h-[7.25rem] animate-pulse bg-white dark:bg-[#2a2015]"
+                className="h-[7.25rem] animate-pulse bg-white dark:bg-surface-dark"
               />
             ))
           ) : (

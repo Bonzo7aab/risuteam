@@ -33,7 +33,7 @@ export function AuthDivider({ label }: { label: string }) {
         <div className="w-full border-t border-stone-200 dark:border-stone-700" />
       </div>
       <div className="relative flex justify-center text-[11px] font-medium uppercase tracking-wider text-stone-400">
-        <span className="bg-white px-3 dark:bg-[#2a2015]">{label}</span>
+        <span className="bg-white px-3 dark:bg-surface-dark">{label}</span>
       </div>
     </div>
   );

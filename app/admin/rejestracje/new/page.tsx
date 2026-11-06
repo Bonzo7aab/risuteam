@@ -411,7 +411,7 @@ export default function AdminNewCampPage() {
 
       <form id="camp-form" onSubmit={handleSubmit} className="space-y-6">
         {/* Section 1 – Basic Info */}
-        <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-soft dark:border-stone-700 dark:bg-stone-900/80 sm:p-6">
+        <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-soft dark:border-white/12 dark:bg-surface-dark sm:p-6">
           <div className="flex items-center gap-2 mb-4">
             <h2 className="text-base font-bold text-stone-900 dark:text-white">
               Podstawowe dane
@@ -540,7 +540,7 @@ export default function AdminNewCampPage() {
         </section>
 
         {/* Section 2 – Media & Description */}
-        <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-soft dark:border-stone-700 dark:bg-stone-900/80 sm:p-6">
+        <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-soft dark:border-white/12 dark:bg-surface-dark sm:p-6">
           <div className="flex items-center gap-2 mb-4">
             <h2 className="text-base font-bold text-stone-900 dark:text-white">
               Media i opis
@@ -662,7 +662,7 @@ export default function AdminNewCampPage() {
         </section>
 
         {/* Section 3 – Pricing & Capacity */}
-        <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-soft dark:border-stone-700 dark:bg-stone-900/80 sm:p-6">
+        <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-soft dark:border-white/12 dark:bg-surface-dark sm:p-6">
           <div className="flex items-center gap-2 mb-4">
             <h2 className="text-base font-bold text-stone-900 dark:text-white">
               Cena i liczba miejsc
@@ -732,7 +732,7 @@ export default function AdminNewCampPage() {
         </section>
 
         {/* Section 4 – Daily Schedule (by day) */}
-        <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-soft dark:border-stone-700 dark:bg-stone-900/80 sm:p-6">
+        <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-soft dark:border-white/12 dark:bg-surface-dark sm:p-6">
           <div className="flex items-center justify-between gap-4 flex-wrap mb-4">
             <div className="flex items-center gap-2">
               <h2 className="text-base font-bold text-stone-900 dark:text-white">
@@ -833,7 +833,7 @@ export default function AdminNewCampPage() {
         </section>
 
         {/* Section 4b – General attractions */}
-        <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-soft dark:border-stone-700 dark:bg-stone-900/80 sm:p-6">
+        <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-soft dark:border-white/12 dark:bg-surface-dark sm:p-6">
           <div className="mb-4">
             <h2 className="text-base font-bold text-stone-900 dark:text-white">
               Atrakcje ogólne dla całego obozu
@@ -910,7 +910,7 @@ export default function AdminNewCampPage() {
         </section>
 
         {/* Section 5 – Included Items */}
-        <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-soft dark:border-stone-700 dark:bg-stone-900/80 sm:p-6">
+        <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-soft dark:border-white/12 dark:bg-surface-dark sm:p-6">
           <div className="mb-4">
             <h2 className="text-base font-bold text-stone-900 dark:text-white">
               Co w cenie
