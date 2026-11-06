@@ -60,6 +60,16 @@ export default defineSchema({
     city: v.string(),
     postalCode: v.optional(v.string()),
     mapsUrl: v.optional(v.string()),
+    /** Map pin — required for public /lokalizacja. */
+    lat: v.optional(v.number()),
+    lng: v.optional(v.number()),
+    /** Opening hours shown on the public locations page. */
+    hours: v.optional(v.string()),
+    /**
+     * When false, location is admin/schedule-only and hidden on the public map.
+     * Undefined/true = visible when lat/lng are set.
+     */
+    isPublic: v.optional(v.boolean()),
   }).index("by_city", ["city"]),
 
   events: defineTable({

@@ -76,13 +76,43 @@ export default function AdminGaleriaFolderPage() {
   const [addingVideo, setAddingVideo] = useState(false);
   const [folderName, setFolderName] = useState<string | null>(null);
   const [savingFolder, setSavingFolder] = useState(false);
+  const [movingItemId, setMovingItemId] = useState<Id<"galleryItems"> | null>(
+    null,
+  );
 
   const folderId = album?._id ?? undefined;
   const displayName = folderName ?? album?.name ?? "";
-  const otherFolders = useMemo(
-    () => (albums ?? []).filter((entry) => !entry.isUncategorized && entry.slug !== slug),
-    [albums, slug],
+  const folderChoices = useMemo(
+    () =>
+      (albums ?? []).filter(
+        (entry) => !entry.isUncategorized && entry._id !== null,
+      ),
+    [albums],
   );
+
+  const moveItemToFolder = async (
+    itemId: Id<"galleryItems">,
+    target: "pozostale" | Id<"galleryCategories">,
+  ) => {
+    setMovingItemId(itemId);
+    try {
+      await updateItemMeta({
+        id: itemId,
+        categoryId: target === "pozostale" ? null : target,
+      });
+      toast.success(
+        target === "pozostale"
+          ? "Przeniesiono do „Pozostałe”."
+          : "Przeniesiono do innego folderu.",
+      );
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Nie udało się przenieść.",
+      );
+    } finally {
+      setMovingItemId(null);
+    }
+  };
 
   const uploadFiles = useCallback(
     async (files: File[]) => {
@@ -266,7 +296,7 @@ export default function AdminGaleriaFolderPage() {
           "rounded-2xl border border-dashed px-4 py-8 text-center transition-colors",
           dragOver
             ? "border-primary bg-primary/5"
-            : "border-stone-300 bg-white dark:border-stone-600 dark:bg-stone-900/80",
+            : "border-stone-300 bg-white dark:border-stone-600 dark:bg-surface-dark",
         )}
       >
         <span className="material-symbols-outlined mb-2 block text-4xl text-stone-400">
@@ -303,7 +333,7 @@ export default function AdminGaleriaFolderPage() {
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-stone-200 bg-white p-4 shadow-soft dark:border-stone-700 dark:bg-stone-900/80 sm:p-5">
+      <div className="overflow-hidden rounded-2xl border border-stone-200 bg-white p-4 shadow-soft dark:border-white/12 dark:bg-surface-dark sm:p-5">
         <h2 className="text-sm font-bold text-stone-900 dark:text-white">Dodaj wideo</h2>
         <div className="mt-3 grid gap-3 sm:grid-cols-[1fr_12rem_auto]">
           <Input
@@ -345,7 +375,7 @@ export default function AdminGaleriaFolderPage() {
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-soft dark:border-stone-700 dark:bg-stone-900/80">
+      <div className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-soft dark:border-white/12 dark:bg-surface-dark">
         <div className="border-b border-stone-200 px-4 py-3 dark:border-stone-700 sm:px-5">
           <h2 className="text-sm font-bold text-stone-900 dark:text-white">Zawartość</h2>
         </div>
@@ -401,39 +431,43 @@ export default function AdminGaleriaFolderPage() {
                         />
                         Opublikowane
                       </label>
-                      <Select
-                        value={item.categoryId ?? "pozostale"}
-                        onValueChange={(value) => {
-                          void updateItemMeta({
-                            id: item._id,
-                            categoryId:
+                      <div className="flex min-w-0 flex-1 items-center gap-2 sm:max-w-xs">
+                        <span
+                          className="material-symbols-outlined shrink-0 text-[18px] text-stone-400"
+                          aria-hidden
+                        >
+                          drive_file_move
+                        </span>
+                        <Select
+                          value={item.categoryId ?? "pozostale"}
+                          disabled={movingItemId === item._id}
+                          onValueChange={(value) => {
+                            const next =
                               value === "pozostale"
-                                ? null
-                                : (value as Id<"galleryCategories">),
-                          })
-                            .then(() => toast.success("Przeniesiono."))
-                            .catch((err) =>
-                              toast.error(err instanceof Error ? err.message : "Błąd przenoszenia."),
-                            );
-                        }}
-                      >
-                        <SelectTrigger className="h-8 w-44 text-xs">
-                          <SelectValue placeholder="Folder" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="pozostale">Pozostałe</SelectItem>
-                          {album._id ? (
-                            <SelectItem value={album._id}>{album.name}</SelectItem>
-                          ) : null}
-                          {otherFolders.map((folder) =>
-                            folder._id ? (
-                              <SelectItem key={folder._id} value={folder._id}>
+                                ? "pozostale"
+                                : (value as Id<"galleryCategories">);
+                            const current = item.categoryId ?? "pozostale";
+                            if (next === current) return;
+                            void moveItemToFolder(item._id, next);
+                          }}
+                        >
+                          <SelectTrigger
+                            className="h-8 w-full text-xs"
+                            aria-label="Zmień folder"
+                          >
+                            <SelectValue placeholder="Wybierz folder" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="pozostale">Pozostałe</SelectItem>
+                            {folderChoices.map((folder) => (
+                              <SelectItem key={folder._id!} value={folder._id!}>
                                 {folder.name}
+                                {folder.slug === slug ? " (ten folder)" : ""}
                               </SelectItem>
-                            ) : null,
-                          )}
-                        </SelectContent>
-                      </Select>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
                   </div>
                   <div className="flex shrink-0 gap-2">

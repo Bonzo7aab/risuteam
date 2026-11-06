@@ -8,7 +8,6 @@ import type { Id } from "@/convex/_generated/dataModel";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
@@ -207,19 +206,14 @@ export default function AdminPlatnosciPage() {
   const setClassMonthPaymentStatus = useMutation(
     api.payments.setClassMonthPaymentStatusForAdmin
   );
-  const ensureClassInvoices = useMutation(
-    api.payments.ensureClassInvoicesThroughCurrentMonth
-  );
   const sendClassPaymentReminderEmail = useAction(
     api.payments.sendClassPaymentReminderEmail
   );
 
-  const initialScope = searchParams.get("scope");
   const initialQ = searchParams.get("q") ?? searchParams.get("search") ?? "";
 
-  const [paymentScope, setPaymentScope] = useState<"camps" | "classes">(
-    initialScope === "classes" ? "classes" : "camps"
-  );
+  /** Class (zajęcia) tab hidden — keep state typed so camp-only UI stays easy to restore. */
+  const [paymentScope] = useState<"camps" | "classes">("camps");
   const [openEventType, setOpenEventType] = useState<"camp" | "nocowanka">("camp");
   const [closedEventKey, setClosedEventKey] = useState("all");
   const [search, setSearch] = useState(initialQ);
@@ -232,15 +226,10 @@ export default function AdminPlatnosciPage() {
   const [partialDialogRow, setPartialDialogRow] = useState<CampsPaymentRow | null>(null);
   const [partialAmount, setPartialAmount] = useState("");
   const [info, setInfo] = useState<string | null>(null);
-  const [selectedOpenCampKeys, setSelectedOpenCampKeys] = useState<string[]>([]);
-  const [selectedOpenSleepoverKeys, setSelectedOpenSleepoverKeys] = useState<string[]>([]);
+  /** `"all"` = every open event of the selected type. */
+  const [selectedEventKey, setSelectedEventKey] = useState<string>("all");
   const [selectedClassTypes, setSelectedClassTypes] = useState<string[]>([]);
-  const [statusSortSelection, setStatusSortSelection] = useState<Record<StatusSortKey, boolean>>({
-    paid: false,
-    partial: false,
-    pending: false,
-    overdue: false,
-  });
+  const [statusFilter, setStatusFilter] = useState<"all" | StatusSortKey>("all");
   const [expandedGroupKeys, setExpandedGroupKeys] = useState<Set<string>>(new Set());
   const [reminderTargetGroup, setReminderTargetGroup] =
     useState<GroupedClassRow | null>(null);
@@ -283,25 +272,12 @@ export default function AdminPlatnosciPage() {
   );
 
   useEffect(() => {
-    const scope = searchParams.get("scope");
     const q = searchParams.get("q") ?? searchParams.get("search");
-    if (scope === "camps" || scope === "classes") {
-      setPaymentScope(scope);
-    }
     if (q != null && q !== "") {
       setSearch(q);
       setPage(0);
     }
   }, [searchParams]);
-
-  useEffect(() => {
-    if (paymentScope !== "classes" || classRowsRaw === undefined) return;
-    void ensureClassInvoices({}).catch(() => {
-      /* non-blocking backfill */
-    });
-    // Run once when opening the classes payments tab with data.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [paymentScope, classRowsRaw === undefined]);
 
   const groupedClassRows = useMemo<GroupedClassRow[]>(() => {
     const groups = new Map<string, GroupedClassRow>();
@@ -359,15 +335,6 @@ export default function AdminPlatnosciPage() {
     return Array.from(groups.values());
   }, [classRows]);
 
-  const revenueThisMonth = useMemo(() => {
-    const now = new Date();
-    const start = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
-    const end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999).getTime();
-    return campsRows
-      .filter((r) => r.date >= start && r.date <= end)
-      .reduce((acc, row) => acc + getPaidValue(row), 0);
-  }, [campsRows]);
-
   const openCampEvents = useMemo(
     () =>
       Array.from(
@@ -420,18 +387,6 @@ export default function AdminPlatnosciPage() {
     return set;
   }, [classRows]);
 
-  useEffect(() => {
-    if (openCampEvents.length && selectedOpenCampKeys.length === 0) {
-      setSelectedOpenCampKeys(openCampEvents.map((entry) => entry.split("::")[0]));
-    }
-  }, [openCampEvents, selectedOpenCampKeys.length]);
-
-  useEffect(() => {
-    if (openSleepoverEvents.length && selectedOpenSleepoverKeys.length === 0) {
-      setSelectedOpenSleepoverKeys(openSleepoverEvents.map((entry) => entry.split("::")[0]));
-    }
-  }, [openSleepoverEvents, selectedOpenSleepoverKeys.length]);
-
   /** Default: only disciplines that have at least one active zapis; empty disciplines stay unchecked. */
   useEffect(() => {
     if (classesList === undefined || classRowsRaw === undefined) return;
@@ -453,16 +408,15 @@ export default function AdminPlatnosciPage() {
     }
     return campsRows.filter((r) => {
       if (!r.eventOpen || r.eventType !== openEventType) return false;
-      if (openEventType === "camp") return selectedOpenCampKeys.includes(r.eventKey);
-      return selectedOpenSleepoverKeys.includes(r.eventKey);
+      if (selectedEventKey === "all") return true;
+      return r.eventKey === selectedEventKey;
     });
   }, [
     paymentScope,
     campsRows,
     closedEventKey,
     openEventType,
-    selectedOpenCampKeys,
-    selectedOpenSleepoverKeys,
+    selectedEventKey,
   ]);
 
   const filteredCampRows = useMemo<CampsPaymentRow[]>(() => {
@@ -476,11 +430,8 @@ export default function AdminPlatnosciPage() {
           r.parentName.toLowerCase().includes(q)
       );
     }
-    const selectedStatuses = (Object.keys(statusSortSelection) as StatusSortKey[]).filter(
-      (k) => statusSortSelection[k]
-    );
-    if (selectedStatuses.length > 0) {
-      list = list.filter((r) => selectedStatuses.includes(getStatusSortKey(r)));
+    if (statusFilter !== "all") {
+      list = list.filter((r) => getStatusSortKey(r) === statusFilter);
     }
     if (dateFrom) {
       const startTs = new Date(dateFrom).setHours(0, 0, 0, 0);
@@ -500,7 +451,7 @@ export default function AdminPlatnosciPage() {
     dateFrom,
     dateTo,
     sortDirection,
-    statusSortSelection,
+    statusFilter,
   ]);
 
   const filteredClassGroups = useMemo<GroupedClassRow[]>(() => {
@@ -522,13 +473,8 @@ export default function AdminPlatnosciPage() {
           g.parentName.toLowerCase().includes(q)
       );
     }
-    const selectedStatuses = (Object.keys(statusSortSelection) as StatusSortKey[]).filter(
-      (k) => statusSortSelection[k]
-    );
-    if (selectedStatuses.length > 0) {
-      list = list.filter((g) =>
-        g.statusKeys.some((k) => selectedStatuses.includes(k))
-      );
+    if (statusFilter !== "all") {
+      list = list.filter((g) => g.statusKeys.includes(statusFilter));
     }
     if (dateFrom) {
       const startTs = new Date(dateFrom).setHours(0, 0, 0, 0);
@@ -552,7 +498,7 @@ export default function AdminPlatnosciPage() {
     dateFrom,
     dateTo,
     sortDirection,
-    statusSortSelection,
+    statusFilter,
   ]);
 
   const totalRowsCount =
@@ -694,13 +640,23 @@ export default function AdminPlatnosciPage() {
     setPartialDialogRow(null);
   };
 
-  if (
-    campsRowsRaw === undefined ||
-    classRowsRaw === undefined ||
-    classesList === undefined
-  ) {
+  if (campsRowsRaw === undefined) {
     return <div className="text-text-light dark:text-stone-400">Ładowanie…</div>;
   }
+
+  const hasActivePaymentFilters =
+    search.trim() !== "" ||
+    dateFrom !== "" ||
+    dateTo !== "" ||
+    statusFilter !== "all" ||
+    selectedEventKey !== "all" ||
+    closedEventKey !== "all";
+
+  const activeEventEntries =
+    openEventType === "camp" ? openCampEvents : openSleepoverEvents;
+
+  const filterSelectClass =
+    "h-9 w-full rounded-lg border border-stone-200 bg-white px-3 text-sm text-stone-800 dark:border-stone-600 dark:bg-stone-900 dark:text-stone-100";
 
   return (
     <div className="space-y-5 sm:space-y-6">
@@ -710,291 +666,206 @@ export default function AdminPlatnosciPage() {
             Płatności
           </h1>
           <p className="mt-1 text-sm text-text-light dark:text-stone-400">
-            Rozliczenia zajęć, obozów i nocowanek.
+            Rozliczenia obozów i nocowanek.
           </p>
         </div>
-        <p className="text-sm text-text-light dark:text-stone-400">
-          {totalRowsCount} {totalRowsCount === 1 ? "wiersz" : "wierszy"}
-        </p>
-      </div>
-
-      <div className="flex flex-wrap gap-2">
-        <button
-          type="button"
-          onClick={() => {
-            setPaymentScope("camps");
-            setPage(0);
-          }}
-          className={cn(
-            "rounded-md border px-3 py-1.5 text-sm font-medium transition-colors",
-            paymentScope === "camps"
-              ? "border-primary bg-primary/10 text-primary"
-              : "border-stone-300 bg-white text-stone-700 dark:border-stone-600 dark:bg-stone-900 dark:text-stone-200"
-          )}
-        >
-          Obozy i nocowanki
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            setPaymentScope("classes");
-            setPage(0);
-          }}
-          className={cn(
-            "rounded-md border px-3 py-1.5 text-sm font-medium transition-colors",
-            paymentScope === "classes"
-              ? "border-primary bg-primary/10 text-primary"
-              : "border-stone-300 bg-white text-stone-700 dark:border-stone-600 dark:bg-stone-900 dark:text-stone-200"
-          )}
-        >
-          Zajęcia
-        </button>
-      </div>
-
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-xl border border-stone-200 bg-white px-4 py-3 dark:border-stone-700 dark:bg-stone-900/60">
-          <div className="flex items-center gap-2 text-xs font-medium text-text-light dark:text-stone-400">
-            <span className="material-symbols-outlined text-base">payments</span>
-            Przychód (miesiąc)
-          </div>
-          <p className="mt-1 text-2xl font-bold tabular-nums text-text-main dark:text-white">
-            {formatPln(revenueThisMonth)}
-          </p>
-        </div>
-        <div className="rounded-xl border border-stone-200 bg-white px-4 py-3 dark:border-stone-700 dark:bg-stone-900/60">
-          <div className="flex items-center gap-2 text-xs font-medium text-text-light dark:text-stone-400">
-            <span className="material-symbols-outlined text-base">check_circle</span>
-            Opłacone
-          </div>
-          <p className="mt-1 text-2xl font-bold tabular-nums text-green-600 dark:text-green-400">
-            {stats.paidCount}
-          </p>
-        </div>
-        <div className="rounded-xl border border-stone-200 bg-white px-4 py-3 dark:border-stone-700 dark:bg-stone-900/60">
-          <div className="flex items-center gap-2 text-xs font-medium text-text-light dark:text-stone-400">
-            <span className="material-symbols-outlined text-base">schedule</span>
-            Nieopłacone
-          </div>
-          <p className="mt-1 text-2xl font-bold tabular-nums text-amber-600 dark:text-amber-400">
-            {stats.unpaidCount}
-          </p>
-        </div>
-        <div className="rounded-xl border border-stone-200 bg-white px-4 py-3 dark:border-stone-700 dark:bg-stone-900/60">
-          <div className="flex items-center gap-2 text-xs font-medium text-text-light dark:text-stone-400">
-            <span className="material-symbols-outlined text-base">table_rows</span>
-            Na liście
-          </div>
-          <p className="mt-1 text-2xl font-bold tabular-nums text-text-main dark:text-white">
-            {totalRowsCount}
-          </p>
+        <div className="flex items-center gap-4 text-sm">
+          <span className="tabular-nums text-green-700 dark:text-green-400">
+            <span className="font-semibold">{stats.paidCount}</span> opłacone
+          </span>
+          <span className="tabular-nums text-amber-700 dark:text-amber-400">
+            <span className="font-semibold">{stats.unpaidCount}</span> nieopłacone
+          </span>
         </div>
       </div>
-
-      {paymentScope === "camps" && (
-        <section className="rounded-xl border border-stone-200 bg-stone-100 p-3 dark:border-stone-700 dark:bg-stone-800/60">
-          <div className="flex flex-wrap items-center gap-2">
-            <Button
-              type="button"
-              variant={openEventType === "camp" && closedEventKey === "all" ? "default" : "outline"}
-              size="sm"
-              onClick={() => {
-                setOpenEventType("camp");
-                setClosedEventKey("all");
-                setPage(0);
-              }}
-            >
-              Otwarte obozy ({openCampEvents.length})
-            </Button>
-            <Button
-              type="button"
-              variant={openEventType === "nocowanka" && closedEventKey === "all" ? "default" : "outline"}
-              size="sm"
-              onClick={() => {
-                setOpenEventType("nocowanka");
-                setClosedEventKey("all");
-                setPage(0);
-              }}
-            >
-              Otwarte nocowanki ({openSleepoverEvents.length})
-            </Button>
-            <select
-              value={closedEventKey}
-              onChange={(e) => {
-                setClosedEventKey(e.target.value);
-                setPage(0);
-              }}
-              className="h-9 rounded-md border border-stone-300 bg-white px-3 text-sm dark:border-stone-600 dark:bg-stone-900"
-            >
-              <option value="all">Zamknięte: brak</option>
-              {closedEvents.map((entry) => {
-                const [key, name] = entry.split("::");
-                return <option key={key} value={key}>Zamknięte: {name}</option>;
-              })}
-            </select>
-          </div>
-          {closedEventKey === "all" && openEventType === "camp" && (
-            <div className="mt-3 flex flex-wrap items-center gap-2">
-              {openCampEvents.map((entry) => {
-                const [key, name] = entry.split("::");
-                const selected = selectedOpenCampKeys.includes(key);
-                return (
-                  <button
-                    key={key}
-                    type="button"
-                    className={cn(
-                      "rounded-md border px-3 py-2 text-sm font-medium transition-colors",
-                      selected
-                        ? "border-primary bg-primary/10 text-primary"
-                        : "border-stone-300 bg-white text-stone-700 dark:border-stone-600 dark:bg-stone-900 dark:text-stone-200"
-                    )}
-                    onClick={() =>
-                      setSelectedOpenCampKeys((prev) =>
-                        prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
-                      )
-                    }
-                  >
-                    {name}
-                  </button>
-                );
-              })}
-            </div>
-          )}
-          {closedEventKey === "all" && openEventType === "nocowanka" && (
-            <div className="mt-3 flex flex-wrap items-center gap-2">
-              {openSleepoverEvents.map((entry) => {
-                const [key, name] = entry.split("::");
-                const selected = selectedOpenSleepoverKeys.includes(key);
-                return (
-                  <button
-                    key={key}
-                    type="button"
-                    className={cn(
-                      "rounded-md border px-3 py-2 text-sm font-medium transition-colors",
-                      selected
-                        ? "border-primary bg-primary/10 text-primary"
-                        : "border-stone-300 bg-white text-stone-700 dark:border-stone-600 dark:bg-stone-900 dark:text-stone-200"
-                    )}
-                    onClick={() =>
-                      setSelectedOpenSleepoverKeys((prev) =>
-                        prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
-                      )
-                    }
-                  >
-                    {name}
-                  </button>
-                );
-              })}
-            </div>
-          )}
-        </section>
-      )}
-
-      <section className="rounded-xl border border-stone-200 bg-stone-100 p-3 dark:border-stone-700 dark:bg-stone-800/60">
-        <div className="flex flex-wrap items-center gap-2">
-          <Input
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setPage(0);
-            }}
-            placeholder="Szukaj ucznia lub rodzica…"
-            className="min-w-[16rem] flex-1 bg-white dark:bg-stone-900"
-          />
-          <Input
-            type="date"
-            value={dateFrom}
-            onChange={(e) => {
-              setDateFrom(e.target.value);
-              setPage(0);
-            }}
-            className="w-42 bg-white dark:bg-stone-900"
-          />
-          <Input
-            type="date"
-            value={dateTo}
-            onChange={(e) => {
-              setDateTo(e.target.value);
-              setPage(0);
-            }}
-            className="w-42 bg-white dark:bg-stone-900"
-          />
-          <Button
-            variant="outline"
-            className="ml-auto bg-white dark:bg-stone-900"
-            onClick={() => {
-              setSearch("");
-              setDateFrom("");
-              setDateTo("");
-              setStatusSortSelection({
-                paid: false,
-                partial: false,
-                pending: false,
-                overdue: false,
-              });
-              setPage(0);
-            }}
-          >
-            Wyczyść filtry
-          </Button>
-        </div>
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-          <div className="flex flex-wrap items-center gap-2">
-            {(
-              [
-                ["overdue", "Po terminie"],
-                ["pending", "Oczekujące"],
-                ["partial", "Częściowo opłacone"],
-                ["paid", "Opłacone"],
-              ] as const
-            ).map(([key, label]) => (
-              <label key={key} className="inline-flex items-center gap-2 rounded-md border border-stone-300 bg-white px-2.5 py-1.5 text-xs dark:border-stone-600 dark:bg-stone-900">
-                <Checkbox
-                  checked={statusSortSelection[key]}
-                  onCheckedChange={(checked) =>
-                                    setStatusSortSelection((prev) => {
-                                      const next = { ...prev, [key]: checked === true };
-                                      return next;
-                                    })
-                  }
-                />
-                {label}
-              </label>
-            ))}
-          </div>
-        </div>
-        {paymentScope === "classes" && (
-          <div className="mt-5 flex flex-wrap items-center gap-2">
-            {allDisciplineTypes.map((type) => {
-              const selected = selectedClassTypes.includes(type);
-              return (
-                <button
-                  key={type}
-                  type="button"
-                  className={cn(
-                    "rounded-md border px-3 py-2 text-sm font-medium transition-colors",
-                    selected
-                      ? "border-primary bg-primary/10 text-primary"
-                      : "border-stone-300 bg-white text-stone-700 dark:border-stone-600 dark:bg-stone-900 dark:text-stone-200"
-                  )}
-                  onClick={() =>
-                    setSelectedClassTypes((prev) =>
-                      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
-                    )
-                  }
-                >
-                  {type}
-                </button>
-              );
-            })}
-          </div>
-        )}
-      </section>
 
       {error && <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</div>}
       {info && <div className="rounded-lg bg-blue-500/10 p-3 text-sm text-blue-700 dark:text-blue-300">{info}</div>}
 
       <Card className="overflow-hidden border-stone-200 dark:border-stone-700">
         <CardContent className="p-0">
+          <div className="border-b border-stone-200 px-4 py-3 dark:border-stone-700">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
+              <label className="block min-w-0 space-y-1">
+                <span className="text-[11px] font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
+                  Typ
+                </span>
+                <select
+                  value={
+                    closedEventKey !== "all"
+                      ? `closed:${closedEventKey}`
+                      : openEventType
+                  }
+                  aria-label="Typ wydarzenia"
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value.startsWith("closed:")) {
+                      setClosedEventKey(value.slice("closed:".length));
+                      setSelectedEventKey("all");
+                    } else {
+                      setClosedEventKey("all");
+                      setOpenEventType(value as "camp" | "nocowanka");
+                      setSelectedEventKey("all");
+                    }
+                    setPage(0);
+                  }}
+                  className={filterSelectClass}
+                >
+                  <option value="camp">Obozy</option>
+                  <option value="nocowanka">Nocowanki</option>
+                  {closedEvents.length > 0 ? (
+                    <optgroup label="Zamknięte">
+                      {closedEvents.map((entry) => {
+                        const [key, name] = entry.split("::");
+                        return (
+                          <option key={key} value={`closed:${key}`}>
+                            {name}
+                          </option>
+                        );
+                      })}
+                    </optgroup>
+                  ) : null}
+                </select>
+              </label>
+
+              <label className="block min-w-0 space-y-1">
+                <span className="text-[11px] font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
+                  Wydarzenie
+                </span>
+                <select
+                  value={closedEventKey !== "all" ? closedEventKey : selectedEventKey}
+                  aria-label="Wydarzenie"
+                  disabled={closedEventKey !== "all"}
+                  onChange={(e) => {
+                    setSelectedEventKey(e.target.value);
+                    setPage(0);
+                  }}
+                  className={cn(
+                    filterSelectClass,
+                    closedEventKey !== "all" && "opacity-60",
+                  )}
+                >
+                  {closedEventKey !== "all" ? (
+                    <option value={closedEventKey}>
+                      {closedEvents
+                        .find((entry) => entry.startsWith(`${closedEventKey}::`))
+                        ?.split("::")[1] ?? "Zamknięte"}
+                    </option>
+                  ) : (
+                    <>
+                      <option value="all">Wszystkie otwarte</option>
+                      {activeEventEntries.map((entry) => {
+                        const [key, name] = entry.split("::");
+                        return (
+                          <option key={key} value={key}>
+                            {name}
+                          </option>
+                        );
+                      })}
+                    </>
+                  )}
+                </select>
+              </label>
+
+              <label className="block min-w-0 space-y-1">
+                <span className="text-[11px] font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
+                  Status
+                </span>
+                <select
+                  value={statusFilter}
+                  aria-label="Status płatności"
+                  onChange={(e) => {
+                    setStatusFilter(e.target.value as "all" | StatusSortKey);
+                    setPage(0);
+                  }}
+                  className={filterSelectClass}
+                >
+                  <option value="all">Wszystkie statusy</option>
+                  <option value="overdue">Po terminie</option>
+                  <option value="pending">Oczekujące</option>
+                  <option value="partial">Częściowo opłacone</option>
+                  <option value="paid">Opłacone</option>
+                </select>
+              </label>
+
+              <label className="block min-w-0 space-y-1 sm:col-span-2 lg:col-span-1 xl:col-span-1">
+                <span className="text-[11px] font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
+                  Szukaj
+                </span>
+                <div className="relative">
+                  <span
+                    className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 material-symbols-outlined text-[18px] text-stone-400"
+                    aria-hidden
+                  >
+                    search
+                  </span>
+                  <Input
+                    value={search}
+                    onChange={(e) => {
+                      setSearch(e.target.value);
+                      setPage(0);
+                    }}
+                    placeholder="Uczeń lub rodzic…"
+                    aria-label="Szukaj ucznia lub rodzica"
+                    className="h-9 pl-9"
+                  />
+                </div>
+              </label>
+
+              <label className="block min-w-0 space-y-1">
+                <span className="text-[11px] font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
+                  Data od
+                </span>
+                <Input
+                  type="date"
+                  value={dateFrom}
+                  onChange={(e) => {
+                    setDateFrom(e.target.value);
+                    setPage(0);
+                  }}
+                  aria-label="Data od"
+                  className="h-9"
+                />
+              </label>
+
+              <label className="block min-w-0 space-y-1">
+                <span className="text-[11px] font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
+                  Data do
+                </span>
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="date"
+                    value={dateTo}
+                    onChange={(e) => {
+                      setDateTo(e.target.value);
+                      setPage(0);
+                    }}
+                    aria-label="Data do"
+                    className="h-9 min-w-0 flex-1"
+                  />
+                  {hasActivePaymentFilters ? (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-9 shrink-0 px-2 text-xs font-semibold text-stone-500"
+                      onClick={() => {
+                        setSearch("");
+                        setDateFrom("");
+                        setDateTo("");
+                        setClosedEventKey("all");
+                        setSelectedEventKey("all");
+                        setStatusFilter("all");
+                        setPage(0);
+                      }}
+                    >
+                      Wyczyść
+                    </Button>
+                  ) : null}
+                </div>
+              </label>
+            </div>
+          </div>
           <div className="overflow-x-auto">
             {paymentScope === "camps" ? (
               <table className="w-full text-sm">

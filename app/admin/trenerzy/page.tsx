@@ -267,7 +267,7 @@ export default function AdminTrenerzyPage() {
         </div>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {(
           [
             ["Wszyscy", stats.total, "group"],
@@ -278,85 +278,18 @@ export default function AdminTrenerzyPage() {
         ).map(([label, value, icon]) => (
           <div
             key={label}
-            className="rounded-xl border border-stone-200 bg-white px-4 py-3 dark:border-stone-700 dark:bg-stone-900/60"
+            className="rounded-xl border border-stone-200 bg-white px-3.5 py-2.5 dark:border-stone-700 dark:bg-stone-900/60"
           >
-            <div className="flex items-center gap-2 text-xs font-medium text-text-light dark:text-stone-400">
-              <span className="material-symbols-outlined text-base">{icon}</span>
+            <div className="flex items-center gap-1.5 text-[11px] font-medium text-text-light dark:text-stone-400">
+              <span className="material-symbols-outlined text-[15px]">{icon}</span>
               {label}
             </div>
-            <p className="mt-1 text-2xl font-bold tabular-nums text-text-main dark:text-white">
+            <p className="mt-0.5 text-xl font-bold tabular-nums text-text-main dark:text-white">
               {coaches === undefined ? "—" : value}
             </p>
           </div>
         ))}
       </div>
-
-      <section className="rounded-xl border border-stone-200 bg-stone-100 p-3 dark:border-stone-700 dark:bg-stone-800/60">
-        <div className="flex flex-wrap items-center gap-2">
-          <Input
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setPage(0);
-            }}
-            placeholder="Szukaj po imieniu, bio lub dyscyplinie…"
-            className="min-w-[16rem] flex-1 bg-white dark:bg-stone-900"
-          />
-          <Button
-            variant="outline"
-            className="bg-white dark:bg-stone-900"
-            disabled={!hasActiveFilters}
-            onClick={clearFilters}
-          >
-            Wyczyść filtry
-          </Button>
-        </div>
-        <div className="mt-3 flex flex-wrap items-center gap-2">
-          {(
-            [
-              ["all", "Wszyscy"],
-              ["active", "Aktywni"],
-              ["inactive", "Nieaktywni"],
-            ] as const
-          ).map(([value, label]) => (
-            <button
-              key={value}
-              type="button"
-              className={cn(
-                "rounded-md border px-3 py-1.5 text-sm font-medium transition-colors",
-                statusFilter === value
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-stone-300 bg-white text-stone-700 dark:border-stone-600 dark:bg-stone-900 dark:text-stone-200"
-              )}
-              onClick={() => {
-                setStatusFilter(value);
-                setPage(0);
-              }}
-            >
-              {label}
-            </button>
-          ))}
-          <span className="mx-1 hidden h-5 w-px bg-stone-300 sm:inline-block dark:bg-stone-600" />
-          {DISCIPLINE_OPTIONS.map((d) => (
-            <button
-              key={d}
-              type="button"
-              className={cn(
-                "rounded-md border px-3 py-1.5 text-sm font-medium transition-colors",
-                disciplineFilter === d
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-stone-300 bg-white text-stone-700 dark:border-stone-600 dark:bg-stone-900 dark:text-stone-200"
-              )}
-              onClick={() => {
-                setDisciplineFilter((prev) => (prev === d ? null : d));
-                setPage(0);
-              }}
-            >
-              {d}
-            </button>
-          ))}
-        </div>
-      </section>
 
       {error && (
         <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
@@ -371,6 +304,70 @@ export default function AdminTrenerzyPage() {
 
       <Card className="overflow-hidden border-stone-200 dark:border-stone-700">
         <CardContent className="p-0">
+          <div className="flex flex-col gap-2.5 border-b border-stone-200 px-3 py-3 dark:border-stone-700 sm:flex-row sm:flex-wrap sm:items-center sm:gap-2 sm:px-4">
+            <div className="relative min-w-0 flex-1 sm:max-w-xs">
+              <span
+                className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 material-symbols-outlined text-[18px] text-stone-400"
+                aria-hidden
+              >
+                search
+              </span>
+              <Input
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setPage(0);
+                }}
+                placeholder="Szukaj…"
+                aria-label="Szukaj trenera"
+                className="h-9 pl-9"
+              />
+            </div>
+            <select
+              value={statusFilter}
+              aria-label="Status"
+              onChange={(e) => {
+                setStatusFilter(e.target.value as StatusFilter);
+                setPage(0);
+              }}
+              className="h-9 rounded-md border border-stone-200 bg-white px-2.5 text-sm dark:border-stone-600 dark:bg-stone-900"
+            >
+              <option value="all">Status: wszyscy</option>
+              <option value="active">Status: aktywni</option>
+              <option value="inactive">Status: nieaktywni</option>
+            </select>
+            <div className="flex flex-wrap items-center gap-1.5">
+              {DISCIPLINE_OPTIONS.map((d) => (
+                <button
+                  key={d}
+                  type="button"
+                  className={cn(
+                    "h-8 rounded-md border px-2.5 text-xs font-semibold transition-colors",
+                    disciplineFilter === d
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-stone-200 bg-white text-stone-600 hover:border-stone-300 dark:border-stone-600 dark:bg-stone-900 dark:text-stone-300",
+                  )}
+                  onClick={() => {
+                    setDisciplineFilter((prev) => (prev === d ? null : d));
+                    setPage(0);
+                  }}
+                >
+                  {d}
+                </button>
+              ))}
+            </div>
+            {hasActiveFilters ? (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-8 px-2 text-xs font-semibold text-stone-500 sm:ml-auto"
+                onClick={clearFilters}
+              >
+                Wyczyść
+              </Button>
+            ) : null}
+          </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
@@ -391,7 +388,6 @@ export default function AdminTrenerzyPage() {
                       onClick={() => toggleSort("disciplines")}
                     />
                   </th>
-                  <th className="px-4 py-3 text-left font-bold">Bio</th>
                   <th className="px-4 py-3 text-left">
                     <SortHeader
                       label="Status"
@@ -407,7 +403,7 @@ export default function AdminTrenerzyPage() {
                 {coaches === undefined ? (
                   <tr>
                     <td
-                      colSpan={5}
+                      colSpan={4}
                       className="py-12 text-center text-text-light dark:text-stone-400"
                     >
                       Ładowanie…
@@ -416,7 +412,7 @@ export default function AdminTrenerzyPage() {
                 ) : pageRows.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={5}
+                      colSpan={4}
                       className="py-12 text-center text-text-light dark:text-stone-400"
                     >
                       Brak wyników.
@@ -461,11 +457,6 @@ export default function AdminTrenerzyPage() {
                             </span>
                           ))}
                         </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <p className="max-w-[20rem] truncate text-text-light dark:text-stone-400">
-                          {c.bio?.trim() || "—"}
-                        </p>
                       </td>
                       <td className="px-4 py-3">
                         <span

@@ -3,10 +3,12 @@
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { GalleryAlbumCard } from "@/components/galeria/gallery-album-card";
+import { GalleryPreview } from "@/components/galeria/gallery-preview";
 import { albumCountLabel } from "@/lib/galeria";
 
 export default function GaleriaPage() {
   const albums = useQuery(api.gallery.listPublicAlbums);
+  const preview = useQuery(api.gallery.listPublicPreview);
 
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark">
@@ -23,12 +25,25 @@ export default function GaleriaPage() {
           </p>
         </div>
 
+        {preview === undefined ? (
+          <div className="mb-12 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 md:gap-3">
+            {Array.from({ length: 8 }).map((_, index) => (
+              <div
+                key={index}
+                className="aspect-4/3 animate-pulse rounded-xl bg-stone-100 dark:bg-stone-800 md:rounded-2xl"
+              />
+            ))}
+          </div>
+        ) : preview.length > 0 ? (
+          <GalleryPreview items={preview} />
+        ) : null}
+
         {albums === undefined ? (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }).map((_, index) => (
               <div
                 key={index}
-                className="overflow-hidden border-b border-stone-200 pb-4 last:border-b-0 dark:border-stone-700 md:rounded-2xl md:border md:bg-white md:pb-0 md:last:border dark:md:border-stone-700 dark:md:bg-stone-900/80"
+                className="overflow-hidden border-b border-stone-200 pb-4 last:border-b-0 dark:border-stone-700 md:rounded-2xl md:border md:bg-white md:pb-0 md:last:border dark:md:border-white/12 dark:md:bg-surface-dark"
               >
                 <div className="aspect-4/3 animate-pulse bg-stone-100 dark:bg-stone-800" />
                 <div className="space-y-2 px-4 py-3.5">
@@ -48,16 +63,28 @@ export default function GaleriaPage() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {albums.map((album) => (
-              <GalleryAlbumCard
-                key={album.slug}
-                href={`/galeria/${encodeURIComponent(album.slug)}`}
-                name={album.name}
-                countLabel={albumCountLabel(album.imageCount, album.videoCount)}
-                coverUrls={album.coverUrls}
-              />
-            ))}
+          <div>
+            {preview && preview.length > 0 ? (
+              <div className="mb-4">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-stone-500 dark:text-stone-400">
+                  Foldery
+                </p>
+                <h2 className="mt-1 text-lg font-bold tracking-tight text-stone-900 dark:text-white">
+                  Przeglądaj albumy
+                </h2>
+              </div>
+            ) : null}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {albums.map((album) => (
+                <GalleryAlbumCard
+                  key={album.slug}
+                  href={`/galeria/${encodeURIComponent(album.slug)}`}
+                  name={album.name}
+                  countLabel={albumCountLabel(album.imageCount, album.videoCount)}
+                  coverUrls={album.coverUrls}
+                />
+              ))}
+            </div>
           </div>
         )}
       </section>

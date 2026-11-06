@@ -9,6 +9,7 @@
  */
 
 import type * as BrevoPasswordReset from "../BrevoPasswordReset.js";
+import type * as adminEmails from "../adminEmails.js";
 import type * as auth from "../auth.js";
 import type * as authHelpers from "../authHelpers.js";
 import type * as authImpl from "../authImpl.js";
@@ -27,6 +28,7 @@ import type * as http from "../http.js";
 import type * as locations from "../locations.js";
 import type * as nocowanki from "../nocowanki.js";
 import type * as parentDashboard from "../parentDashboard.js";
+import type * as parentMessageHtml from "../parentMessageHtml.js";
 import type * as payments from "../payments.js";
 import type * as paymentsInternal from "../paymentsInternal.js";
 import type * as registrationFormQuestions from "../registrationFormQuestions.js";
@@ -46,6 +48,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   BrevoPasswordReset: typeof BrevoPasswordReset;
+  adminEmails: typeof adminEmails;
   auth: typeof auth;
   authHelpers: typeof authHelpers;
   authImpl: typeof authImpl;
@@ -64,6 +67,7 @@ declare const fullApi: ApiFromModules<{
   locations: typeof locations;
   nocowanki: typeof nocowanki;
   parentDashboard: typeof parentDashboard;
+  parentMessageHtml: typeof parentMessageHtml;
   payments: typeof payments;
   paymentsInternal: typeof paymentsInternal;
   registrationFormQuestions: typeof registrationFormQuestions;

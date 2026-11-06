@@ -69,45 +69,80 @@ export function GalleryAlbumCard({
   countLabel,
   coverUrls,
   badge,
+  onDelete,
+  deleting,
 }: {
   href: string;
   name: string;
   countLabel: string;
   coverUrls: string[];
   badge?: string;
+  /** When set, shows a trash control on hover (admin). */
+  onDelete?: () => void;
+  deleting?: boolean;
 }) {
   return (
-    <Link
-      href={href}
-      className="group block overflow-hidden border-b border-stone-200 pb-4 transition-colors last:border-b-0 dark:border-stone-700 md:rounded-2xl md:border md:bg-white md:pb-0 md:shadow-soft md:last:border hover:md:border-stone-300 dark:md:bg-stone-900/80 dark:hover:md:border-stone-600"
-    >
-      <div className="relative aspect-4/3 overflow-hidden bg-stone-100 dark:bg-stone-800">
-        <AlbumCover mosaic={coverUrls} />
-      </div>
-      <div className="flex items-start justify-between gap-3 px-4 py-3.5">
-        <div className="min-w-0">
-          <h2 className="truncate text-sm font-bold text-stone-900 dark:text-white">
-            {name}
-          </h2>
-          <p className="mt-0.5 text-xs font-medium text-stone-500 dark:text-stone-400">
-            {countLabel}
-          </p>
+    <div className="group relative">
+      <Link
+        href={href}
+        className="block overflow-hidden border-b border-stone-200 pb-4 transition-[border-color,box-shadow,transform] last:border-b-0 dark:border-stone-700 md:rounded-2xl md:border md:border-stone-200/80 md:bg-white md:pb-0 md:shadow-card md:last:border hover:md:-translate-y-0.5 hover:md:border-primary/30 hover:md:shadow-card-hover motion-reduce:hover:md:translate-y-0 dark:md:border-white/12 dark:md:bg-surface-dark dark:md:shadow-card-dark dark:hover:md:border-white/20"
+      >
+        <div className="relative aspect-4/3 overflow-hidden bg-stone-100 dark:bg-stone-800">
+          <AlbumCover mosaic={coverUrls} />
         </div>
-        {badge ? (
-          <span
-            className={cn(
-              "inline-flex shrink-0 rounded-md px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide",
-              "bg-stone-200 text-stone-600 dark:bg-stone-700 dark:text-stone-400",
-            )}
-          >
-            {badge}
+        <div className="flex items-start justify-between gap-3 px-4 py-3.5">
+          <div className="min-w-0">
+            <h2 className="truncate text-sm font-bold text-stone-900 dark:text-white">
+              {name}
+            </h2>
+            <p className="mt-0.5 text-xs font-medium text-stone-500 dark:text-stone-400">
+              {countLabel}
+            </p>
+          </div>
+          {badge ? (
+            <span
+              className={cn(
+                "inline-flex shrink-0 rounded-md px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide",
+                "bg-stone-200 text-stone-600 dark:bg-stone-700 dark:text-stone-400",
+              )}
+            >
+              {badge}
+            </span>
+          ) : (
+            <span
+              className="material-symbols-outlined text-stone-400 transition-transform group-hover:translate-x-0.5"
+              aria-hidden
+            >
+              chevron_right
+            </span>
+          )}
+        </div>
+      </Link>
+
+      {onDelete ? (
+        <button
+          type="button"
+          disabled={deleting}
+          aria-label={`Usuń folder ${name}`}
+          title="Usuń folder"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onDelete();
+          }}
+          className={cn(
+            "absolute right-2.5 top-2.5 z-10 inline-flex size-9 items-center justify-center rounded-full",
+            "border border-white/30 bg-stone-950/70 text-white shadow-md backdrop-blur-sm",
+            "opacity-100 transition-[opacity,background-color,transform] hover:bg-rose-600 md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100",
+            "focus-visible:opacity-100 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-rose-400",
+            "disabled:cursor-not-allowed disabled:opacity-50",
+          )}
+        >
+          <span className="material-symbols-outlined text-[18px]" aria-hidden>
+            delete
           </span>
-        ) : (
-          <span className="material-symbols-outlined text-stone-400 transition-transform group-hover:translate-x-0.5" aria-hidden>
-            chevron_right
-          </span>
-        )}
-      </div>
-    </Link>
+        </button>
+      ) : null}
+    </div>
   );
 }

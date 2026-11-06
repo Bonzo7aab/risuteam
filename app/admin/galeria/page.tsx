@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
 import { GalleryAlbumCard } from "@/components/galeria/gallery-album-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,9 +23,13 @@ export default function AdminGaleriaPage() {
   const router = useRouter();
   const albums = useQuery(api.gallery.listAdminAlbums);
   const createCategory = useMutation(api.gallery.createCategory);
+  const removeCategory = useMutation(api.gallery.removeCategory);
   const [createOpen, setCreateOpen] = useState(false);
   const [newName, setNewName] = useState("");
   const [creating, setCreating] = useState(false);
+  const [deletingId, setDeletingId] = useState<Id<"galleryCategories"> | null>(
+    null,
+  );
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,6 +44,35 @@ export default function AdminGaleriaPage() {
       toast.error(err instanceof Error ? err.message : "Nie udało się utworzyć folderu.");
     } finally {
       setCreating(false);
+    }
+  };
+
+  const handleDeleteFolder = async (album: {
+    _id: Id<"galleryCategories"> | null;
+    name: string;
+    imageCount: number;
+    videoCount: number;
+    isUncategorized: boolean;
+  }) => {
+    if (!album._id || album.isUncategorized) return;
+    const hasItems = album.imageCount + album.videoCount > 0;
+    const ok = window.confirm(
+      hasItems
+        ? `Usunąć folder „${album.name}”? Zdjęcia i wideo trafią do „Pozostałe”.`
+        : `Usunąć folder „${album.name}”?`,
+    );
+    if (!ok) return;
+    setDeletingId(album._id);
+    try {
+      await removeCategory({
+        id: album._id,
+        moveItemsToUncategorized: hasItems,
+      });
+      toast.success("Usunięto folder.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Nie udało się usunąć folderu.");
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -76,6 +110,12 @@ export default function AdminGaleriaPage() {
               countLabel={albumCountLabel(album.imageCount, album.videoCount)}
               coverUrls={album.coverUrls}
               badge={album.isActive ? undefined : "Ukryty"}
+              deleting={album._id !== null && deletingId === album._id}
+              onDelete={
+                album._id && !album.isUncategorized
+                  ? () => void handleDeleteFolder(album)
+                  : undefined
+              }
             />
           ))}
         </div>

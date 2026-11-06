@@ -80,9 +80,15 @@ export default function AdminRejestracjeNocowankaPage() {
       !r.paymentStatus
   ).length;
   const pendingPaymentsCount = pendingCount;
-  const missingMedicalFormsCount = registrations.filter(
-    (r) => r.medicalFormStatus !== "complete" && !r.medicalFormStatus
-  ).length;
+  const missingMedicalFormsCount = registrations.filter((r) => {
+    if (r.medicalFormStatus === "complete") return false;
+    const hasAnswers = Boolean(
+      r.dietary?.trim() || r.allergies?.trim() || r.medicalNotes?.trim(),
+    );
+    return !hasAnswers;
+  }).length;
+
+  const price = nocowankaDoc?.price ?? getNocowankaPrice(slug);
 
   const participants = registrations.map((r) => ({
     _id: r._id,
@@ -90,6 +96,7 @@ export default function AdminRejestracjeNocowankaPage() {
     childSurname: r.childSurname,
     childDob: r.childDob,
     paymentStatus: r.paymentStatus,
+    amountPaid: r.amountPaid,
     medicalFormStatus: r.medicalFormStatus,
     consent: r.consent,
     parentEmail: r.parentEmail,
@@ -101,7 +108,6 @@ export default function AdminRejestracjeNocowankaPage() {
     customAnswers: r.customAnswers,
   }));
 
-  const price = nocowankaDoc?.price ?? getNocowankaPrice(slug);
   const facts = [
     { icon: "calendar_month", label: "Termin", value: nocowankaDoc?.datesLabel?.trim() || "—" },
     { icon: "location_on", label: "Miejsce", value: nocowankaDoc?.locationLabel?.trim() || "—" },
@@ -166,7 +172,9 @@ export default function AdminRejestracjeNocowankaPage() {
             ? `/admin/wydarzenia/nocowanka/${encodeURIComponent(slug)}/edit`
             : undefined
         }
-        paymentsHref="/admin/platnosci"
+        paymentSource="nocowanka"
+        eventAmount={price}
+        eventPublicHref={`/obozy/nocowanki/${encodeURIComponent(slug)}`}
         editEventLabel="Edytuj nocowankę"
         customQuestionLabels={customQuestionLabels}
         participants={participants}

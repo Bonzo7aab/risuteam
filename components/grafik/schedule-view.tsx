@@ -210,19 +210,31 @@ const DAY_SHORT: Record<number, string> = {
   6: "Sb",
 };
 
-function formatWeeklyBundle(slots: ScheduleSlot[]): string {
-  const sorted = [...slots].sort((a, b) => {
+const DAY_LONG_BY_NUM: Record<number, string> = {
+  0: "Niedziela",
+  1: "Poniedziałek",
+  2: "Wtorek",
+  3: "Środa",
+  4: "Czwartek",
+  5: "Piątek",
+  6: "Sobota",
+};
+
+function sortSlotsByWeek(slots: ScheduleSlot[]): ScheduleSlot[] {
+  return [...slots].sort((a, b) => {
     const dayA = a.dayOfWeek === 0 ? 7 : a.dayOfWeek;
     const dayB = b.dayOfWeek === 0 ? 7 : b.dayOfWeek;
     if (dayA !== dayB) return dayA - dayB;
     return a.startTime.localeCompare(b.startTime);
   });
-  return sorted
-    .map(
-      (s) =>
-        `${DAY_SHORT[s.dayOfWeek] ?? "?"} ${s.startTime}–${s.endTime}`
-    )
-    .join(" · ");
+}
+
+/** One line per weekly occurrence, for stacked Terminy display. */
+function formatWeeklyBundleLines(slots: ScheduleSlot[]): string[] {
+  return sortSlotsByWeek(slots).map(
+    (s) =>
+      `${DAY_LONG_BY_NUM[s.dayOfWeek] ?? DAY_SHORT[s.dayOfWeek] ?? "?"} · ${s.startTime}–${s.endTime}`
+  );
 }
 
 function ClassCard({
@@ -357,61 +369,58 @@ function ClassCard({
     else openDetails();
   };
 
-  const availabilityDotClass =
+  const availabilityTone =
     maxCap === undefined
-      ? "bg-emerald-500 shadow-[0_0_0_1px_rgba(16,185,129,0.4)]"
+      ? "open"
       : isFull || remaining === 0
-        ? "bg-red-500 shadow-[0_0_0_1px_rgba(239,68,68,0.4)]"
+        ? "full"
         : (remaining ?? 0) > 5
-          ? "bg-emerald-500 shadow-[0_0_0_1px_rgba(16,185,129,0.4)]"
-          : "bg-amber-400 shadow-[0_0_0_1px_rgba(251,191,36,0.5)]";
+          ? "open"
+          : "limited";
 
   const slotsLine =
     maxCap !== undefined
       ? isFull
-        ? `Pełny (${enrolledCount}/${maxCap})`
-        : `${remaining}/${maxCap} miejsc`
-      : "Miejsca: bez limitu";
+        ? `Pełny · ${enrolledCount}/${maxCap}`
+        : `${remaining} wolne · ${maxCap}`
+      : "Bez limitu miejsc";
 
   const anyClassFocused = activeClassId != null;
+  const showPublicFooter = !onAdminEdit;
 
   const card = (
     <div
       onMouseEnter={() => onHoverClassId?.(slot.classId)}
       onMouseLeave={() => onHoverClassId?.(null)}
       className={cn(
-        "group/card relative flex w-full min-h-34 flex-col overflow-hidden rounded-xl border text-left will-change-transform",
-        "transition-[border-color,box-shadow,opacity,transform,background-color,filter] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+        "group/card relative flex w-full flex-col overflow-hidden rounded-xl border text-left will-change-transform",
+        "transition-[border-color,box-shadow,opacity,transform,background-color] duration-250 ease-[cubic-bezier(0.22,1,0.36,1)]",
+        onAdminEdit ? "min-h-[7.25rem]" : "min-h-[8.5rem]",
         isClassFocused &&
-          "animate-class-focus z-10 scale-[1.01] border-primary/80 bg-orange-50/40 dark:border-primary/50 dark:bg-primary/12",
-        isClassFocused && isEnrolled && !onAdminEdit && "bg-primary/12 dark:bg-primary/20",
+          "z-10 border-primary/70 bg-orange-50/50 shadow-[0_0_0_1px_rgba(233,138,0,0.18)] dark:border-primary/45 dark:bg-primary/12",
+        isClassFocused && isEnrolled && !onAdminEdit && "bg-primary/12 dark:bg-primary/18",
         !isClassFocused &&
           hasOtherClassFocused &&
-          "scale-[0.99] opacity-55 saturate-75",
+          "opacity-55",
         !isClassFocused &&
           !anyClassFocused &&
-          "hover:-translate-y-px hover:shadow-card motion-reduce:hover:translate-y-0",
+          "hover:-translate-y-px hover:border-stone-300 hover:shadow-card motion-reduce:hover:translate-y-0 dark:hover:border-white/20",
         !isClassFocused &&
           isEnrolled &&
           !onAdminEdit &&
-          "border-primary/50 bg-primary/10 dark:border-primary/40 dark:bg-primary/15",
+          "border-primary/40 bg-primary/[0.07] dark:border-primary/35 dark:bg-primary/14",
         !isClassFocused &&
           !(isEnrolled && !onAdminEdit) &&
-          "border-stone-200/90 bg-white dark:border-stone-700 dark:bg-[#2a2015]",
-        !isClassFocused &&
-          !hasOtherClassFocused &&
-          !(isEnrolled && !onAdminEdit) &&
-          "hover:border-stone-300 dark:hover:border-stone-600",
-        isInactive && !isClassFocused && "opacity-55 saturate-65",
-        isInactive && isClassFocused && "opacity-100 saturate-100"
+          "border-stone-200/90 bg-white dark:border-white/12 dark:bg-surface-dark",
+        isInactive && !isClassFocused && "opacity-60",
       )}
     >
       <span
         className={cn(
-          "absolute inset-y-2 left-0 w-0.5 origin-center rounded-full bg-primary transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+          "absolute inset-y-0 left-0 w-[3px] transition-colors duration-250",
           isClassFocused || (isEnrolled && !onAdminEdit)
-            ? "scale-y-100"
-            : "scale-y-0"
+            ? "bg-primary"
+            : "bg-stone-200 group-hover/card:bg-primary/50 dark:bg-white/15",
         )}
         aria-hidden
       />
@@ -420,68 +429,90 @@ function ClassCard({
         onClick={handlePrimaryOpen}
         onFocus={() => onHoverClassId?.(slot.classId)}
         onBlur={() => onHoverClassId?.(null)}
-        className="flex flex-1 flex-col px-3 pb-2.5 pt-3 text-left outline-hidden focus-visible:bg-stone-50/80 dark:focus-visible:bg-stone-800/40"
+        className={cn(
+          "flex flex-1 flex-col pl-3.5 pr-3 text-left outline-hidden",
+          "focus-visible:bg-stone-50/90 dark:focus-visible:bg-white/5",
+          showPublicFooter ? "pb-2.5 pt-3" : "py-3",
+        )}
       >
-        <div className="mb-2.5 flex items-start justify-between gap-2">
-          <span
-            className="min-w-0 max-w-[58%] truncate text-[10px] font-bold uppercase tracking-[0.12em] text-primary"
-            title={c?.discipline}
-          >
-            {c?.discipline ?? "—"}
-          </span>
-          <div className="flex shrink-0 flex-wrap items-center justify-end gap-1">
+        <div className="mb-2 flex items-start justify-between gap-2">
+          <div className="min-w-0">
             {duration ? (
-              <span className="rounded-md bg-stone-900/90 px-1.5 py-0.5 text-[10px] font-bold tabular-nums tracking-wide text-white dark:bg-stone-100 dark:text-stone-900">
+              <p className="text-[13px] font-bold tabular-nums tracking-tight text-text-main dark:text-white">
                 {duration}
-              </span>
+              </p>
             ) : null}
+            <p
+              className="mt-0.5 truncate text-[10px] font-semibold uppercase tracking-[0.14em] text-primary"
+              title={c?.discipline}
+            >
+              {c?.discipline ?? "—"}
+            </p>
+          </div>
+          <div className="flex shrink-0 flex-wrap items-center justify-end gap-1">
             {isNew ? (
-              <span className="rounded-md bg-emerald-600 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white">
+              <span className="rounded-md bg-emerald-600/90 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white">
                 Nowe
               </span>
             ) : null}
-            {isEnrolled ? (
-              <span className="rounded-md bg-primary/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-primary dark:bg-primary/25">
+            {isEnrolled && !onAdminEdit ? (
+              <span className="rounded-md border border-primary/25 bg-primary/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-primary">
                 Zapisany
               </span>
             ) : null}
             {isInactive ? (
-              <span className="rounded-md bg-stone-500 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white">
-                Nieaktywna
+              <span className="rounded-md bg-stone-500/90 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white">
+                Ukryta
               </span>
             ) : null}
           </div>
         </div>
-        <span className="block truncate text-sm font-bold leading-snug text-text-main dark:text-white">
+
+        <p className="line-clamp-2 text-[13px] font-semibold leading-snug text-text-main dark:text-white">
           {c?.name ?? "—"}
-        </span>
-        <div className="mt-1.5 flex min-h-0 items-center gap-1">
-          <span className="material-symbols-outlined shrink-0 text-[16px] text-stone-400" aria-hidden>
-            location_on
-          </span>
-          <span className="min-w-0 truncate text-[11px] font-medium text-stone-500 dark:text-stone-400">
-            {locationName}
-          </span>
-        </div>
-      </button>
-      <div className="mt-auto flex items-center justify-between gap-2 border-t border-stone-100 px-3 py-2 dark:border-stone-800">
-        <div className="flex min-w-0 flex-1 items-center gap-1.5">
+        </p>
+
+        <p className="mt-2 flex min-w-0 items-center gap-1.5 text-[11px] text-stone-500 dark:text-stone-400">
           <span
-            className={cn("size-1.5 shrink-0 rounded-full", availabilityDotClass)}
+            className="material-symbols-outlined shrink-0 text-[14px] text-stone-400"
             aria-hidden
-          />
-          <span
-            className={cn(
-              "min-w-0 truncate text-[11px] font-medium",
-              isFull
-                ? "font-semibold text-amber-800 dark:text-amber-200"
-                : "text-stone-500 dark:text-stone-400"
-            )}
           >
-            {slotsLine}
+            person
           </span>
-        </div>
-        {!onAdminEdit && (
+          <span className="min-w-0 truncate font-medium">{coachName}</span>
+        </p>
+      </button>
+
+      {showPublicFooter ? (
+        <div
+          className={cn(
+            "mt-auto flex items-center gap-2 border-t border-stone-100/90 px-3.5 py-2 pl-3.5 dark:border-white/8",
+            enrollmentEnabled ? "justify-between" : "justify-end",
+          )}
+        >
+          {enrollmentEnabled ? (
+            <div className="flex min-w-0 flex-1 items-center gap-1.5">
+              <span
+                className={cn(
+                  "size-1.5 shrink-0 rounded-full",
+                  availabilityTone === "open" && "bg-emerald-500",
+                  availabilityTone === "limited" && "bg-amber-400",
+                  availabilityTone === "full" && "bg-rose-500",
+                )}
+                aria-hidden
+              />
+              <span
+                className={cn(
+                  "min-w-0 truncate text-[11px] font-medium",
+                  availabilityTone === "full"
+                    ? "text-rose-700 dark:text-rose-300"
+                    : "text-stone-500 dark:text-stone-400",
+                )}
+              >
+                {slotsLine}
+              </span>
+            </div>
+          ) : null}
           <Button
             type="button"
             size="sm"
@@ -490,7 +521,7 @@ function ClassCard({
               "h-7 shrink-0 rounded-lg px-2.5 text-[11px] font-bold",
               !isEnrolled &&
                 enrollmentEnabled &&
-                "bg-primary hover:bg-primary-hover"
+                "bg-primary hover:bg-primary-hover",
             )}
             onClick={(e) => {
               e.stopPropagation();
@@ -499,47 +530,53 @@ function ClassCard({
           >
             {isEnrolled || !enrollmentEnabled ? "Szczegóły" : "Zapisz"}
           </Button>
-        )}
-      </div>
+        </div>
+      ) : null}
     </div>
   );
 
-  const weeklyBundle =
-    relatedSlots.length > 1
-      ? formatWeeklyBundle(relatedSlots)
+  const terminyLines =
+    relatedSlots.length > 0
+      ? formatWeeklyBundleLines(relatedSlots)
       : duration
-        ? `${DAY_SHORT[slot.dayOfWeek] ?? "?"} ${duration}`
-        : "";
+        ? [
+            `${DAY_LONG_BY_NUM[slot.dayOfWeek] ?? DAY_SHORT[slot.dayOfWeek] ?? "?"} · ${duration}`,
+          ]
+        : [];
 
   const detailRows = [
     { icon: "person", label: "Trener", value: coachName },
-    weeklyBundle
+    terminyLines.length > 0
       ? {
           icon: "calendar_month",
           label:
-            relatedSlots.length > 1
-              ? `Terminy (${relatedSlots.length}× / tydz.)`
+            terminyLines.length > 1
+              ? `Terminy (${terminyLines.length}× / tydz.)`
               : "Termin",
-          value: weeklyBundle,
+          value: terminyLines,
         }
-      : duration
-        ? { icon: "schedule", label: "Godziny", value: duration }
-        : null,
+      : null,
     c?.ageGroup
       ? { icon: "child_care", label: "Grupa wiekowa", value: c.ageGroup }
       : null,
-    {
-      icon: "event_seat",
-      label: "Miejsca",
-      value:
-        maxCap !== undefined
-          ? isFull
-            ? `Brak wolnych miejsc (${enrolledCount}/${maxCap})`
-            : `Wolne: ${remaining} / ${maxCap}`
-          : "Bez limitu",
-    },
+    enrollmentEnabled
+      ? {
+          icon: "event_seat",
+          label: "Miejsca",
+          value:
+            maxCap !== undefined
+              ? isFull
+                ? `Brak wolnych miejsc (${enrolledCount}/${maxCap})`
+                : `Wolne: ${remaining} / ${maxCap}`
+              : "Bez limitu",
+        }
+      : null,
     { icon: "location_on", label: "Lokalizacja", value: locationName },
-  ].filter(Boolean) as { icon: string; label: string; value: string }[];
+  ].filter(Boolean) as {
+    icon: string;
+    label: string;
+    value: string | string[];
+  }[];
 
   const detailsMeta = (
     <ul className="divide-y divide-stone-100 rounded-xl border border-stone-200/80 bg-stone-50/70 dark:divide-stone-800 dark:border-stone-800 dark:bg-stone-950/30">
@@ -553,13 +590,30 @@ function ClassCard({
               {row.icon}
             </span>
           </span>
-          <div className="min-w-0 pt-0.5">
+          <div className="min-w-0 flex-1 pt-0.5">
             <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-stone-400">
               {row.label}
             </p>
-            <p className="text-sm font-semibold text-text-main dark:text-stone-100">
-              {row.value}
-            </p>
+            {Array.isArray(row.value) ? (
+              <ul className="mt-1.5 space-y-1.5">
+                {row.value.map((line) => (
+                  <li
+                    key={line}
+                    className="flex items-baseline gap-2 text-sm font-semibold text-text-main dark:text-stone-100"
+                  >
+                    <span
+                      className="mt-1.5 size-1.5 shrink-0 rounded-full bg-primary/70"
+                      aria-hidden
+                    />
+                    <span className="min-w-0 leading-snug">{line}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm font-semibold text-text-main dark:text-stone-100">
+                {row.value}
+              </p>
+            )}
           </div>
         </li>
       ))}
@@ -755,7 +809,7 @@ function ClassCard({
       <>
         {card}
         <Drawer open={open} onOpenChange={setOpen}>
-          <DrawerContent className="border-stone-200 bg-[#FDFBF7] dark:border-stone-800 dark:bg-[#2a2015]">
+          <DrawerContent className="border-stone-200 bg-[#FDFBF7] dark:border-white/12 dark:bg-surface-dark">
             <DrawerHeader className="border-b border-stone-200/80 px-5 pb-4 text-left dark:border-stone-800">
               <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-primary">
                 {c?.discipline ?? "Zajęcia"}
@@ -784,7 +838,7 @@ function ClassCard({
         side="bottom"
         sideOffset={10}
         collisionPadding={16}
-        className="w-[22rem] overflow-hidden rounded-2xl border border-stone-200/80 bg-white p-0 text-popover-foreground shadow-card-hover dark:border-stone-800 dark:bg-[#2a2015] dark:shadow-card-dark-hover"
+        className="w-[22rem] overflow-hidden rounded-2xl border border-stone-200/80 bg-white p-0 text-popover-foreground shadow-card-hover dark:border-white/12 dark:bg-surface-dark dark:shadow-card-dark-hover"
       >
         {detailsBody}
       </PopoverContent>
@@ -1154,7 +1208,7 @@ export function ScheduleView({
       <div
         className={cn(
           "mb-8 p-0 sm:mb-10",
-          "md:rounded-2xl md:border md:border-stone-200 md:bg-white md:p-4 md:shadow-soft dark:md:border-stone-700 dark:md:bg-stone-900/80",
+          "md:rounded-2xl md:border md:border-stone-200 md:bg-white md:p-4 md:shadow-card dark:md:border-white/12 dark:md:bg-surface-dark dark:md:shadow-card-dark",
           isAdminMode &&
             "max-lg:border-0 max-lg:bg-transparent max-lg:p-0 max-lg:shadow-none dark:max-lg:bg-transparent"
         )}
@@ -1326,7 +1380,7 @@ export function ScheduleView({
             <div
               className={cn(
                 "w-full min-w-0 max-w-full overflow-hidden",
-                "md:rounded-2xl md:border md:border-stone-200/80 md:bg-white md:shadow-card dark:md:border-stone-800 dark:md:bg-[#2a2015] dark:md:shadow-card-dark",
+                "md:rounded-2xl md:border md:border-stone-200/80 md:bg-white md:shadow-card dark:md:border-white/12 dark:md:bg-surface-dark dark:md:border-white/12 dark:md:shadow-card-dark",
                 isAdminMode &&
                   "border-0 bg-transparent shadow-none dark:bg-transparent"
               )}
@@ -1393,7 +1447,7 @@ export function ScheduleView({
             </div>
           </div>
 
-          <div className="hidden overflow-hidden rounded-2xl border border-stone-200/80 bg-white shadow-card dark:border-stone-800 dark:bg-[#2a2015] dark:shadow-card-dark lg:block">
+          <div className="hidden overflow-hidden rounded-2xl border border-stone-200/80 bg-white shadow-card dark:border-white/12 dark:bg-surface-dark dark:shadow-card-dark lg:block">
             <div className="overflow-x-auto">
               <table className="w-full min-w-[720px] table-fixed border-separate border-spacing-0">
                 <colgroup>
@@ -1427,12 +1481,12 @@ export function ScheduleView({
                       <td
                         className={cn(
                           "sticky left-0 z-10 px-2 py-3 text-center align-middle",
-                          "bg-white dark:bg-[#2a2015]",
+                          "bg-white dark:bg-surface-dark",
                           rowIndex < times.length - 1 &&
                             "border-b border-stone-200/70 dark:border-stone-700/80"
                         )}
                       >
-                        <span className="inline-flex h-8 min-w-[3.5rem] items-center justify-center rounded-lg bg-stone-100 px-2 text-xs font-bold tabular-nums text-text-main dark:bg-stone-900/80 dark:text-stone-100">
+                        <span className="inline-flex h-8 min-w-[3.5rem] items-center justify-center rounded-lg bg-stone-100 px-2 text-xs font-bold tabular-nums text-text-main dark:bg-surface-dark dark:text-stone-100">
                           {time}
                         </span>
                       </td>

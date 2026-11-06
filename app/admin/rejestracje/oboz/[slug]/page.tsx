@@ -64,9 +64,21 @@ export default function AdminRejestracjeObozPage() {
     (r) => r.paymentStatus === "partial" || r.paymentStatus === "unpaid" || !r.paymentStatus
   ).length;
   const pendingPaymentsCount = pendingCount;
-  const missingMedicalFormsCount = registrations.filter(
-    (r) => r.medicalFormStatus !== "complete" && !r.medicalFormStatus
-  ).length;
+  const missingMedicalFormsCount = registrations.filter((r) => {
+    if (r.medicalFormStatus === "complete") return false;
+    const hasAnswers = Boolean(
+      r.dietary?.trim() || r.allergies?.trim() || r.medicalNotes?.trim(),
+    );
+    return !hasAnswers;
+  }).length;
+
+  const eventAmount =
+    camp.price != null &&
+    camp.earlyBirdDiscountPercent != null &&
+    camp.earlyBirdDiscountPercent > 0 &&
+    camp.earlyBirdDiscountPercent < 100
+      ? Math.round(camp.price * (1 - camp.earlyBirdDiscountPercent / 100))
+      : (camp.price ?? 0);
 
   const participants = registrations.map((r) => ({
     _id: r._id,
@@ -74,6 +86,7 @@ export default function AdminRejestracjeObozPage() {
     childSurname: r.childSurname,
     childDob: r.childDob,
     paymentStatus: r.paymentStatus,
+    amountPaid: r.amountPaid,
     medicalFormStatus: r.medicalFormStatus,
     consent: r.consent,
     parentEmail: r.parentEmail,
@@ -130,7 +143,9 @@ export default function AdminRejestracjeObozPage() {
         campSlug={camp.slug}
         formQuestionsHref={`/admin/wydarzenia/oboz/${encodeURIComponent(camp.slug)}/pytania`}
         editCampHref={`/admin/wydarzenia/oboz/${encodeURIComponent(camp.slug)}/edit`}
-        paymentsHref="/admin/platnosci"
+        paymentSource="camp"
+        eventAmount={eventAmount}
+        eventPublicHref={`/obozy/${encodeURIComponent(camp.slug)}`}
         customQuestionLabels={customQuestionLabels}
         participants={participants}
         totalRegistered={registrations.length}

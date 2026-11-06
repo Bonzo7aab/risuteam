@@ -189,6 +189,104 @@ export const listPublicAlbums = query({
   },
 });
 
+const previewItemValidator = v.object({
+  _id: v.id("galleryItems"),
+  imageUrl: v.string(),
+  title: v.optional(v.string()),
+  albumSlug: v.string(),
+  albumName: v.string(),
+});
+
+/**
+ * Up to 8 published images for the gallery index teaser,
+ * drawn round-robin from different folders when possible.
+ */
+export const listPublicPreview = query({
+  args: {},
+  returns: v.array(previewItemValidator),
+  handler: async (ctx) => {
+    const cats = await ctx.db
+      .query("galleryCategories")
+      .withIndex("by_active", (q) => q.eq("isActive", true))
+      .collect();
+    cats.sort((a, b) => a.order - b.order);
+
+    const items = await ctx.db
+      .query("galleryItems")
+      .withIndex("by_published_order", (q) => q.eq("isPublished", true))
+      .collect();
+
+    type PreviewPool = {
+      albumSlug: string;
+      albumName: string;
+      images: Doc<"galleryItems">[];
+    };
+
+    const byCategory = new Map<string, Doc<"galleryItems">[]>();
+    const uncategorized: Doc<"galleryItems">[] = [];
+    for (const item of items) {
+      if (item.type !== "image" || !item.imageUrl?.trim()) continue;
+      if (!item.categoryId) {
+        uncategorized.push(item);
+        continue;
+      }
+      const list = byCategory.get(item.categoryId) ?? [];
+      list.push(item);
+      byCategory.set(item.categoryId, list);
+    }
+
+    const sortImages = (list: Doc<"galleryItems">[]) =>
+      [...list].sort((a, b) => a.order - b.order);
+
+    const pools: PreviewPool[] = [];
+    for (const cat of cats) {
+      const images = sortImages(byCategory.get(cat._id) ?? []);
+      if (images.length === 0) continue;
+      pools.push({
+        albumSlug: cat.slug,
+        albumName: cat.name,
+        images,
+      });
+    }
+    if (uncategorized.length > 0) {
+      pools.push({
+        albumSlug: UNCATEGORIZED_FOLDER_SLUG,
+        albumName: UNCATEGORIZED_FOLDER_NAME,
+        images: sortImages(uncategorized),
+      });
+    }
+
+    const preview: {
+      _id: Id<"galleryItems">;
+      imageUrl: string;
+      title?: string;
+      albumSlug: string;
+      albumName: string;
+    }[] = [];
+    let depth = 0;
+    const max = 8;
+    while (preview.length < max) {
+      let added = false;
+      for (const pool of pools) {
+        const item = pool.images[depth];
+        if (!item?.imageUrl) continue;
+        preview.push({
+          _id: item._id,
+          imageUrl: item.imageUrl,
+          title: item.title,
+          albumSlug: pool.albumSlug,
+          albumName: pool.albumName,
+        });
+        added = true;
+        if (preview.length >= max) break;
+      }
+      if (!added) break;
+      depth += 1;
+    }
+    return preview;
+  },
+});
+
 export const listAdminAlbums = query({
   args: {},
   returns: v.array(albumSummaryValidator),

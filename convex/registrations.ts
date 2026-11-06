@@ -115,6 +115,10 @@ export const createCampRegistration = mutation({
     parentName: v.string(),
     parentPhone: v.optional(v.string()),
     parentEmail: v.string(),
+    consent: v.optional(v.boolean()),
+    medicalFormStatus: v.optional(
+      v.union(v.literal("complete"), v.literal("pending")),
+    ),
     customAnswers: v.optional(v.record(v.string(), v.string())),
   },
   handler: async (ctx, args) => {
@@ -130,6 +134,11 @@ export const createCampRegistration = mutation({
     const childSurname = args.childSurname.trim();
     const parentEmail = args.parentEmail.trim();
     const key = campChildKey(args.campId, childName, childSurname);
+    const hasMedicalAnswers = Boolean(
+      args.dietary?.trim() ||
+        args.allergies?.trim() ||
+        args.medicalNotes?.trim(),
+    );
 
     const existingForCamp = await ctx.db
       .query("registrations")
@@ -167,6 +176,10 @@ export const createCampRegistration = mutation({
       status: "new",
       paymentStatus: "unpaid",
       amountPaid: 0,
+      consent: args.consent ?? false,
+      medicalFormStatus:
+        args.medicalFormStatus ??
+        (hasMedicalAnswers ? "complete" : "pending"),
       customAnswers: args.customAnswers,
     });
   },
@@ -214,6 +227,10 @@ export const createNocowankaRegistration = mutation({
     parentName: v.string(),
     parentPhone: v.optional(v.string()),
     parentEmail: v.string(),
+    consent: v.optional(v.boolean()),
+    medicalFormStatus: v.optional(
+      v.union(v.literal("complete"), v.literal("pending")),
+    ),
     customAnswers: v.optional(v.record(v.string(), v.string())),
   },
   handler: async (ctx, args) => {
@@ -229,6 +246,11 @@ export const createNocowankaRegistration = mutation({
     const childSurname = args.childSurname.trim();
     const parentEmail = args.parentEmail.trim();
     const key = nocowankaChildKey(slug, childName, childSurname);
+    const hasMedicalAnswers = Boolean(
+      args.dietary?.trim() ||
+        args.allergies?.trim() ||
+        args.medicalNotes?.trim(),
+    );
 
     const existingForSlug = await ctx.db
       .query("nocowankaRegistrations")
@@ -266,6 +288,10 @@ export const createNocowankaRegistration = mutation({
       status: "new",
       paymentStatus: "unpaid",
       amountPaid: 0,
+      consent: args.consent ?? false,
+      medicalFormStatus:
+        args.medicalFormStatus ??
+        (hasMedicalAnswers ? "complete" : "pending"),
       customAnswers: args.customAnswers,
     });
   },

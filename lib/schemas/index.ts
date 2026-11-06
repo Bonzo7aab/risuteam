@@ -6,7 +6,13 @@ export {
   type CampRegistrationApiInput,
   type CampRegistrationStep1Input,
 } from "./camp-registration";
-export { contactSchema, type ContactInput } from "./contact";
+export {
+  contactSchema,
+  contactFieldErrors,
+  validateContactField,
+  type ContactInput,
+  type ContactFieldName,
+} from "./contact";
 export {
   sendCampReminderSchema,
   type SendCampReminderInput,

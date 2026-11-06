@@ -30,6 +30,10 @@ export const seedSchedule = mutation({
         city: "Warszawa",
         postalCode: "02-777",
         mapsUrl: "https://maps.app.goo.gl/F9iebzDe8PTvdB1b9",
+        lat: 52.11414262410244,
+        lng: 20.979183105916306,
+        hours: "15:00–20:00",
+        isPublic: true,
       });
       await ctx.db.insert("locations", {
         name: "Szkoła Podstawowa 12",
@@ -37,6 +41,10 @@ export const seedSchedule = mutation({
         city: "Warszawa",
         postalCode: "02-777",
         mapsUrl: "https://maps.app.goo.gl/F9iebzDe8PTvdB1b9",
+        lat: 52.1428758424321,
+        lng: 21.02736716213801,
+        hours: "16:00–19:00",
+        isPublic: true,
       });
     }
 
