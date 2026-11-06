@@ -10,6 +10,7 @@ import {
   CampCtaBlock,
 } from "@/components/obozy";
 import { CampRegistrationClosedBanner } from "@/components/obozy/camp-registration-closed-banner";
+import { brandMedia, FALLBACK_COACH_PHOTO } from "@/lib/brand-media";
 
 export const metadata: Metadata = {
   title: "Obóz rowerowy Mazury | Rowerowe Szaleństwo | Risu Team",
@@ -17,10 +18,8 @@ export const metadata: Metadata = {
     "Intensywny obóz rowerowy dla dzieci 10–14 lat. Nauka techniki jazdy, serwisowania i bezpiecznego poruszania się w terenie. Mazury, sierpień.",
 };
 
-const HERO_IMAGE =
-  "https://images.pexels.com/photos/3771074/pexels-photo-3771074.jpeg?auto=compress&cs=tinysrgb&w=1200";
-const PROMO_BANNER =
-  "https://images.pexels.com/photos/3763188/pexels-photo-3763188.jpeg?auto=compress&cs=tinysrgb&w=1200";
+const HERO_IMAGE = brandMedia.zakopaneWinter1;
+const PROMO_BANNER = brandMedia.zakopaneWinter2;
 const REGISTRATION_HREF = "/obozy/zimowe/rejestracja";
 
 const FEATURE_CARDS = [
@@ -95,33 +94,25 @@ const INSTRUCTORS = [
   {
     name: "Piotr Nowak",
     role: "Główny instruktor, kolarstwo górskie",
-    image:
-      "https://images.pexels.com/photos/3771074/pexels-photo-3771074.jpeg?auto=compress&cs=tinysrgb&w=600",
+    image: FALLBACK_COACH_PHOTO,
   },
   {
     name: "Anna Kowalska",
     role: "Trenerka, opieka wychowawcza",
-    image:
-      "https://images.pexels.com/photos/3764011/pexels-photo-3764011.jpeg?auto=compress&cs=tinysrgb&w=600",
+    image: FALLBACK_COACH_PHOTO,
   },
   {
     name: "Michał Wiśniewski",
     role: "Instruktor techniki jazdy",
-    image:
-      "https://images.pexels.com/photos/3763188/pexels-photo-3763188.jpeg?auto=compress&cs=tinysrgb&w=600",
+    image: FALLBACK_COACH_PHOTO,
   },
 ];
 
 const GALLERY_IMAGES = [
-  { src: HERO_IMAGE, alt: "Obóz rowerowy Mazury" },
-  {
-    src: "https://images.pexels.com/photos/3764011/pexels-photo-3764011.jpeg?auto=compress&cs=tinysrgb&w=600",
-    alt: "Wycieczka rowerowa",
-  },
-  {
-    src: PROMO_BANNER,
-    alt: "Uczestnicy obozu",
-  },
+  { src: HERO_IMAGE, alt: "Obóz zimowy Zakopane" },
+  { src: brandMedia.zakopaneSummer1, alt: "Aktywności na wyjeździe" },
+  { src: PROMO_BANNER, alt: "Uczestnicy obozu" },
+  { src: brandMedia.willaBasienka, alt: "Baza wypadowa" },
 ];
 
 export default function ZimoweObozPage() {

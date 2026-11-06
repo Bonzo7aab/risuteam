@@ -828,9 +828,19 @@ export function NocowankaEditor({ variant, doc, editSlug }: NocowankaEditorProps
                     value={url}
                     onChange={(e) => updateImageUrl(i, e.target.value)}
                     placeholder={`Lub wklej URL zdjęcia ${i + 1}`}
-                    className="max-w-xs"
+                    className="min-w-0 flex-1 max-w-md"
                   />
                 </div>
+                {url.trim() ? (
+                  <div className="relative mx-auto w-full max-w-md overflow-hidden rounded-lg border border-stone-200 shadow-xs dark:border-stone-700 sm:mx-0">
+                    {/* eslint-disable-next-line @next/next/no-img-element -- admin preview of arbitrary uploaded/pasted URLs */}
+                    <img
+                      src={url.trim()}
+                      alt={`Podgląd zdjęcia ${i + 1}`}
+                      className="h-40 w-full object-cover bg-stone-100 dark:bg-stone-800"
+                    />
+                  </div>
+                ) : null}
               </div>
             ))}
           </div>

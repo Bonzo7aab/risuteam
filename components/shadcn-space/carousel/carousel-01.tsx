@@ -12,10 +12,10 @@ import {
 import { cn } from "@/lib/utils";
 
 const images = [
-  "https://images.shadcnspace.com/assets/gallery/destinations-1.webp",
-  "https://images.shadcnspace.com/assets/gallery/destinations-2.webp",
-  "https://images.shadcnspace.com/assets/gallery/destinations-3.webp",
-  "https://images.shadcnspace.com/assets/gallery/destinations-4.webp",
+  "/images/652855775_122163406388748139_8085305856522333687_n.jpg",
+  "/images/654197779_122163407402748139_2742728780677275494_n.jpg",
+  "/hero-facebook.jpg",
+  "/zakopane_2025_ver2_1.jpg",
 ];
 
 const CarouselCustomDots = () => {

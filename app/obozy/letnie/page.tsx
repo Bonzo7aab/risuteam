@@ -10,6 +10,7 @@ import {
   CampCtaBlock,
 } from "@/components/obozy";
 import { CampRegistrationClosedBanner } from "@/components/obozy/camp-registration-closed-banner";
+import { brandMedia, FALLBACK_COACH_PHOTO } from "@/lib/brand-media";
 
 export const metadata: Metadata = {
   title: "Letni obóz Zakopane | Risu Team",
@@ -17,8 +18,8 @@ export const metadata: Metadata = {
     "Rodzinny obóz w Zakopanem — treningi judo i karate, wycieczki w góry, Willa Basieńka. Zapisz się na letni obóz.",
 };
 
-const HERO_IMAGE = "/zakopane_2025_ver2_1.jpg";
-const PROMO_BANNER = "/zakopane_2025_ver2_2.jpg";
+const HERO_IMAGE = brandMedia.zakopaneWinter1;
+const PROMO_BANNER = brandMedia.zakopaneWinter2;
 const REGISTRATION_HREF = "/obozy/letnie/rejestracja";
 
 const FEATURE_CARDS = [
@@ -98,34 +99,30 @@ const INSTRUCTORS = [
   {
     name: "Piotr Nowak",
     role: "Główny trener Judo, 2 dan",
-    image:
-      "https://images.pexels.com/photos/3771074/pexels-photo-3771074.jpeg?auto=compress&cs=tinysrgb&w=600",
+    image: FALLBACK_COACH_PHOTO,
   },
   {
     name: "Anna Kowalska",
     role: "Trenerka gimnastyki",
-    image:
-      "https://images.pexels.com/photos/3764011/pexels-photo-3764011.jpeg?auto=compress&cs=tinysrgb&w=600",
+    image: FALLBACK_COACH_PHOTO,
   },
   {
     name: "Michał Wiśniewski",
     role: "Trener Karate",
-    image:
-      "https://images.pexels.com/photos/3763188/pexels-photo-3763188.jpeg?auto=compress&cs=tinysrgb&w=600",
+    image: FALLBACK_COACH_PHOTO,
   },
   {
     name: "Katarzyna Lewandowska",
     role: "Asystentka trenera",
-    image:
-      "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=600",
+    image: FALLBACK_COACH_PHOTO,
   },
 ];
 
 const GALLERY_IMAGES = [
-  { src: "/zakopane_2025_ver2_2.jpg", alt: "Obóz Zakopane" },
-  { src: "/willabasienka.jpg", alt: "Willa Basieńka" },
-  { src: "/zakopane_2025_ver2_1.jpg", alt: "Trening w górach" },
-  { src: "/zakopane_lato_2025_1.jpeg", alt: "Uczestnicy obozu" },
+  { src: brandMedia.zakopaneWinter2, alt: "Obóz Zakopane" },
+  { src: brandMedia.willaBasienka, alt: "Willa Basieńka" },
+  { src: brandMedia.zakopaneWinter1, alt: "Trening w górach" },
+  { src: brandMedia.zakopaneSummer1, alt: "Uczestnicy obozu" },
 ];
 
 export default function LetniObozPage() {

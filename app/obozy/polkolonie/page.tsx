@@ -10,6 +10,7 @@ import {
   CampCtaBlock,
 } from "@/components/obozy";
 import { CampRegistrationClosedBanner } from "@/components/obozy/camp-registration-closed-banner";
+import { brandMedia, FALLBACK_COACH_PHOTO } from "@/lib/brand-media";
 
 export const metadata: Metadata = {
   title: "Półkolonie letnie Warszawa | Risu Team",
@@ -17,10 +18,8 @@ export const metadata: Metadata = {
     "Aktywne półkolonie w Warszawie — sport, zabawy i nowe znajomości. Opieka od rana do popołudnia. Zapisz dziecko na półkolonie letnie.",
 };
 
-const HERO_IMAGE =
-  "https://images.pexels.com/photos/3764011/pexels-photo-3764011.jpeg?auto=compress&cs=tinysrgb&w=1200";
-const PROMO_BANNER =
-  "https://images.pexels.com/photos/3771074/pexels-photo-3771074.jpeg?auto=compress&cs=tinysrgb&w=1200";
+const HERO_IMAGE = brandMedia.trainingGroup;
+const PROMO_BANNER = brandMedia.trainingMat;
 const REGISTRATION_HREF = "/obozy/polkolonie/rejestracja";
 
 const FEATURE_CARDS = [
@@ -104,27 +103,20 @@ const INSTRUCTORS = [
   {
     name: "Piotr Nowak",
     role: "Główny trener Judo",
-    image:
-      "https://images.pexels.com/photos/3771074/pexels-photo-3771074.jpeg?auto=compress&cs=tinysrgb&w=600",
+    image: FALLBACK_COACH_PHOTO,
   },
   {
     name: "Anna Kowalska",
     role: "Trenerka gimnastyki, animatorka",
-    image:
-      "https://images.pexels.com/photos/3764011/pexels-photo-3764011.jpeg?auto=compress&cs=tinysrgb&w=600",
+    image: FALLBACK_COACH_PHOTO,
   },
 ];
 
 const GALLERY_IMAGES = [
   { src: HERO_IMAGE, alt: "Półkolonie letnie Warszawa" },
-  {
-    src: PROMO_BANNER,
-    alt: "Zajęcia sportowe",
-  },
-  {
-    src: "https://images.pexels.com/photos/3763188/pexels-photo-3763188.jpeg?auto=compress&cs=tinysrgb&w=600",
-    alt: "Uczestnicy półkolonii",
-  },
+  { src: PROMO_BANNER, alt: "Zajęcia sportowe" },
+  { src: brandMedia.heroGirl, alt: "Uczestnicy półkolonii" },
+  { src: brandMedia.heroFacebook, alt: "Atmosfera Risu Team" },
 ];
 
 export default function PolkoloniePage() {
