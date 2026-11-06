@@ -9,7 +9,7 @@ import { CtaSection } from "@/components/sections/cta-section";
 
 export default function Home() {
   return (
-    <div className="grow flex flex-col bg-[#FDFBF7] dark:bg-background-dark blob-bg">
+    <div className="grow flex flex-col bg-background-light dark:bg-background-dark blob-bg">
       <HeroHome />
       <HomeFeaturedOffer />
       <DisciplinesGrid />

@@ -231,7 +231,7 @@ export default function CennikPage() {
               </div>
 
               {/* How to start — desktop sidebar / mobile section */}
-              <div className="border-t border-stone-200/90 pt-10 dark:border-white/10 md:flex md:flex-col md:justify-between md:gap-6 md:rounded-2xl md:border md:border-stone-200/80 md:bg-white md:p-8 md:pt-8 md:shadow-card dark:md:border-white/12 dark:md:bg-surface-dark dark:md:shadow-card-dark">
+              <div className="border-t border-stone-200/90 pt-10 dark:border-white/10 md:flex md:flex-col md:justify-between md:gap-6 md:rounded-2xl md:border md:border-orange-200/70 md:bg-white md:p-8 md:pt-8 md:shadow-card dark:md:border-white/12 dark:md:bg-surface-dark dark:md:shadow-card-dark">
                 <div>
                   <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
                     Jak zacząć
@@ -282,7 +282,7 @@ export default function CennikPage() {
               {highlights.map((item) => (
                 <div
                   key={item.title}
-                  className="flex gap-3.5 border-b border-stone-200/80 py-4 last:border-b-0 dark:border-stone-800 sm:flex-col sm:border-0 sm:py-0 md:rounded-2xl md:border md:border-stone-200/80 md:bg-white/90 md:p-5 md:shadow-card dark:md:border-white/12 dark:md:bg-surface-dark/90 dark:md:shadow-card-dark"
+                  className="flex gap-3.5 border-b border-stone-200/80 py-4 last:border-b-0 dark:border-stone-800 sm:flex-col sm:border-0 sm:py-0 md:rounded-2xl md:border md:border-orange-200/70 md:bg-white/90 md:p-5 md:shadow-card dark:md:border-white/12 dark:md:bg-surface-dark/90 dark:md:shadow-card-dark"
                 >
                   <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                     <span
@@ -306,7 +306,7 @@ export default function CennikPage() {
           </section>
 
           {/* Bank transfer */}
-          <section className="mb-12 border-t border-stone-200/90 pt-10 dark:border-white/10 md:mb-16 md:rounded-2xl md:border md:border-stone-200/80 md:bg-white md:pt-0 md:shadow-card dark:md:border-white/12 dark:md:bg-surface-dark dark:md:shadow-card-dark">
+          <section className="mb-12 border-t border-stone-200/90 pt-10 dark:border-white/10 md:mb-16 md:rounded-2xl md:border md:border-orange-200/70 md:bg-white md:pt-0 md:shadow-card dark:md:border-white/12 dark:md:bg-surface-dark dark:md:shadow-card-dark">
             <div className="md:border-b md:border-stone-100 md:px-8 md:py-5 dark:md:border-white/10">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
@@ -373,7 +373,7 @@ export default function CennikPage() {
                   value={`billing-${i}`}
                   className={cn(
                     "border-b border-stone-200/80 px-0 last:border-b-0 dark:border-stone-800",
-                    "md:mb-3 md:overflow-hidden md:rounded-2xl md:border md:border-stone-200/80 md:bg-white md:px-5 md:shadow-card md:last:mb-0 md:last:border",
+                    "md:mb-3 md:overflow-hidden md:rounded-2xl md:border md:border-orange-200/70 md:bg-white md:px-5 md:shadow-card md:last:mb-0 md:last:border",
                     "dark:md:border-white/12 dark:md:bg-surface-dark dark:md:shadow-card-dark"
                   )}
                 >

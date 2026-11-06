@@ -68,7 +68,7 @@ function normalizeCampCategory(raw: unknown, slug: string): CampCategory {
 
 function ListState({ children }: { children: React.ReactNode }) {
   return (
-    <div className="py-10 text-center md:rounded-2xl md:border md:border-stone-200/80 md:bg-white md:px-6 md:py-14 md:shadow-card dark:md:border-white/12 dark:md:bg-surface-dark dark:md:border-white/12 dark:md:shadow-card-dark">
+    <div className="py-10 text-center md:rounded-2xl md:border md:border-orange-200/70 md:bg-white md:px-6 md:py-14 md:shadow-card dark:md:border-white/12 dark:md:bg-surface-dark dark:md:border-white/12 dark:md:shadow-card-dark">
       <p className="text-sm text-stone-500 dark:text-stone-400 sm:text-base">{children}</p>
     </div>
   );
@@ -217,7 +217,7 @@ function ObozyContent() {
           <div
             className={cn(
               "mb-8 flex flex-wrap gap-2 sm:mb-10",
-              "sm:inline-flex sm:gap-1 sm:rounded-2xl sm:border sm:border-stone-200/80 sm:bg-white/90 sm:p-1.5 sm:shadow-card sm:backdrop-blur-sm",
+              "sm:inline-flex sm:gap-1 sm:rounded-2xl sm:border sm:border-orange-200/70 sm:bg-white/90 sm:p-1.5 sm:shadow-card sm:backdrop-blur-sm",
               "sm:dark:border-white/12 sm:dark:bg-surface-dark/90 sm:dark:shadow-card-dark"
             )}
             role="tablist"

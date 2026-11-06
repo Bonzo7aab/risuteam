@@ -7,8 +7,8 @@ export function cn(...inputs: ClassValue[]) {
 
 /** Section content surface: full-width / unboxed on mobile, card from md up. */
 export const sectionSurface =
-  "md:overflow-hidden md:rounded-2xl md:border md:border-stone-200/80 md:bg-white md:shadow-card dark:md:border-white/12 dark:md:bg-surface-dark dark:md:shadow-card-dark";
+  "md:overflow-hidden md:rounded-2xl md:border md:border-primary/20 md:bg-white md:shadow-card dark:md:border-white/12 dark:md:bg-surface-dark dark:md:shadow-card-dark";
 
 /** Softer stone variant used on older public sections. */
 export const sectionSurfaceSoft =
-  "md:overflow-hidden md:rounded-2xl md:border md:border-stone-200 md:bg-white md:shadow-card dark:md:border-white/12 dark:md:bg-surface-dark dark:md:shadow-card-dark";
+  "md:overflow-hidden md:rounded-2xl md:border md:border-orange-200/70 md:bg-white md:shadow-card dark:md:border-white/12 dark:md:bg-surface-dark dark:md:shadow-card-dark";

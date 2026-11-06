@@ -137,9 +137,9 @@ function CompactFilterPopover({
         <button
           type="button"
           className={cn(
-            "inline-flex min-w-0 w-full max-w-full items-center gap-3 rounded-2xl border border-stone-200/90 bg-white px-3 py-2.5 pr-3 shadow-xs transition-colors sm:w-auto sm:max-w-[min(100%,18rem)] sm:rounded-full",
-            "hover:border-stone-300 hover:bg-stone-50/80",
-            "dark:border-stone-600 dark:bg-stone-900 dark:hover:border-stone-500 dark:hover:bg-stone-800/80"
+            "inline-flex min-w-0 w-full max-w-full items-center gap-3 rounded-2xl border border-orange-200/80 bg-white px-3 py-2.5 pr-3 shadow-card transition-colors sm:w-auto sm:max-w-[min(100%,18rem)] sm:rounded-full",
+            "hover:border-orange-300 hover:bg-orange-50/50",
+            "dark:border-stone-600 dark:bg-stone-900 dark:hover:border-stone-500 dark:hover:bg-stone-800/80 dark:shadow-none"
           )}
         >
           <span
@@ -404,14 +404,14 @@ function ClassCard({
           "opacity-55",
         !isClassFocused &&
           !anyClassFocused &&
-          "hover:-translate-y-px hover:border-stone-300 hover:shadow-card motion-reduce:hover:translate-y-0 dark:hover:border-white/20",
+          "hover:-translate-y-px hover:border-orange-300 hover:shadow-card motion-reduce:hover:translate-y-0 dark:hover:border-white/20",
         !isClassFocused &&
           isEnrolled &&
           !onAdminEdit &&
           "border-primary/40 bg-primary/[0.07] dark:border-primary/35 dark:bg-primary/14",
         !isClassFocused &&
           !(isEnrolled && !onAdminEdit) &&
-          "border-stone-200/90 bg-white dark:border-white/12 dark:bg-surface-dark",
+          "border-orange-200/80 bg-white shadow-card dark:border-white/12 dark:bg-surface-dark dark:shadow-none",
         isInactive && !isClassFocused && "opacity-60",
       )}
     >
@@ -420,7 +420,7 @@ function ClassCard({
           "absolute inset-y-0 left-0 w-[3px] transition-colors duration-250",
           isClassFocused || (isEnrolled && !onAdminEdit)
             ? "bg-primary"
-            : "bg-stone-200 group-hover/card:bg-primary/50 dark:bg-white/15",
+            : "bg-orange-200 group-hover/card:bg-primary dark:bg-white/15",
         )}
         aria-hidden
       />
@@ -809,7 +809,7 @@ function ClassCard({
       <>
         {card}
         <Drawer open={open} onOpenChange={setOpen}>
-          <DrawerContent className="border-stone-200 bg-[#FDFBF7] dark:border-white/12 dark:bg-surface-dark">
+          <DrawerContent className="border-orange-200/70 bg-background-light dark:border-white/12 dark:bg-surface-dark">
             <DrawerHeader className="border-b border-stone-200/80 px-5 pb-4 text-left dark:border-stone-800">
               <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-primary">
                 {c?.discipline ?? "Zajęcia"}
@@ -838,7 +838,7 @@ function ClassCard({
         side="bottom"
         sideOffset={10}
         collisionPadding={16}
-        className="w-[22rem] overflow-hidden rounded-2xl border border-stone-200/80 bg-white p-0 text-popover-foreground shadow-card-hover dark:border-white/12 dark:bg-surface-dark dark:shadow-card-dark-hover"
+        className="w-[22rem] overflow-hidden rounded-2xl border border-orange-200/70 bg-white p-0 text-popover-foreground shadow-card-hover dark:border-white/12 dark:bg-surface-dark dark:shadow-card-dark-hover"
       >
         {detailsBody}
       </PopoverContent>
@@ -1208,7 +1208,7 @@ export function ScheduleView({
       <div
         className={cn(
           "mb-8 p-0 sm:mb-10",
-          "md:rounded-2xl md:border md:border-stone-200 md:bg-white md:p-4 md:shadow-card dark:md:border-white/12 dark:md:bg-surface-dark dark:md:shadow-card-dark",
+          "md:rounded-2xl md:border md:border-orange-200/70 md:bg-white md:p-4 md:shadow-card dark:md:border-white/12 dark:md:bg-surface-dark dark:md:shadow-card-dark",
           isAdminMode &&
             "max-lg:border-0 max-lg:bg-transparent max-lg:p-0 max-lg:shadow-none dark:max-lg:bg-transparent"
         )}
@@ -1380,7 +1380,7 @@ export function ScheduleView({
             <div
               className={cn(
                 "w-full min-w-0 max-w-full overflow-hidden",
-                "md:rounded-2xl md:border md:border-stone-200/80 md:bg-white md:shadow-card dark:md:border-white/12 dark:md:bg-surface-dark dark:md:border-white/12 dark:md:shadow-card-dark",
+                "md:rounded-2xl md:border md:border-orange-200/70 md:bg-white md:shadow-card dark:md:border-white/12 dark:md:bg-surface-dark dark:md:border-white/12 dark:md:shadow-card-dark",
                 isAdminMode &&
                   "border-0 bg-transparent shadow-none dark:bg-transparent"
               )}
@@ -1447,7 +1447,7 @@ export function ScheduleView({
             </div>
           </div>
 
-          <div className="hidden overflow-hidden rounded-2xl border border-stone-200/80 bg-white shadow-card dark:border-white/12 dark:bg-surface-dark dark:shadow-card-dark lg:block">
+          <div className="hidden overflow-hidden rounded-2xl border border-orange-200/70 bg-white shadow-card dark:border-white/12 dark:bg-surface-dark dark:shadow-card-dark lg:block">
             <div className="overflow-x-auto">
               <table className="w-full min-w-[720px] table-fixed border-separate border-spacing-0">
                 <colgroup>
@@ -1558,7 +1558,7 @@ export function ScheduleView({
         !hasChildren &&
         schedule !== undefined &&
         schedule.length > 0 && (
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-3 border-t border-stone-200/80 py-4 dark:border-stone-800 md:rounded-2xl md:border md:bg-orange-50/60 md:p-4 dark:md:bg-primary/10">
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-3 border-t border-orange-200/60 py-4 dark:border-stone-800 md:rounded-2xl md:border md:border-orange-200/70 md:bg-orange-50/70 md:p-4 dark:md:border-white/12 dark:md:bg-primary/10">
           <p className="text-sm font-medium text-text-main dark:text-stone-300">
             Aby zapisać dziecko na zajęcia, dodaj je w panelu.
           </p>

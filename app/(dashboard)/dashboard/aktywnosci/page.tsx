@@ -174,7 +174,7 @@ function PaymentSummaryCard({
   footer: ReactNode;
 }) {
   return (
-    <section className="mb-8 overflow-hidden rounded-2xl border border-stone-200/80 bg-white shadow-card dark:border-white/12 dark:bg-surface-dark dark:shadow-card-dark">
+    <section className="mb-8 overflow-hidden rounded-2xl border border-orange-200/70 bg-white shadow-card dark:border-white/12 dark:bg-surface-dark dark:shadow-card-dark">
       <div className="border-b border-stone-100 px-5 py-5 dark:border-white/10 sm:px-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
@@ -232,7 +232,7 @@ function PaymentSummaryCard({
           </span>
         </div>
 
-        <div className="overflow-hidden rounded-2xl border border-stone-200/90 bg-stone-50/90 dark:border-white/12 dark:bg-black/20">
+        <div className="overflow-hidden rounded-2xl border border-orange-200/70 bg-orange-50/40 dark:border-white/12 dark:bg-black/20">
           <div className="grid sm:grid-cols-[minmax(0,0.9fr)_minmax(0,1.35fr)]">
             <div className="flex gap-3 border-b border-stone-200/80 p-4 sm:border-b-0 sm:border-r dark:border-white/10 sm:p-5">
               <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
@@ -495,7 +495,7 @@ function AktywnosciPageInner() {
             role="tablist"
             aria-label="Status zapisów"
           >
-            <div className="inline-flex min-w-full gap-1 rounded-2xl border border-stone-200/80 bg-white/90 p-1.5 shadow-card dark:border-white/12 dark:bg-surface-dark/90 dark:shadow-card-dark sm:min-w-0">
+            <div className="inline-flex min-w-full gap-1 rounded-2xl border border-orange-200/70 bg-white/90 p-1.5 shadow-card dark:border-white/12 dark:bg-surface-dark/90 dark:shadow-card-dark sm:min-w-0">
               {CLASS_TABS.map((t) => {
                 const selected = classTab === t.id;
                 const count =
@@ -547,7 +547,7 @@ function AktywnosciPageInner() {
           {subscriptions === undefined ? (
             <ListSkeleton />
           ) : subscriptions.length === 0 ? (
-            <div className="rounded-2xl border border-stone-200/80 bg-white px-6 py-14 text-center shadow-card dark:border-white/12 dark:bg-surface-dark dark:shadow-card-dark">
+            <div className="rounded-2xl border border-orange-200/70 bg-white px-6 py-14 text-center shadow-card dark:border-white/12 dark:bg-surface-dark dark:shadow-card-dark">
               <span className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
                 <span className="material-symbols-outlined text-3xl" aria-hidden>
                   fitness_center
@@ -579,7 +579,7 @@ function AktywnosciPageInner() {
                 {dueBillingItems.map((item) => (
                   <li
                     key={item.key}
-                    className="flex flex-col gap-3 rounded-2xl border border-stone-200/80 bg-white p-5 shadow-card dark:border-white/12 dark:bg-surface-dark dark:shadow-card-dark sm:flex-row sm:items-center sm:justify-between"
+                    className="flex flex-col gap-3 rounded-2xl border border-orange-200/70 bg-white p-5 shadow-card dark:border-white/12 dark:bg-surface-dark dark:shadow-card-dark sm:flex-row sm:items-center sm:justify-between"
                   >
                     <div className="flex min-w-0 items-start gap-3.5">
                       <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-200">
@@ -636,7 +636,7 @@ function AktywnosciPageInner() {
                 return (
                   <li
                     key={s._id}
-                    className="flex flex-col gap-4 rounded-2xl border border-stone-200/80 bg-white p-5 shadow-card dark:border-white/12 dark:bg-surface-dark dark:shadow-card-dark sm:flex-row sm:items-center sm:justify-between sm:p-5"
+                    className="flex flex-col gap-4 rounded-2xl border border-orange-200/70 bg-white p-5 shadow-card dark:border-white/12 dark:bg-surface-dark dark:shadow-card-dark sm:flex-row sm:items-center sm:justify-between sm:p-5"
                   >
                     <div className="flex min-w-0 items-start gap-3.5">
                       <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
@@ -765,7 +765,7 @@ function AktywnosciPageInner() {
             role="tablist"
             aria-label="Rodzaj płatności"
           >
-            <div className="inline-flex min-w-full gap-1 rounded-2xl border border-stone-200/80 bg-white/90 p-1.5 shadow-card dark:border-white/12 dark:bg-surface-dark/90 dark:shadow-card-dark sm:min-w-0">
+            <div className="inline-flex min-w-full gap-1 rounded-2xl border border-orange-200/70 bg-white/90 p-1.5 shadow-card dark:border-white/12 dark:bg-surface-dark/90 dark:shadow-card-dark sm:min-w-0">
               {EVENT_TABS.map((t) => {
                 const selected = eventTab === t.id;
                 const count =
@@ -820,7 +820,7 @@ function AktywnosciPageInner() {
           {eventPayments === undefined ? (
             <ListSkeleton />
           ) : eventRows.length === 0 ? (
-            <div className="rounded-2xl border border-stone-200/80 bg-white px-6 py-14 text-center shadow-card dark:border-white/12 dark:bg-surface-dark dark:shadow-card-dark">
+            <div className="rounded-2xl border border-orange-200/70 bg-white px-6 py-14 text-center shadow-card dark:border-white/12 dark:bg-surface-dark dark:shadow-card-dark">
               <span className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
                 <span className="material-symbols-outlined text-3xl" aria-hidden>
                   camping
@@ -855,7 +855,7 @@ function AktywnosciPageInner() {
                 <li key={item.id}>
                   <Link
                     href={item.href}
-                    className="flex flex-col gap-3 rounded-2xl border border-stone-200/80 bg-white p-5 shadow-card transition-colors hover:border-primary/30 dark:border-white/12 dark:bg-surface-dark dark:shadow-card-dark sm:flex-row sm:items-center sm:justify-between"
+                    className="flex flex-col gap-3 rounded-2xl border border-orange-200/70 bg-white p-5 shadow-card transition-colors hover:border-primary/30 dark:border-white/12 dark:bg-surface-dark dark:shadow-card-dark sm:flex-row sm:items-center sm:justify-between"
                   >
                     <div className="flex min-w-0 items-start gap-3.5">
                       <span
