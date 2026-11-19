@@ -90,6 +90,10 @@ function badgeTone(urgent: boolean): string {
   return "bg-primary/15 text-primary ring-1 ring-inset ring-primary/25 dark:bg-primary/20 dark:text-amber-100";
 }
 
+/** White sheet that overlaps the mobile hero so the next band is obvious in light mode. */
+const homeOfferSheet =
+  "relative z-10 w-full max-md:-mt-8 max-md:rounded-t-[1.75rem] max-md:bg-white max-md:shadow-[0_-18px_36px_-22px_rgba(28,22,13,0.42)] max-md:dark:bg-[#2c2419] max-md:dark:shadow-[0_-18px_36px_-22px_rgba(0,0,0,0.62)]";
+
 export function HomeFeaturedOffer() {
   const camps = useQuery(api.camps.getCamps, { activeOnly: true });
   const nocowanki = useQuery(api.nocowanki.listPublicActive);
@@ -97,8 +101,10 @@ export function HomeFeaturedOffer() {
 
   if (camps === undefined || nocowanki === undefined) {
     return (
-      <section className="mx-auto w-full max-w-7xl px-4 pb-4 pt-2 sm:px-6 lg:px-8 lg:pb-6">
-        <div className="h-44 animate-pulse rounded-2xl bg-stone-200/70 dark:bg-surface-dark sm:h-52" />
+      <section className={homeOfferSheet}>
+        <div className="mx-auto w-full max-w-7xl px-4 pb-6 pt-6 md:px-6 md:pb-6 md:pt-2 lg:px-8 lg:pb-6">
+          <div className="h-44 animate-pulse rounded-2xl bg-stone-200/70 dark:bg-surface-dark sm:h-52" />
+        </div>
       </section>
     );
   }
@@ -160,13 +166,11 @@ export function HomeFeaturedOffer() {
   const meta = [offer.dates, offer.place, offer.ageGroup].filter(Boolean);
 
   return (
-    <section
-      aria-label="Nadchodząca oferta"
-      className="mx-auto w-full max-w-7xl px-4 pb-6 pt-2 sm:px-6 lg:px-8 lg:pb-8"
-    >
+    <section aria-label="Nadchodząca oferta" className={homeOfferSheet}>
+      <div className="mx-auto w-full max-w-7xl px-0 pb-8 md:px-6 md:pb-6 md:pt-2 lg:px-8 lg:pb-8">
       <Link
         href={offer.href}
-        className="group relative grid overflow-hidden transition-[box-shadow,transform] duration-300 dark:border-white/12 md:rounded-2xl md:border md:border-orange-200/70 md:bg-white md:shadow-card hover:md:-translate-y-0.5 hover:md:shadow-card-hover motion-reduce:hover:md:translate-y-0 dark:md:bg-surface-dark dark:md:border-white/12 dark:md:shadow-card-dark dark:hover:md:shadow-card-dark-hover lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]"
+        className="group relative grid overflow-hidden transition-[box-shadow,transform] duration-300 max-md:rounded-t-[1.75rem] dark:border-white/12 md:rounded-2xl md:border md:border-orange-200/70 md:bg-white md:shadow-card hover:md:-translate-y-0.5 hover:md:shadow-card-hover motion-reduce:hover:md:translate-y-0 dark:md:bg-surface-dark dark:md:border-white/12 dark:md:shadow-card-dark dark:hover:md:shadow-card-dark-hover lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]"
       >
         <span
           className={`absolute right-3 top-3 z-10 inline-flex max-w-[min(100%-1.5rem,16rem)] items-center gap-1.5 truncate rounded-full px-3 py-1.5 text-xs font-bold tracking-wide ${badgeTone(badge.urgent)}`}
@@ -246,6 +250,7 @@ export function HomeFeaturedOffer() {
           </span>
         </div>
       </Link>
+      </div>
     </section>
   );
 }

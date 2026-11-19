@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { ArrowRightIcon } from "@/components/icons/arrow-right";
+import { HomeSectionDivider } from "@/components/sections/home-section-divider";
 
 const WEEKDAY_ORDER = [1, 2, 3, 4, 5, 6, 0] as const;
 
@@ -23,7 +24,8 @@ export function HomeSchedulePreview() {
 
   if (slots === undefined) {
     return (
-      <section className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
+      <section className="mx-auto w-full max-w-7xl border-t border-orange-200/80 bg-white px-4 py-12 dark:border-white/10 dark:bg-[#2c2419] sm:px-6 max-md:pt-0 md:border-t-0 md:bg-transparent md:dark:bg-transparent lg:px-8 lg:py-16">
+        <HomeSectionDivider />
         <div className="mb-8 h-10 w-56 animate-pulse rounded-xl bg-stone-200/80 dark:bg-surface-dark" />
         <div className="space-y-2">
           {Array.from({ length: 5 }).map((_, index) => (
@@ -59,8 +61,9 @@ export function HomeSchedulePreview() {
   return (
     <section
       id="grafik-tygodnia"
-      className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16"
+      className="mx-auto w-full max-w-7xl border-t border-orange-200/80 bg-white px-4 py-12 dark:border-white/10 dark:bg-[#2c2419] sm:px-6 max-md:pt-0 md:border-t-0 md:bg-transparent md:dark:bg-transparent lg:px-8 lg:py-16"
     >
+      <HomeSectionDivider />
       <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-primary">
@@ -79,7 +82,7 @@ export function HomeSchedulePreview() {
         </Link>
       </div>
 
-      <ul className="divide-y divide-stone-100 overflow-hidden dark:divide-white/8 md:rounded-2xl md:border md:border-orange-200/70 md:bg-white md:shadow-card dark:md:border-white/12 dark:md:bg-surface-dark dark:md:border-white/12 dark:md:shadow-card-dark md:divide-y-0">
+      <ul className="divide-y divide-stone-200/90 overflow-hidden dark:divide-white/10 md:rounded-2xl md:border md:border-orange-200/70 md:bg-white md:shadow-card dark:md:border-white/12 dark:md:bg-surface-dark dark:md:shadow-card-dark md:divide-y-0">
         {rows.map(({ day, primary, extra }) => {
           const age = primary.class?.ageGroup?.trim();
           const details = [

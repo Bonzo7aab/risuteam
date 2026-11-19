@@ -193,7 +193,7 @@ function ObozyContent() {
     <div className="min-h-screen bg-[#FDFBF7] dark:bg-background-dark">
       <section className="relative px-4 py-12 sm:px-6 md:py-16 lg:py-20">
         <div
-          className="pointer-events-none absolute inset-0 opacity-70 dark:opacity-40"
+          className="pointer-events-none absolute inset-0 overflow-hidden opacity-70 dark:opacity-40"
           aria-hidden
         >
           <div className="absolute -right-24 top-0 size-80 rounded-full bg-primary/12 blur-3xl" />

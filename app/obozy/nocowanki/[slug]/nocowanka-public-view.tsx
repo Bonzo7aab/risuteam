@@ -281,7 +281,8 @@ export function NocowankaPublicView({ slug }: { slug: string }) {
           title="Główne atrakcje"
           subtitle="Co czeka na uczestników podczas nocowanki."
           cards={data.attractions}
-          cardsGridClassName="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 lg:gap-8"
+          pairOnMobile
+          cardsGridClassName="grid grid-cols-2 gap-2.5 sm:gap-6 lg:grid-cols-5 lg:gap-8"
         />
       ) : null}
 

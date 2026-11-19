@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { HomeSectionDivider } from "@/components/sections/home-section-divider";
 import { BlurFade } from "@/components/ui/blur-fade";
 
 /** Left collage — reuse paths from hero / homepage (`public/`). */
@@ -90,8 +91,9 @@ function PhilosophyVisuals() {
 
 export function WhyKidsLove() {
   return (
-    <section className="w-full bg-[#FDFBF7] dark:bg-background-dark">
-      <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8 lg:py-20">
+    <section className="w-full border-t border-orange-200/80 bg-[#FDFBF7] dark:border-white/10 dark:bg-background-dark md:border-t-0">
+      <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 max-md:pt-0 lg:px-8 lg:py-20">
+        <HomeSectionDivider />
         <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-12 xl:gap-16">
           <BlurFade inView delay={0.06} offset={16} blur="0px" className="order-2 lg:order-1">
             <PhilosophyVisuals />

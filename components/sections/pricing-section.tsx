@@ -1,12 +1,14 @@
 import { MembershipPlanCard } from "@/components/sections/membership-plan-card";
+import { HomeSectionDivider } from "@/components/sections/home-section-divider";
 import { BlurFade } from "@/components/ui/blur-fade";
 
 export function PricingSection() {
   return (
     <section
-      className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 lg:py-20"
+      className="mx-auto w-full max-w-7xl border-t border-orange-200/80 bg-white px-4 py-14 dark:border-white/10 dark:bg-[#2c2419] sm:px-6 max-md:pt-0 md:border-t-0 md:bg-transparent md:dark:bg-transparent lg:px-8 lg:py-20"
       id="pricing"
     >
+      <HomeSectionDivider />
       <BlurFade inView delay={0.04} offset={10} blur="0px" className="text-center mb-12">
         <div className="inline-flex items-center gap-2 text-primary text-xs font-bold uppercase tracking-wider mb-3">
           <span className="material-symbols-outlined text-sm">model_training</span>

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowRightIcon } from "@/components/icons/arrow-right";
+import { HomeSectionDivider } from "@/components/sections/home-section-divider";
 import { BlurFade } from "@/components/ui/blur-fade";
 import { cn } from "@/lib/utils";
 
@@ -33,9 +34,10 @@ const disciplines = [
 export function DisciplinesGrid() {
   return (
     <section
-      className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16"
+      className="mx-auto w-full max-w-7xl border-t border-orange-200/80 bg-[#faf6ef] px-4 py-12 dark:border-white/10 dark:bg-background-dark sm:px-6 max-md:pt-0 md:border-t-0 md:bg-transparent md:dark:bg-transparent lg:px-8 lg:py-16"
       id="disciplines"
     >
+      <HomeSectionDivider />
       <BlurFade inView delay={0.04} offset={10} blur="0px" className="flex flex-col gap-3 mb-10 text-center max-w-2xl mx-auto">
         <h2 className="text-3xl md:text-4xl font-black text-text-main dark:text-white tracking-tight">
           Wybierz swoją ścieżkę mocy

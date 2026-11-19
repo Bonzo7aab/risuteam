@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowRightIcon } from "@/components/icons/arrow-right";
+import { HomeSectionDivider } from "@/components/sections/home-section-divider";
 import { BlurFade } from "@/components/ui/blur-fade";
 
 const secondaryLinks = [
@@ -10,7 +11,8 @@ const secondaryLinks = [
 
 export function CtaSection() {
   return (
-    <section className="w-full px-4 pb-16 sm:px-6 lg:px-8 lg:pb-24">
+    <section className="w-full border-t border-orange-200/80 bg-[#faf6ef] px-4 pb-16 dark:border-white/10 dark:bg-background-dark sm:px-6 md:border-t-0 md:bg-transparent md:dark:bg-transparent lg:px-8 lg:pb-24">
+      <HomeSectionDivider />
       <BlurFade inView delay={0.06} offset={16} blur="0px">
         <div className="relative mx-auto max-w-6xl overflow-hidden rounded-3xl border border-stone-200/90 bg-white shadow-card dark:border-white/12 dark:bg-surface-dark dark:shadow-card-dark">
           <div

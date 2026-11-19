@@ -131,7 +131,7 @@ export function HeroHome() {
           "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(244, 157, 37, 0.08), transparent 55%), radial-gradient(ellipse 70% 50% at 100% 50%, rgba(59, 130, 246, 0.06), transparent 50%)",
       }}
     >
-      <div className="mx-auto flex max-w-7xl flex-col items-center gap-8 px-4 pb-8 pt-0 sm:px-6 sm:pb-12 sm:pt-0 lg:flex-row lg:items-center lg:gap-16 lg:px-8 lg:py-16">
+      <div className="mx-auto flex max-w-7xl flex-col items-center gap-8 px-4 pb-0 pt-0 sm:px-6 sm:pb-0 sm:pt-0 lg:flex-row lg:items-center lg:gap-16 lg:px-8 lg:py-16">
         {/* Mobile hero visual */}
         <div className="w-full lg:hidden">
           <div className="relative isolate -mx-4 overflow-hidden sm:-mx-6">
@@ -144,7 +144,10 @@ export function HeroHome() {
               />
               <div className="absolute inset-0 bg-primary/8 mix-blend-soft-light" />
               <div className="absolute inset-x-0 top-0 z-10 flex justify-center px-5 pt-[max(env(safe-area-inset-top),1rem)]">
-                <RisuTeamLogoTitleMark priority />
+                <RisuTeamLogoTitleMark
+                  priority
+                  titleClassName="text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.55)]"
+                />
               </div>
               <div className="absolute inset-x-0 bottom-16 mx-auto max-w-xl px-6 pt-16 text-center">
                 <BlurFade delay={0.08} offset={10}>

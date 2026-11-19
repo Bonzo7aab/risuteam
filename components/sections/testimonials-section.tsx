@@ -6,6 +6,7 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { ArrowLeftIcon } from "@/components/icons/arrow-left";
 import { ArrowRightIcon } from "@/components/icons/arrow-right";
+import { HomeSectionDivider } from "@/components/sections/home-section-divider";
 import { BlurFade } from "@/components/ui/blur-fade";
 
 const testimonials = [
@@ -97,7 +98,8 @@ export function TestimonialsSection() {
   const activeDot = Math.min(Math.floor(startIndex / cardsPerView), dotCount - 1);
 
   return (
-    <section id="opinie" className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
+    <section id="opinie" className="mx-auto w-full max-w-7xl border-t border-orange-200/80 bg-[#faf6ef] px-4 py-16 dark:border-white/10 dark:bg-background-dark sm:px-6 max-md:pt-0 md:border-t-0 md:bg-transparent md:dark:bg-transparent lg:px-8 lg:py-24">
+      <HomeSectionDivider />
       <BlurFade inView delay={0.04} offset={10} blur="0px" className="text-center mb-12">
         <h2 className="text-3xl md:text-4xl font-black leading-[1.1] tracking-tight text-text-main dark:text-white mb-4">
           Opinie rodziców
