@@ -1,6 +1,4 @@
-import Link from "next/link";
 import Image from "next/image";
-import { ArrowRightIcon } from "@/components/icons/arrow-right";
 import { RisuTeamLogoTitleMark } from "@/components/brand/risu-team-logo-title";
 import { AnimatedCounter } from "@/components/ui/animated-counter";
 import { BlurFade } from "@/components/ui/blur-fade";
@@ -73,20 +71,6 @@ function HeroImageSection() {
   return (
     <div className="relative mx-auto w-full">
       <RadialCarousel slides={slides} />
-    </div>
-  );
-}
-
-function HeroCtaButtons({ className }: { className?: string }) {
-  return (
-    <div className={className}>
-      <Link
-        href="/dashboard/zapisy"
-        className="group inline-flex items-center justify-center gap-2 rounded-2xl bg-primary px-8 py-4 text-base font-bold text-primary-foreground shadow-[0_8px_24px_-6px_rgba(244,157,37,0.55)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-primary-hover hover:shadow-[0_12px_28px_-6px_rgba(244,157,37,0.65)] motion-reduce:hover:translate-y-0"
-      >
-        Zapisz się
-        <ArrowRightIcon className="text-[1.15em] transition-transform duration-300 group-hover:translate-x-1" />
-      </Link>
     </div>
   );
 }
@@ -170,9 +154,6 @@ export function HeroHome() {
                     Bezpieczne, energiczne zajęcia z sztuk walki i gimnastyki dla dzieci w każdym wieku.
                   </p>
                 </BlurFade>
-                <BlurFade delay={0.32} offset={8}>
-                  <HeroCtaButtons className="mt-6 flex flex-col gap-3" />
-                </BlurFade>
               </div>
             </div>
           </div>
@@ -204,9 +185,6 @@ export function HeroHome() {
           </BlurFade>
 
           <BlurFade delay={0.3} offset={8}>
-            <HeroCtaButtons className="flex flex-col justify-center gap-3 pt-2 sm:flex-row sm:gap-4 lg:justify-start" />
-          </BlurFade>
-          <BlurFade delay={0.38} offset={8}>
             <HeroTrustRow />
           </BlurFade>
         </div>

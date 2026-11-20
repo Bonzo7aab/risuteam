@@ -11,6 +11,12 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import {
+  AdminFact,
+  AdminInitials,
+  AdminMobileCard,
+  adminGhostIconClass,
+} from "@/components/admin/admin-mobile-record";
 
 const PAGE_SIZE = 10;
 const OVERDUE_DAYS_MS = 14 * 24 * 60 * 60 * 1000;
@@ -866,7 +872,306 @@ export default function AdminPlatnosciPage() {
               </label>
             </div>
           </div>
-          <div className="overflow-x-auto">
+          <div className="md:hidden">
+            {paymentScope === "camps" ? (
+              pageCampRows.length === 0 ? (
+                <p className="py-12 text-center text-sm text-text-light dark:text-stone-400">
+                  Brak wyników.
+                </p>
+              ) : (
+                <ul className="space-y-2 p-2">
+                  {pageCampRows.map((row) => (
+                    <AdminMobileCard key={row.id}>
+                      <div className="flex items-start gap-3">
+                        <AdminInitials text={row.studentName} />
+                        <div className="min-w-0 flex-1 pt-0.5">
+                          <p className="font-semibold leading-tight text-text-main dark:text-white">
+                            {row.studentName}
+                          </p>
+                          <p className="mt-0.5 text-[13px] text-stone-500 dark:text-stone-400">
+                            {row.parentName}
+                          </p>
+                          <p className="mt-0.5 text-[12px] text-stone-400">{row.eventName}</p>
+                        </div>
+                        <div className="flex shrink-0 items-center">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className={adminGhostIconClass}
+                            title="Opłacone"
+                            aria-label="Opłacone"
+                            onClick={() => setStatus(row, "paid")}
+                            disabled={updatingRowId === row.id}
+                          >
+                            <span className="material-symbols-outlined text-[18px]">check_circle</span>
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className={adminGhostIconClass}
+                            title="Częściowo opłacone"
+                            aria-label="Częściowo opłacone"
+                            onClick={() => {
+                              setPartialDialogRow(row);
+                              setPartialAmount(row.paymentStatus === "partial" ? String(row.amountPaid ?? "") : "");
+                            }}
+                            disabled={updatingRowId === row.id}
+                          >
+                            <span className="material-symbols-outlined text-[18px]">payments</span>
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className={adminGhostIconClass}
+                            title="Nieopłacone"
+                            aria-label="Nieopłacone"
+                            onClick={() => setStatus(row, "unpaid")}
+                            disabled={updatingRowId === row.id}
+                          >
+                            <span className="material-symbols-outlined text-[18px]">money_off</span>
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 border-t border-stone-100 pt-2.5 dark:border-white/8">
+                        <PaymentStatusBadge row={row} />
+                        <AdminFact icon="payments">Kwota {formatPln(row.amount)}</AdminFact>
+                        <AdminFact icon="check">Opłacone {formatPln(getPaidValue(row))}</AdminFact>
+                        <AdminFact icon="account_balance_wallet">Do zapłaty {formatPln(getDueValue(row))}</AdminFact>
+                        <AdminFact icon="calendar_today">{formatDate(row.date)}</AdminFact>
+                      </div>
+                    </AdminMobileCard>
+                  ))}
+                </ul>
+              )
+            ) : pageClassGroups.length === 0 ? (
+              <p className="py-12 text-center text-sm text-text-light dark:text-stone-400">
+                Brak wyników.
+              </p>
+            ) : (
+              <ul className="space-y-2 p-2">
+                {pageClassGroups.map((group) => {
+                  const isExpanded = expandedGroupKeys.has(group.groupKey);
+                  const canExpand =
+                    group.classCount > EXPAND_SPECIAL_CASE_CLASS_COUNT ||
+                    group.weeklySessionsTotal > 2 ||
+                    group.subscriptions.some((s) => (s.months?.length ?? 0) > 0);
+                  const toggleExpand = () =>
+                    setExpandedGroupKeys((prev) => {
+                      const next = new Set(prev);
+                      if (next.has(group.groupKey)) next.delete(group.groupKey);
+                      else next.add(group.groupKey);
+                      return next;
+                    });
+                  const missing = [
+                    ...new Set(
+                      group.subscriptions.flatMap((s) => s.missingMonthLabels ?? [])
+                    ),
+                  ];
+                  return (
+                    <AdminMobileCard key={group.groupKey}>
+                      <div className="flex items-start gap-3">
+                        <AdminInitials text={group.studentName || group.parentName} />
+                        <div className="min-w-0 flex-1 pt-0.5">
+                          <p className="font-semibold leading-tight text-text-main dark:text-white">
+                            {group.parentName}
+                          </p>
+                          <p className="mt-0.5 text-[13px] text-stone-500 dark:text-stone-400">
+                            {group.studentName}
+                          </p>
+                        </div>
+                        <div className="flex shrink-0 items-center">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className={adminGhostIconClass}
+                            title="Opłacone (wszystkie zapisy w wierszu)"
+                            aria-label="Oznacz jako opłacone"
+                            disabled={classPaymentUpdating === `group:${group.groupKey}`}
+                            onClick={() =>
+                              markClassSubscriptions(
+                                group.subscriptions.map((s) => s.subscriptionId),
+                                true,
+                                `group:${group.groupKey}`
+                              )
+                            }
+                          >
+                            <span className="material-symbols-outlined text-[18px]">check_circle</span>
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className={adminGhostIconClass}
+                            title="Nieopłacone (wszystkie zapisy w wierszu)"
+                            aria-label="Oznacz jako nieopłacone"
+                            disabled={classPaymentUpdating === `group:${group.groupKey}`}
+                            onClick={() =>
+                              markClassSubscriptions(
+                                group.subscriptions.map((s) => s.subscriptionId),
+                                false,
+                                `group:${group.groupKey}`
+                              )
+                            }
+                          >
+                            <span className="material-symbols-outlined text-[18px]">money_off</span>
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="size-8 text-sky-600 hover:bg-sky-500/10 hover:text-sky-700 dark:text-sky-400"
+                            title="Wyślij przypomnienie e-mail"
+                            aria-label="Wyślij przypomnienie e-mail"
+                            disabled={classPaymentUpdating === `group:${group.groupKey}`}
+                            onClick={() => setReminderTargetGroup(group)}
+                          >
+                            <span className="material-symbols-outlined text-[18px]">mail</span>
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 border-t border-stone-100 pt-2.5 dark:border-white/8">
+                        <GroupedStatusBadge statusKey={group.worstStatusKey} />
+                        <AdminFact icon="event_repeat">
+                          {group.weeklySessionsTotal} w tyg. ·{" "}
+                          {group.classCount === 1 ? "1 zapis" : `${group.classCount} zapisów`} ·{" "}
+                          {group.paidCount} opłaconych
+                        </AdminFact>
+                        <AdminFact icon="calendar_today">
+                          {group.latestPaidAt ? formatDate(group.latestPaidAt) : "Brak wpłaty"}
+                        </AdminFact>
+                      </div>
+                      {missing.length > 0 ? (
+                        <p className="mt-2 text-xs font-medium text-amber-700 dark:text-amber-300">
+                          Brak: {missing.join(", ")}
+                        </p>
+                      ) : null}
+                      {canExpand ? (
+                        <button
+                          type="button"
+                          className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-primary"
+                          onClick={toggleExpand}
+                        >
+                          <span className="material-symbols-outlined text-base">
+                            {isExpanded ? "expand_less" : "expand_more"}
+                          </span>
+                          {isExpanded ? "Zwiń zapisy" : "Pokaż zapisy"}
+                        </button>
+                      ) : null}
+                      {canExpand && isExpanded ? (
+                        <ul className="mt-2 space-y-2">
+                          {group.subscriptions.map((sub) => (
+                            <li
+                              key={sub.id}
+                              className="rounded-xl bg-stone-50 px-2.5 py-2.5 dark:bg-white/5"
+                            >
+                              <div className="flex items-start justify-between gap-2">
+                                <div className="min-w-0">
+                                  <p className="text-sm font-semibold text-text-main dark:text-white">
+                                    {sub.classType ?? "Inne"}
+                                  </p>
+                                  <p className="text-xs text-stone-500 dark:text-stone-400">
+                                    {sub.eventName}
+                                  </p>
+                                </div>
+                                <div className="flex shrink-0">
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className={adminGhostIconClass}
+                                    title="Opłacone"
+                                    aria-label="Opłacone"
+                                    disabled={classPaymentUpdating === `sub:${sub.id}`}
+                                    onClick={() =>
+                                      markClassSubscriptions([sub.subscriptionId], true, `sub:${sub.id}`)
+                                    }
+                                  >
+                                    <span className="material-symbols-outlined text-[18px]">check_circle</span>
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className={adminGhostIconClass}
+                                    title="Nieopłacone"
+                                    aria-label="Nieopłacone"
+                                    disabled={classPaymentUpdating === `sub:${sub.id}`}
+                                    onClick={() =>
+                                      markClassSubscriptions([sub.subscriptionId], false, `sub:${sub.id}`)
+                                    }
+                                  >
+                                    <span className="material-symbols-outlined text-[18px]">money_off</span>
+                                  </Button>
+                                </div>
+                              </div>
+                              <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
+                                <AdminFact icon="event_repeat">{sub.sessionsPerWeek} w tyg.</AdminFact>
+                                <AdminFact icon="calendar_today">{formatDate(sub.date)}</AdminFact>
+                              </div>
+                              <div className="mt-2 flex flex-col gap-1.5">
+                                {(sub.months ?? []).length === 0 ? (
+                                  <PaymentStatusBadge row={sub} />
+                                ) : (
+                                  (sub.months ?? []).map((m) => (
+                                    <div
+                                      key={`${sub.id}-${m.year}-${m.month}`}
+                                      className="flex flex-wrap items-center gap-1.5"
+                                    >
+                                      <span
+                                        className={cn(
+                                          "rounded-full px-2 py-0.5 text-[10px] font-bold",
+                                          m.paymentStatus === "paid"
+                                            ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200"
+                                            : m.paymentStatus === "partial"
+                                              ? "bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-200"
+                                              : "bg-stone-200 text-stone-700 dark:bg-stone-800 dark:text-stone-300"
+                                        )}
+                                      >
+                                        {m.label}
+                                        {m.paymentStatus === "paid"
+                                          ? " · OK"
+                                          : m.paymentStatus === "partial"
+                                            ? " · częściowo"
+                                            : " · brak"}
+                                      </span>
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="size-6"
+                                        title={
+                                          m.paymentStatus === "paid"
+                                            ? "Oznacz jako nieopłacone"
+                                            : "Oznacz jako opłacone"
+                                        }
+                                        disabled={
+                                          classPaymentUpdating ===
+                                          `month:${sub.subscriptionId}:${m.year}-${m.month}`
+                                        }
+                                        onClick={() =>
+                                          markClassMonth(
+                                            sub.subscriptionId,
+                                            m.year,
+                                            m.month,
+                                            m.paymentStatus !== "paid",
+                                            `month:${sub.subscriptionId}:${m.year}-${m.month}`
+                                          )
+                                        }
+                                      >
+                                        <span className="material-symbols-outlined text-sm">
+                                          {m.paymentStatus === "paid" ? "money_off" : "check_circle"}
+                                        </span>
+                                      </Button>
+                                    </div>
+                                  ))
+                                )}
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : null}
+                    </AdminMobileCard>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
+          <div className="hidden overflow-x-auto md:block">
             {paymentScope === "camps" ? (
               <table className="w-full text-sm">
                 <thead>
@@ -1330,7 +1635,7 @@ export default function AdminPlatnosciPage() {
       </Card>
 
       {totalRowsCount > 0 && (
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm text-text-light dark:text-stone-400">
             Pokazano {start + 1}–{Math.min(start + PAGE_SIZE, totalRowsCount)} z {totalRowsCount}
           </p>

@@ -11,7 +11,6 @@ import {
 } from "react-leaflet";
 import { LatLngTuple } from "leaflet";
 import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 // Fix default marker icon paths in Next.js (bundler doesn't resolve leaflet's assets)
@@ -109,12 +108,6 @@ function PopupContent({ place }: { place: Place }) {
         {place.address}
       </p>
       <div className="mt-2 flex flex-col gap-1.5 md:mt-3 md:gap-2">
-        <Link
-          href="/dashboard/zapisy"
-          className="inline-flex justify-center rounded-lg bg-primary px-2.5 py-1.5 text-xs font-semibold text-primary-foreground shadow-sm hover:bg-primary-hover transition-colors md:px-3 md:py-2 md:text-sm"
-        >
-          Zapisz się na zajęcia
-        </Link>
         <a
           href={place.link}
           target="_blank"

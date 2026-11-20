@@ -55,8 +55,116 @@ function roleLabel(role?: string): string {
   return role === "admin" ? "Admin" : "Użytkownik";
 }
 
+function userInitials(name?: string, email?: string): string {
+  const source = name?.trim() || email?.split("@")[0] || "";
+  const parts = source.split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "?";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return `${parts[0][0] ?? ""}${parts[1][0] ?? ""}`.toUpperCase();
+}
+
+function childrenLabel(count: number): string {
+  return count === 1 ? "1 dziecko" : `${count} dzieci`;
+}
+
+function EmailLine({ email }: { email: string }) {
+  const at = email.indexOf("@");
+  if (at <= 0) return <>{email}</>;
+  return (
+    <>
+      {email.slice(0, at)}
+      <wbr />
+      {email.slice(at)}
+    </>
+  );
+}
+
 function isAdminRole(role?: string): boolean {
   return role === "admin";
+}
+
+function StatusBadge({ verified }: { verified: boolean }) {
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold",
+        verified
+          ? "bg-green-100 text-green-800 dark:bg-green-900/35 dark:text-green-200"
+          : "bg-amber-100 text-amber-800 dark:bg-amber-900/35 dark:text-amber-200"
+      )}
+    >
+      <span className="material-symbols-outlined text-[14px]" aria-hidden>
+        {verified ? "verified" : "pending"}
+      </span>
+      {verified ? "Zweryfikowany" : "Oczekuje"}
+    </span>
+  );
+}
+
+function UserAvatar({ name, email }: { name?: string; email?: string }) {
+  return (
+    <span
+      className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/12 text-[13px] font-bold tracking-tight text-primary"
+      aria-hidden
+    >
+      {userInitials(name, email)}
+    </span>
+  );
+}
+
+function UserActions({
+  onEdit,
+  onDelete,
+  showDelete,
+  deleting,
+}: {
+  onEdit: () => void;
+  onDelete: () => void;
+  showDelete: boolean;
+  deleting: boolean;
+}) {
+  return (
+    <div className="flex shrink-0 items-center gap-0.5">
+      <Button
+        variant="ghost"
+        size="icon"
+        className="size-8 text-stone-500 hover:bg-stone-100 hover:text-text-main dark:text-stone-400 dark:hover:bg-white/8 dark:hover:text-white"
+        aria-label="Edytuj"
+        title="Edytuj"
+        onClick={onEdit}
+      >
+        <span className="material-symbols-outlined text-[18px]" aria-hidden>
+          edit
+        </span>
+      </Button>
+      {showDelete && (
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-8 text-stone-400 hover:bg-red-500/10 hover:text-destructive dark:hover:text-red-400"
+          aria-label="Usuń"
+          title="Usuń"
+          disabled={deleting}
+          onClick={onDelete}
+        >
+          <span className="material-symbols-outlined text-[18px]" aria-hidden>
+            delete
+          </span>
+        </Button>
+      )}
+    </div>
+  );
+}
+
+function UserFact({ icon, children }: { icon: string; children: React.ReactNode }) {
+  return (
+    <span className="inline-flex min-w-0 items-center gap-1.5 text-[12px] text-stone-600 dark:text-stone-300">
+      <span className="material-symbols-outlined text-[15px] text-stone-400" aria-hidden>
+        {icon}
+      </span>
+      <span>{children}</span>
+    </span>
+  );
 }
 
 function SortHeader({
@@ -366,166 +474,228 @@ export default function AdminUzytkownicyPage() {
 
       <Card className="overflow-hidden border-stone-200 dark:border-stone-700">
         <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-stone-200 bg-stone-50 dark:border-stone-700 dark:bg-stone-800/80">
-                  <th className="px-4 py-3 text-left">
-                    <SortHeader
-                      label="Użytkownik"
-                      active={sortKey === "name"}
-                      direction={sortDirection}
-                      onClick={() => toggleSort("name")}
-                    />
-                  </th>
-                  <th className="px-4 py-3 text-left">
-                    <SortHeader
-                      label="E-mail"
-                      active={sortKey === "email"}
-                      direction={sortDirection}
-                      onClick={() => toggleSort("email")}
-                    />
-                  </th>
-                  <th className="px-4 py-3 text-left">Telefon</th>
-                  <th className="px-4 py-3 text-left">Status</th>
-                  <th className="px-4 py-3 text-left">
-                    <SortHeader
-                      label="Dzieci"
-                      active={sortKey === "children"}
-                      direction={sortDirection}
-                      onClick={() => toggleSort("children")}
-                    />
-                  </th>
-                  <th className="px-4 py-3 text-left">
-                    <SortHeader
-                      label="Dołączył"
-                      active={sortKey === "created"}
-                      direction={sortDirection}
-                      onClick={() => toggleSort("created")}
-                    />
-                  </th>
-                  <th className="px-4 py-3 text-right font-bold">Akcje</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users === undefined ? (
-                  <tr>
-                    <td
-                      colSpan={7}
-                      className="py-12 text-center text-text-light dark:text-stone-400"
+          {users === undefined ? (
+            <p className="py-12 text-center text-sm text-text-light dark:text-stone-400">
+              Ładowanie…
+            </p>
+          ) : pageRows.length === 0 ? (
+            <p className="py-12 text-center text-sm text-text-light dark:text-stone-400">
+              Brak wyników.
+            </p>
+          ) : (
+            <>
+              <div className="flex items-center gap-1.5 overflow-x-auto border-b border-stone-200 px-3 py-2 dark:border-stone-700 md:hidden">
+                <span className="shrink-0 text-[11px] font-semibold uppercase tracking-wide text-stone-400">
+                  Sortuj
+                </span>
+                {(
+                  [
+                    ["name", "Imię"],
+                    ["email", "E-mail"],
+                    ["children", "Dzieci"],
+                    ["created", "Data"],
+                  ] as const
+                ).map(([key, label]) => (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => toggleSort(key)}
+                    className={cn(
+                      "inline-flex shrink-0 items-center gap-0.5 rounded-full px-2.5 py-1 text-xs font-semibold",
+                      sortKey === key
+                        ? "bg-primary/15 text-primary"
+                        : "bg-stone-100 text-stone-600 dark:bg-white/8 dark:text-stone-300"
+                    )}
+                  >
+                    {label}
+                    {sortKey === key && (
+                      <span className="material-symbols-outlined text-[14px]" aria-hidden>
+                        {sortDirection === "asc" ? "arrow_upward" : "arrow_downward"}
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+
+              <ul className="space-y-2 p-2 md:hidden">
+                {pageRows.map((u) => {
+                  const isSelf = currentUser?._id === u._id;
+                  const verified = u.emailVerificationTime != null;
+                  const admin = isAdminRole(u.role);
+                  const displayName = u.name?.trim();
+                  return (
+                    <li
+                      key={u._id}
+                      className="rounded-2xl border border-stone-200/80 bg-white px-3 py-3 shadow-[0_1px_2px_rgba(28,22,13,0.04)] dark:border-white/10 dark:bg-[#241c14] dark:shadow-none"
                     >
-                      Ładowanie…
-                    </td>
-                  </tr>
-                ) : pageRows.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={7}
-                      className="py-12 text-center text-text-light dark:text-stone-400"
-                    >
-                      Brak wyników.
-                    </td>
-                  </tr>
-                ) : (
-                  pageRows.map((u) => {
-                    const isSelf = currentUser?._id === u._id;
-                    const verified = u.emailVerificationTime != null;
-                    return (
-                      <tr
-                        key={u._id}
-                        className="border-b border-stone-100 transition-colors hover:bg-stone-50/80 dark:border-stone-800 dark:hover:bg-stone-800/40"
-                      >
-                        <td className="px-4 py-3">
-                          <div className="min-w-0">
-                            <p className="truncate font-medium text-text-main dark:text-white">
-                              {u.name?.trim() || (
-                                <span className="italic text-text-light dark:text-stone-400">
+                      <div className="flex items-start gap-3">
+                        <UserAvatar name={u.name} email={u.email} />
+                        <div className="min-w-0 flex-1 pt-0.5">
+                          <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
+                            <p className="font-semibold leading-tight text-text-main dark:text-white">
+                              {displayName || (
+                                <span className="font-medium text-text-light dark:text-stone-400">
                                   Brak imienia
                                 </span>
                               )}
-                              {isSelf && (
-                                <span className="ml-1.5 text-xs font-normal text-text-light dark:text-stone-500">
-                                  (Ty)
-                                </span>
-                              )}
                             </p>
-                            {u.isAnonymous && (
-                              <p className="text-xs text-amber-700 dark:text-amber-300">
-                                Konto anonimowe
-                              </p>
-                            )}
-                          </div>
-                        </td>
-                        <td className="px-4 py-3">
-                          <p className="max-w-[16rem] truncate text-text-main dark:text-stone-200">
-                            {u.email ?? "—"}
-                          </p>
-                        </td>
-                        <td className="px-4 py-3 text-text-light dark:text-stone-400">
-                          {u.phone ?? "—"}
-                        </td>
-                        <td className="px-4 py-3">
-                          <span
-                            className={cn(
-                              "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold",
-                              verified
-                                ? "bg-green-100 text-green-800 dark:bg-green-900/35 dark:text-green-200"
-                                : "bg-amber-100 text-amber-800 dark:bg-amber-900/35 dark:text-amber-200"
-                            )}
-                          >
-                            <span className="material-symbols-outlined text-sm">
-                              {verified ? "verified" : "pending"}
-                            </span>
-                            {verified ? "Zweryfikowany" : "Oczekuje"}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 tabular-nums text-text-main dark:text-stone-200">
-                          {u.childrenCount}
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-text-light dark:text-stone-400">
-                          {formatDate(u._creationTime)}
-                        </td>
-                        <td className="px-4 py-3">
-                          <div className="flex items-center justify-end gap-1">
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              className="h-8 w-8"
-                              title="Edytuj"
-                              onClick={() => openEdit(u)}
-                            >
-                              <span className="material-symbols-outlined text-base">
-                                edit
+                            {isSelf && (
+                              <span className="rounded-full bg-stone-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-stone-500 dark:bg-white/8 dark:text-stone-300">
+                                Ty
                               </span>
-                            </Button>
-                            {!isSelf && (
-                              <Button
-                                variant="outline"
-                                size="icon"
-                                className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                                title="Usuń"
-                                disabled={deleting}
-                                onClick={() => setUserPendingDelete(u)}
-                              >
-                                <span className="material-symbols-outlined text-base">
-                                  delete
-                                </span>
-                              </Button>
+                            )}
+                            {admin && (
+                              <span className="rounded-full bg-primary/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">
+                                Admin
+                              </span>
                             )}
                           </div>
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
+                          <p className="mt-0.5 break-words text-[13px] leading-snug text-stone-500 dark:text-stone-400">
+                            {u.email ? <EmailLine email={u.email} /> : "Brak e-maila"}
+                          </p>
+                        </div>
+                        <UserActions
+                          onEdit={() => openEdit(u)}
+                          onDelete={() => setUserPendingDelete(u)}
+                          showDelete={!isSelf}
+                          deleting={deleting}
+                        />
+                      </div>
+                      <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 border-t border-stone-100 pt-2.5 dark:border-white/8">
+                        <StatusBadge verified={verified} />
+                        <UserFact icon="call">{u.phone?.trim() || "Brak numeru"}</UserFact>
+                        <UserFact icon="child_care">{childrenLabel(u.childrenCount)}</UserFact>
+                        <UserFact icon="calendar_today">{formatDate(u._creationTime)}</UserFact>
+                      </div>
+                      {u.isAnonymous && (
+                        <p className="mt-2 text-xs font-medium text-amber-700 dark:text-amber-300">
+                          Konto anonimowe
+                        </p>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+
+              <div className="hidden overflow-x-auto md:block">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-stone-200 bg-stone-50 dark:border-stone-700 dark:bg-stone-800/80">
+                      <th className="px-4 py-3 text-left">
+                        <SortHeader
+                          label="Użytkownik"
+                          active={sortKey === "name"}
+                          direction={sortDirection}
+                          onClick={() => toggleSort("name")}
+                        />
+                      </th>
+                      <th className="px-4 py-3 text-left">
+                        <SortHeader
+                          label="E-mail"
+                          active={sortKey === "email"}
+                          direction={sortDirection}
+                          onClick={() => toggleSort("email")}
+                        />
+                      </th>
+                      <th className="px-4 py-3 text-left">Telefon</th>
+                      <th className="px-4 py-3 text-left">Status</th>
+                      <th className="px-4 py-3 text-left">
+                        <SortHeader
+                          label="Dzieci"
+                          active={sortKey === "children"}
+                          direction={sortDirection}
+                          onClick={() => toggleSort("children")}
+                        />
+                      </th>
+                      <th className="px-4 py-3 text-left">
+                        <SortHeader
+                          label="Dołączył"
+                          active={sortKey === "created"}
+                          direction={sortDirection}
+                          onClick={() => toggleSort("created")}
+                        />
+                      </th>
+                      <th className="px-4 py-3 text-right font-bold">Akcje</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {pageRows.map((u) => {
+                      const isSelf = currentUser?._id === u._id;
+                      const verified = u.emailVerificationTime != null;
+                      return (
+                        <tr
+                          key={u._id}
+                          className="border-b border-stone-100 transition-colors hover:bg-stone-50/80 dark:border-stone-800 dark:hover:bg-stone-800/40"
+                        >
+                          <td className="px-4 py-3">
+                            <div className="flex min-w-0 items-center gap-3">
+                              <UserAvatar name={u.name} email={u.email} />
+                              <div className="min-w-0">
+                                <p className="truncate font-semibold text-text-main dark:text-white">
+                                  {u.name?.trim() || (
+                                    <span className="font-medium text-text-light dark:text-stone-400">
+                                      Brak imienia
+                                    </span>
+                                  )}
+                                  {isSelf && (
+                                    <span className="ml-1.5 text-xs font-normal text-text-light dark:text-stone-500">
+                                      (Ty)
+                                    </span>
+                                  )}
+                                  {isAdminRole(u.role) && (
+                                    <span className="ml-1.5 rounded-full bg-primary/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">
+                                      Admin
+                                    </span>
+                                  )}
+                                </p>
+                                {u.isAnonymous && (
+                                  <p className="text-xs text-amber-700 dark:text-amber-300">
+                                    Konto anonimowe
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-4 py-3">
+                            <p className="max-w-[16rem] truncate text-text-main dark:text-stone-200">
+                              {u.email ?? "—"}
+                            </p>
+                          </td>
+                          <td className="px-4 py-3 text-text-light dark:text-stone-400">
+                            {u.phone ?? "—"}
+                          </td>
+                          <td className="px-4 py-3">
+                            <StatusBadge verified={verified} />
+                          </td>
+                          <td className="px-4 py-3 tabular-nums text-text-main dark:text-stone-200">
+                            {u.childrenCount}
+                          </td>
+                          <td className="px-4 py-3 whitespace-nowrap text-text-light dark:text-stone-400">
+                            {formatDate(u._creationTime)}
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="flex justify-end">
+                              <UserActions
+                                onEdit={() => openEdit(u)}
+                                onDelete={() => setUserPendingDelete(u)}
+                                showDelete={!isSelf}
+                                deleting={deleting}
+                              />
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
         </CardContent>
       </Card>
 
       {filtered.length > 0 && (
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm text-text-light dark:text-stone-400">
             Pokazano {currentPage * PAGE_SIZE + 1}–
             {Math.min(currentPage * PAGE_SIZE + PAGE_SIZE, filtered.length)} z{" "}

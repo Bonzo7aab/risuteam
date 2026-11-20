@@ -86,14 +86,8 @@ export default function RodzajeZajecPage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start pt-2">
               <Link
-                href="/dashboard/zapisy"
-                className="flex items-center justify-center rounded-xl h-12 px-8 bg-primary text-primary-foreground font-bold shadow-lg hover:bg-primary-hover transition-all"
-              >
-                Zapisz się na zajęcia
-              </Link>
-              <Link
                 href="/grafik"
-                className="flex items-center justify-center rounded-xl h-12 px-8 bg-white dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-700 text-text-main dark:text-white font-bold hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"
+                className="flex items-center justify-center rounded-xl h-12 px-8 bg-primary text-primary-foreground font-bold shadow-lg hover:bg-primary-hover transition-all"
               >
                 Zobacz grafik
               </Link>
@@ -229,12 +223,6 @@ export default function RodzajeZajecPage() {
                     ))}
                   </ul>
                 </div>
-                <Link
-                  href={`/grafik?dyscyplina=${encodeURIComponent(d.title)}`}
-                  className="flex items-center justify-center rounded-xl h-12 px-8 bg-primary text-primary-foreground font-bold shadow-lg hover:bg-primary-hover w-fit transition-all"
-                >
-                  Zapisz się na zajęcia — {d.title}
-                </Link>
               </div>
             </div>
           </div>

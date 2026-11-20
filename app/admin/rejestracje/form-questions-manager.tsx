@@ -19,6 +19,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import {
+  AdminFact,
+  AdminMobileCard,
+  adminGhostIconClass,
+} from "@/components/admin/admin-mobile-record";
 
 const QUESTION_TYPES = [
   { value: "short_text", label: "Krótki tekst", icon: "short_text" },
@@ -250,7 +255,90 @@ export function FormQuestionsManager({
               </Button>
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <ul className="space-y-2 p-2 md:hidden">
+              {list.map((q, index) => {
+                const meta = typeMeta(q.type);
+                return (
+                  <AdminMobileCard key={q._id}>
+                    <div className="flex items-start gap-3">
+                      <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/12 text-[13px] font-bold tabular-nums text-primary">
+                        {index + 1}
+                      </span>
+                      <div className="min-w-0 flex-1 pt-0.5">
+                        <p className="font-semibold leading-snug text-text-main dark:text-white">
+                          {q.label}
+                        </p>
+                        {q.type === "single_choice" && (q.options?.length ?? 0) > 0 ? (
+                          <p className="mt-0.5 text-[13px] text-stone-500 dark:text-stone-400">
+                            {q.options!.length} opcji
+                          </p>
+                        ) : null}
+                      </div>
+                    </div>
+                    <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 border-t border-stone-100 pt-2.5 dark:border-white/8">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-stone-100 px-2 py-0.5 text-[11px] font-semibold text-stone-700 dark:bg-white/8 dark:text-stone-200">
+                        <span className="material-symbols-outlined text-[14px]" aria-hidden>
+                          {meta.icon}
+                        </span>
+                        {meta.label}
+                      </span>
+                      <AdminFact icon={q.required ? "priority_high" : "check"}>
+                        {q.required ? "Wymagane" : "Opcjonalne"}
+                      </AdminFact>
+                    </div>
+                    <div className="mt-2 flex items-center justify-end">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className={adminGhostIconClass}
+                        disabled={reordering || index === 0}
+                        onClick={() => void move(index, -1)}
+                        title="Wyżej"
+                        aria-label="Przesuń w górę"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">arrow_upward</span>
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className={adminGhostIconClass}
+                        disabled={reordering || index === list.length - 1}
+                        onClick={() => void move(index, 1)}
+                        title="Niżej"
+                        aria-label="Przesuń w dół"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">arrow_downward</span>
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className={adminGhostIconClass}
+                        onClick={() => openEdit(q)}
+                        title="Edytuj"
+                        aria-label="Edytuj"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">edit</span>
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="size-8 text-stone-400 hover:bg-red-500/10 hover:text-destructive"
+                        onClick={() => setPendingDelete(q)}
+                        title="Usuń"
+                        aria-label="Usuń"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">delete</span>
+                      </Button>
+                    </div>
+                  </AdminMobileCard>
+                );
+              })}
+            </ul>
+            <div className="hidden overflow-x-auto md:block">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-stone-200 bg-stone-50 dark:border-stone-700 dark:bg-stone-800/80">

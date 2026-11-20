@@ -21,6 +21,12 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { DISCIPLINE_OPTIONS } from "@/lib/disciplines";
+import {
+  AdminFact,
+  AdminInitials,
+  AdminMobileCard,
+  adminGhostIconClass,
+} from "@/components/admin/admin-mobile-record";
 
 const PAGE_SIZE = 15;
 
@@ -368,7 +374,138 @@ export default function AdminTrenerzyPage() {
               </Button>
             ) : null}
           </div>
-          <div className="overflow-x-auto">
+          <div className="md:hidden">
+            {coaches === undefined ? (
+              <p className="py-12 text-center text-sm text-text-light dark:text-stone-400">
+                Ładowanie…
+              </p>
+            ) : pageRows.length === 0 ? (
+              <p className="py-12 text-center text-sm text-text-light dark:text-stone-400">
+                Brak wyników.
+              </p>
+            ) : (
+              <>
+                <div className="flex items-center gap-1.5 overflow-x-auto border-b border-stone-200 px-3 py-2 dark:border-stone-700">
+                  <span className="shrink-0 text-[11px] font-semibold uppercase tracking-wide text-stone-400">
+                    Sortuj
+                  </span>
+                  {(
+                    [
+                      ["name", "Imię"],
+                      ["disciplines", "Dyscypliny"],
+                      ["status", "Status"],
+                    ] as const
+                  ).map(([key, label]) => (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => toggleSort(key)}
+                      className={cn(
+                        "inline-flex shrink-0 items-center gap-0.5 rounded-full px-2.5 py-1 text-xs font-semibold",
+                        sortKey === key
+                          ? "bg-primary/15 text-primary"
+                          : "bg-stone-100 text-stone-600 dark:bg-white/8 dark:text-stone-300"
+                      )}
+                    >
+                      {label}
+                      {sortKey === key && (
+                        <span className="material-symbols-outlined text-[14px]" aria-hidden>
+                          {sortDirection === "asc" ? "arrow_upward" : "arrow_downward"}
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+                <ul className="space-y-2 p-2">
+                  {pageRows.map((c) => (
+                    <AdminMobileCard key={c._id}>
+                      <div className="flex items-start gap-3">
+                        <div className="relative size-10 shrink-0 overflow-hidden rounded-full bg-primary/12">
+                          {c.photoUrl ? (
+                            <Image
+                              src={c.photoUrl}
+                              alt=""
+                              fill
+                              className="object-cover"
+                              sizes="40px"
+                            />
+                          ) : (
+                            <AdminInitials text={c.name} />
+                          )}
+                        </div>
+                        <div className="min-w-0 flex-1 pt-0.5">
+                          <p className="font-semibold leading-tight text-text-main dark:text-white">
+                            {c.name}
+                          </p>
+                          <div className="mt-1.5 flex flex-wrap gap-1">
+                            {c.disciplines.map((d) => (
+                              <span
+                                key={d}
+                                className="inline-flex rounded-full bg-stone-100 px-2 py-0.5 text-[11px] font-semibold text-stone-600 dark:bg-white/8 dark:text-stone-300"
+                              >
+                                {d}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="flex shrink-0">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className={adminGhostIconClass}
+                            title="Edytuj"
+                            aria-label="Edytuj"
+                            onClick={() => openEdit(c)}
+                          >
+                            <span className="material-symbols-outlined text-[18px]">edit</span>
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="size-8 text-stone-400 hover:bg-red-500/10 hover:text-destructive"
+                            title="Usuń"
+                            aria-label="Usuń"
+                            disabled={deletingId === c._id}
+                            onClick={() => handleDelete(c._id)}
+                          >
+                            <span className="material-symbols-outlined text-[18px]">delete</span>
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 border-t border-stone-100 pt-2.5 dark:border-white/8">
+                        <span
+                          className={cn(
+                            "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold",
+                            c.isActive
+                              ? "bg-green-100 text-green-800 dark:bg-green-900/35 dark:text-green-200"
+                              : "bg-amber-100 text-amber-800 dark:bg-amber-900/35 dark:text-amber-200"
+                          )}
+                        >
+                          <span className="material-symbols-outlined text-[14px]" aria-hidden>
+                            {c.isActive ? "check_circle" : "pause_circle"}
+                          </span>
+                          {c.isActive ? "Aktywny" : "Nieaktywny"}
+                        </span>
+                        <AdminFact icon="sports_martial_arts">
+                          {(() => {
+                            const n = c.disciplines.length;
+                            if (n === 1) return "1 dyscyplina";
+                            const mod10 = n % 10;
+                            const mod100 = n % 100;
+                            if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) {
+                              return `${n} dyscypliny`;
+                            }
+                            return `${n} dyscyplin`;
+                          })()}
+                        </AdminFact>
+                      </div>
+                    </AdminMobileCard>
+                  ))}
+                </ul>
+              </>
+            )}
+          </div>
+          <div className="hidden overflow-x-auto md:block">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-stone-200 bg-stone-50 dark:border-stone-700 dark:bg-stone-800/80">
@@ -510,7 +647,7 @@ export default function AdminTrenerzyPage() {
       </Card>
 
       {filtered.length > 0 && (
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm text-text-light dark:text-stone-400">
             Pokazano {currentPage * PAGE_SIZE + 1}–
             {Math.min(currentPage * PAGE_SIZE + PAGE_SIZE, filtered.length)} z{" "}

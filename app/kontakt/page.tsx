@@ -403,64 +403,20 @@ export default function KontaktPage() {
 
               {/* Right column: brand panel + contact cards */}
               <div className="flex flex-col gap-4">
-                <div className="relative hidden min-h-[280px] shrink-0 overflow-hidden rounded-2xl border border-stone-200/80 bg-linear-to-b from-stone-50 via-white to-amber-50/70 p-8 md:flex md:flex-col md:items-center md:justify-center dark:border-white/12 dark:from-stone-900 dark:via-surface-dark dark:to-amber-950/30">
-                  <div
-                    className="animate-orb-drift pointer-events-none absolute -left-10 top-6 size-36 rounded-full bg-primary/20 blur-3xl dark:bg-primary/25"
-                    aria-hidden
+                <div className="relative hidden min-h-[280px] shrink-0 flex-col items-center justify-center overflow-hidden rounded-2xl border border-stone-200/80 bg-stone-50 px-8 py-10 text-center md:flex dark:border-white/12 dark:bg-stone-900/40">
+                  <Image
+                    src="/logoWithBorder.png"
+                    alt="Risu Team"
+                    width={288}
+                    height={288}
+                    className="size-36 object-contain"
                   />
-                  <div
-                    className="animate-orb-drift pointer-events-none absolute -right-8 bottom-8 size-44 rounded-full bg-amber-400/18 blur-3xl dark:bg-amber-400/12"
-                    style={{ animationDelay: "-3s" }}
-                    aria-hidden
-                  />
-                  <div
-                    className="animate-auth-ring pointer-events-none absolute left-1/2 top-1/2 size-[18rem] -translate-x-1/2 -translate-y-1/2 rounded-full border border-primary/15 dark:border-primary/20"
-                    aria-hidden
-                  />
-                  <div
-                    className="animate-auth-ring pointer-events-none absolute left-1/2 top-1/2 size-[13rem] -translate-x-1/2 -translate-y-1/2 rounded-full border border-stone-300/50 dark:border-white/10"
-                    style={{ animationDelay: "-4s" }}
-                    aria-hidden
-                  />
-
-                  <div className="relative z-10 flex flex-col items-center gap-5 text-center">
-                    <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-primary">
-                      Risu Team
-                    </p>
-                    <div className="animate-float relative">
-                      <div
-                        className="animate-auth-glow absolute -inset-8 rounded-full bg-primary/25 blur-3xl dark:bg-primary/30"
-                        aria-hidden
-                      />
-                      <div
-                        className="relative flex size-36 items-center justify-center rounded-full bg-linear-to-b from-white to-stone-100/90 p-3 ring-1 ring-stone-300/70 dark:from-white/15 dark:to-white/5 dark:ring-white/20"
-                        style={{
-                          boxShadow:
-                            "0 24px 50px -16px rgba(28,22,13,0.28), 0 0 36px rgba(244,157,37,0.2), inset 0 1px 0 rgba(255,255,255,0.85)",
-                        }}
-                      >
-                        <div
-                          className="absolute inset-2.5 rounded-full bg-stone-900/5 shadow-[inset_0_8px_20px_rgba(28,22,13,0.06)] dark:bg-black/20"
-                          aria-hidden
-                        />
-                        <Image
-                          src="/logoWithBorder.png"
-                          alt="Risu Team"
-                          width={288}
-                          height={288}
-                          className="relative size-full object-contain drop-shadow-[0_8px_18px_rgba(28,22,13,0.18)]"
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-1.5">
-                      <p className="text-lg font-bold tracking-tight text-text-main dark:text-white">
-                        Porozmawiajmy
-                      </p>
-                      <p className="max-w-[16rem] text-sm leading-relaxed text-stone-500 dark:text-stone-400">
-                        Odpowiadamy zwykle w ciągu 24 godzin w dni robocze.
-                      </p>
-                    </div>
-                  </div>
+                  <p className="mt-5 text-lg font-bold tracking-tight text-text-main dark:text-white">
+                    Porozmawiajmy
+                  </p>
+                  <p className="mt-1.5 max-w-[16rem] text-sm leading-relaxed text-stone-500 dark:text-stone-400">
+                    Odpowiadamy zwykle w ciągu 24 godzin w dni robocze.
+                  </p>
                 </div>
 
                 <div className="group flex gap-4 rounded-xl border border-transparent py-1 transition-colors md:border-stone-200 md:bg-stone-50 md:p-4 md:shadow-soft md:hover:border-primary/25 dark:md:border-white/12 dark:md:bg-stone-900/40 dark:md:hover:border-white/20">

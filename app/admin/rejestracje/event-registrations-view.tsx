@@ -1021,13 +1021,16 @@ export function EventRegistrationsView({
                     : "Brak wyników dla wybranych filtrów."}
                 </div>
               ) : (
-                <ul className="divide-y divide-stone-100 dark:divide-stone-800">
+                <ul className="space-y-2 p-2">
                   {pageParticipants.map((p) => {
                     const age = computeAge(p.childDob);
                     const payment = p.paymentStatus ?? "unpaid";
                     const medical = getEffectiveMedicalStatus(p);
                     return (
-                      <li key={p._id} className="px-3 py-4 text-left sm:px-4">
+                      <li
+                        key={p._id}
+                        className="rounded-2xl border border-stone-200/80 bg-white px-3 py-3 text-left shadow-[0_1px_2px_rgba(28,22,13,0.04)] dark:border-white/10 dark:bg-[#241c14] dark:shadow-none"
+                      >
                         <div className="flex gap-3">
                           <div
                             className={cn(

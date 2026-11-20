@@ -220,12 +220,6 @@ export default function CennikPage() {
                       Przejdź do zapisów
                       <ArrowRightIcon className="text-[1em]" />
                     </Link>
-                    <Link
-                      href="/kontakt"
-                      className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-stone-200 bg-white px-5 text-sm font-bold text-text-main transition-colors hover:border-stone-300 hover:bg-stone-50 dark:border-white/14 dark:bg-transparent dark:text-white dark:hover:bg-white/5"
-                    >
-                      Zapytaj o ofertę
-                    </Link>
                   </div>
                 </div>
               </div>
